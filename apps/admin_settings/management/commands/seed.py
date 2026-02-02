@@ -55,6 +55,7 @@ class Command(BaseCommand):
             ("alerts", True),
             ("quick_notes", True),
             ("analysis_charts", True),
+            ("ai_assist", False),
         ]
         created = 0
         for key, enabled in defaults:

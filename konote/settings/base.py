@@ -165,3 +165,8 @@ AZURE_CLIENT_ID = os.environ.get("AZURE_CLIENT_ID", "")
 AZURE_CLIENT_SECRET = os.environ.get("AZURE_CLIENT_SECRET", "")
 AZURE_TENANT_ID = os.environ.get("AZURE_TENANT_ID", "")
 AZURE_REDIRECT_URI = os.environ.get("AZURE_REDIRECT_URI", "")
+
+# OpenRouter AI (optional — features hidden when key is empty)
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "anthropic/claude-sonnet-4-20250514")
+OPENROUTER_SITE_URL = os.environ.get("OPENROUTER_SITE_URL", "https://konote.app")

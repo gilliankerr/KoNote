@@ -1,0 +1,10 @@
+<div class="ai-suggestions" role="region" aria-label="AI metric suggestions">
+    <small><strong>Suggested {{ term.metric_plural|default:"Metrics" }}:</strong></small>
+    <ol>
+    {% for s in suggestions %}
+        <li>
+            <strong>{{ s.name }}</strong> — {{ s.reason }}
+        </li>
+    {% endfor %}
+    </ol>
+</div>

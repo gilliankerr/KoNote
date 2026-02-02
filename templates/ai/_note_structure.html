@@ -1,0 +1,11 @@
+<div class="ai-suggestions" role="region" aria-label="Suggested note structure">
+    <small><strong>Suggested note sections for {{ target_name }}:</strong></small>
+    <ol>
+    {% for s in sections %}
+        <li>
+            <strong>{{ s.section }}</strong><br>
+            <small>{{ s.prompt }}</small>
+        </li>
+    {% endfor %}
+    </ol>
+</div>
