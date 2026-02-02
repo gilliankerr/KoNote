@@ -6,14 +6,6 @@ _Nothing flagged._
 
 ## Active Work
 
-**Design Foundation (pre-Phase 2)**
-- [ ] Add KoNote design tokens to main.css — teal primary, warm neutrals, status colours, dark mode — (DES1)
-- [ ] Replace hardcoded badge hex colours with semantic token classes — (DES2)
-- [ ] Redesign login page — add wordmark, brand colour, warmth — (DES3)
-- [ ] Add skip-navigation link and aria-live regions for HTMX targets — (A11Y1)
-- [ ] Create empty state and loading indicator patterns — (DES4)
-- [ ] Move login inline styles to CSS class — (DES5)
-
 **Phase 2: Core Data — Programs & Clients**
 - [ ] Create program CRUD views and templates — (PROG1)
 - [ ] Create user-program role assignment UI — (PROG2)
@@ -78,6 +70,12 @@ _Nothing flagged._
 
 ## Recently Done
 
+- [x] Create theme.css with design tokens (swappable per agency) — 2026-02-02 (DES1)
+- [x] Replace badge colours with semantic token classes — 2026-02-02 (DES2)
+- [x] Redesign login page with wordmark and brand colour — 2026-02-02 (DES3)
+- [x] Add skip-nav, aria-live regions, branded focus style — 2026-02-02 (A11Y1)
+- [x] Create empty state, loading bar, and toast patterns — 2026-02-02 (DES4)
+- [x] Move login inline styles to CSS class — 2026-02-02 (DES5)
 - [x] Generate Django migrations for all 8 apps — 2026-02-02 (FIX1)
 - [x] Create test suite: 15 tests for RBAC + PII encryption — 2026-02-02 (TEST1)
 - [x] Add HTMX global error handler + toast to app.js — 2026-02-02 (FIX2)

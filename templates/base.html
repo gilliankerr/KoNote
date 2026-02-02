@@ -8,12 +8,21 @@
     <!-- Pico CSS — classless, accessible defaults -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
 
-    <!-- App styles -->
-    <link rel="stylesheet" href="{% load static %}{% static 'css/main.css' %}">
+    {% load static %}
+    <!-- Theme (brand identity — swappable per agency) -->
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+
+    <!-- App structure styles -->
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
 
     {% block extra_head %}{% endblock %}
 </head>
 <body>
+    <a href="#main-content" class="visually-hidden-focusable">Skip to main content</a>
+
+    <!-- Loading bar — shown during HTMX requests -->
+    <div id="loading-bar" class="loading-bar htmx-indicator"></div>
+
     {% if user.is_authenticated %}
     <nav class="container-fluid">
         <ul>
@@ -42,7 +51,7 @@
     </nav>
     {% endif %}
 
-    <main class="container">
+    <main id="main-content" class="container">
         {% if messages %}
         {% for message in messages %}
         <article aria-label="notification" {% if message.tags %}class="{{ message.tags }}"{% endif %}>
@@ -55,12 +64,7 @@
     </main>
 
     <!-- HTMX error toast — shown by app.js on network/server errors -->
-    <div id="htmx-error-toast" role="alert" hidden
-         style="position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);
-                background:var(--pico-del-color,#c62828);color:#fff;
-                padding:0.75rem 1.5rem;border-radius:0.5rem;z-index:9999;
-                font-size:0.9rem;max-width:90%;text-align:centre;">
-    </div>
+    <div id="htmx-error-toast" class="toast toast-error" role="alert" hidden></div>
 
     <footer class="container">
         <small>{{ site.product_name|default:"KoNote" }} &mdash; Secure Client Outcome Management</small>

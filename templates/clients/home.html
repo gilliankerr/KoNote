@@ -18,8 +18,9 @@
            hx-target="#client-list">
 </div>
 
-<div id="client-list">
-    <!-- Phase 2: Client list will render here via HTMX -->
-    <p>Client list will appear here once Phase 2 is implemented.</p>
+<div id="client-list" aria-live="polite">
+    <div class="empty-state">
+        <p>No {{ term.client|default:"client" }} files yet.</p>
+    </div>
 </div>
 {% endblock %}

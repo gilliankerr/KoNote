@@ -1,24 +1,62 @@
-/* KoNote Web — custom styles layered on Pico CSS */
+/* KoNote Web — app structure styles (no brand colours here — see theme.css) */
 
-/* Slightly tighter nav */
+/* ---- Skip navigation (accessibility) ---- */
+.visually-hidden-focusable {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+.visually-hidden-focusable:focus {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: auto;
+    height: auto;
+    padding: 0.75rem 1.5rem;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    background: var(--kn-primary);
+    color: var(--kn-text-inverse);
+    z-index: 10000;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* ---- Branded focus style ---- */
+:focus-visible {
+    outline: 2px solid var(--kn-primary);
+    outline-offset: 2px;
+}
+
+/* ---- Navigation ---- */
 nav {
     padding-block: 0.5rem;
 }
 
-/* Status badges */
+/* ---- Status badges ---- */
 .badge {
     display: inline-block;
-    padding: 0.15em 0.5em;
-    border-radius: 4px;
-    font-size: 0.85em;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--kn-radius-badge);
+    font-size: 0.75rem;
     font-weight: 600;
+    line-height: 1.5;
 }
-.badge--active { background: #d1fae5; color: #065f46; }
-.badge--completed { background: #dbeafe; color: #1e40af; }
-.badge--deactivated { background: #f3f4f6; color: #6b7280; }
-.badge--enrolled { background: #ede9fe; color: #5b21b6; }
+.badge-success { background: var(--kn-success-bg); color: var(--kn-success-fg); }
+.badge-info    { background: var(--kn-info-bg);    color: var(--kn-info-fg); }
+.badge-warning { background: var(--kn-warning-bg); color: var(--kn-warning-fg); }
+.badge-danger  { background: var(--kn-danger-bg);  color: var(--kn-danger-fg); }
+.badge-neutral { background: var(--kn-neutral-bg); color: var(--kn-neutral-fg); }
 
-/* Program colour dot */
+/* ---- Program colour dot ---- */
 .program-dot {
     display: inline-block;
     width: 12px;
@@ -28,9 +66,9 @@ nav {
     vertical-align: middle;
 }
 
-/* Timeline styles (Phase 5) */
+/* ---- Timeline (Phase 5) ---- */
 .timeline {
-    border-left: 3px solid var(--pico-muted-border-color);
+    border-left: 3px solid var(--kn-border);
     padding-left: 1.5rem;
     margin-left: 0.5rem;
 }
@@ -46,12 +84,89 @@ nav {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: var(--pico-primary);
+    background: var(--kn-primary);
 }
 
-/* Metric chart container */
+/* ---- Chart container ---- */
 .chart-container {
     position: relative;
     width: 100%;
     max-height: 300px;
+}
+
+/* ---- Login page ---- */
+.login-container {
+    max-width: 420px;
+    margin-top: 10vh;
+}
+.login-wordmark {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--kn-primary);
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+.login-tagline {
+    text-align: center;
+    color: var(--kn-text-muted);
+    font-size: 0.9rem;
+    margin-top: -1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* ---- Empty states ---- */
+.empty-state {
+    text-align: center;
+    padding: var(--kn-section-gap) 1rem;
+    color: var(--kn-text-muted);
+}
+.empty-state p {
+    margin-bottom: 1rem;
+}
+
+/* ---- Loading indicator ---- */
+.htmx-indicator {
+    display: none;
+}
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+    display: block;
+}
+.loading-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    z-index: 9999;
+    background: var(--kn-primary);
+    animation: loading-progress 1.5s ease-in-out infinite;
+}
+@keyframes loading-progress {
+    0%   { transform: scaleX(0); transform-origin: left; }
+    50%  { transform: scaleX(0.7); transform-origin: left; }
+    100% { transform: scaleX(1); transform-origin: left; }
+}
+
+/* ---- Toast notifications ---- */
+.toast {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--kn-radius-card);
+    z-index: 9999;
+    font-size: 0.9rem;
+    max-width: 90%;
+    text-align: center;
+}
+.toast-error {
+    background: var(--kn-danger-bg);
+    color: var(--kn-danger-fg);
+}
+.toast-success {
+    background: var(--kn-success-bg);
+    color: var(--kn-success-fg);
 }

@@ -1,5 +1,8 @@
 /* KoNote Web — minimal vanilla JS for interactions */
 
+// Tell HTMX to use the loading bar as a global indicator
+document.body.setAttribute("hx-indicator", "#loading-bar");
+
 // HTMX configuration
 document.body.addEventListener("htmx:configRequest", function (event) {
     // Include CSRF token in HTMX requests

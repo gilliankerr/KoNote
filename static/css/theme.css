@@ -1,0 +1,72 @@
+/* ============================================
+   KoNote Default Theme
+   Brand identity layer — swappable per agency.
+   Agencies override these variables via the
+   admin UI (Phase 6) or by replacing this file.
+   ============================================ */
+
+:root {
+    /* --- Brand --- */
+    --kn-primary: #0d7377;
+    --kn-primary-hover: #0a5c5f;
+    --kn-primary-focus: rgba(13, 115, 119, 0.25);
+    --kn-secondary: #4a5568;
+
+    /* --- Status colours --- */
+    --kn-success-bg: #d4edda;
+    --kn-success-fg: #1a5632;
+    --kn-info-bg: #d1ecf1;
+    --kn-info-fg: #0c5460;
+    --kn-warning-bg: #fff3cd;
+    --kn-warning-fg: #856404;
+    --kn-danger-bg: #f8d7da;
+    --kn-danger-fg: #842029;
+    --kn-neutral-bg: #e9ecef;
+    --kn-neutral-fg: #495057;
+
+    /* --- Surfaces --- */
+    --kn-page-bg: #fafaf8;
+    --kn-card-bg: #ffffff;
+    --kn-border: #d1d5db;
+    --kn-border-light: #e5e7eb;
+
+    /* --- Text --- */
+    --kn-text: #1a202c;
+    --kn-text-muted: #718096;
+    --kn-text-inverse: #ffffff;
+
+    /* --- Spacing --- */
+    --kn-section-gap: 2rem;
+
+    /* --- Radii --- */
+    --kn-radius-badge: 0.25rem;
+    --kn-radius-card: 0.5rem;
+
+    /* --- Override Pico defaults --- */
+    --pico-primary: var(--kn-primary);
+    --pico-primary-hover: var(--kn-primary-hover);
+    --pico-primary-focus: var(--kn-primary-focus);
+    --pico-background-color: var(--kn-page-bg);
+}
+
+/* --- Dark mode --- */
+[data-theme="dark"] {
+    --kn-success-bg: #1a3a2a;
+    --kn-success-fg: #a3d9b1;
+    --kn-info-bg: #1a3040;
+    --kn-info-fg: #90cdf4;
+    --kn-warning-bg: #3d2e0a;
+    --kn-warning-fg: #f6e05e;
+    --kn-danger-bg: #3b1a1a;
+    --kn-danger-fg: #feb2b2;
+    --kn-neutral-bg: #2d3748;
+    --kn-neutral-fg: #cbd5e0;
+
+    --kn-page-bg: var(--pico-background-color);
+    --kn-card-bg: #1e2533;
+    --kn-border: #4a5568;
+    --kn-border-light: #2d3748;
+
+    --kn-text: #e2e8f0;
+    --kn-text-muted: #a0aec0;
+}
