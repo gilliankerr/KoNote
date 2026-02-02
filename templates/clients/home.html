@@ -8,19 +8,23 @@
     <p>Search and manage {{ term.client|default:"client" }} files.</p>
 </hgroup>
 
+<div role="group">
+    <a href="{% url 'clients:client_create' %}" role="button">New {{ term.client|default:"Client" }}</a>
+    <a href="{% url 'clients:client_list' %}" role="button" class="outline">View All</a>
+</div>
+
 <div role="search">
     <input type="search"
            name="q"
            placeholder="Search by name or ID..."
            aria-label="Search {{ term.client_plural|default:'clients' }}"
-           hx-get="/clients/?search=true"
+           hx-get="{% url 'clients:client_search' %}"
            hx-trigger="input changed delay:300ms"
-           hx-target="#client-list">
+           hx-target="#client-list"
+           hx-indicator="#loading-bar">
 </div>
 
 <div id="client-list" aria-live="polite">
-    <div class="empty-state">
-        <p>No {{ term.client|default:"client" }} files yet.</p>
-    </div>
+    {% include "clients/_search_results.html" %}
 </div>
 {% endblock %}

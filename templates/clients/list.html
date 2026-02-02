@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}{{ term.client_plural|default:"Clients" }} — {{ site.product_name|default:"KoNote" }}{% endblock %}
+
+{% block content %}
+<hgroup>
+    <h1>{{ term.client_plural|default:"Clients" }}</h1>
+    <p>All {{ term.client|default:"client" }} files you have access to.</p>
+</hgroup>
+
+<p><a href="{% url 'clients:client_create' %}" role="button">New {{ term.client|default:"Client" }}</a></p>
+
+{% if page.object_list %}
+<figure>
+<table role="grid">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Record ID</th>
+            <th scope="col">Status</th>
+            <th scope="col">{{ term.program_plural|default:"Programs" }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in page %}
+        <tr>
+            <td><a href="{% url 'clients:client_detail' client_id=item.client.pk %}">{{ item.name }}</a></td>
+            <td>{{ item.client.record_id|default:"—" }}</td>
+            <td>
+                {% if item.client.status == "active" %}
+                    <span class="badge badge-success">Active</span>
+                {% elif item.client.status == "inactive" %}
+                    <span class="badge badge-warning">Inactive</span>
+                {% else %}
+                    <span class="badge badge-neutral">Discharged</span>
+                {% endif %}
+            </td>
+            <td>
+                {% for prog in item.programs %}
+                <span class="program-dot" style="background-color: {{ prog.colour_hex }}" aria-hidden="true"></span>{{ prog.name }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</figure>
+
+{% if page.has_other_pages %}
+<nav aria-label="Pagination">
+    {% if page.has_previous %}
+    <a href="?page={{ page.previous_page_number }}">Previous</a>
+    {% endif %}
+    Page {{ page.number }} of {{ page.paginator.num_pages }}
+    {% if page.has_next %}
+    <a href="?page={{ page.next_page_number }}">Next</a>
+    {% endif %}
+</nav>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+    <p>No {{ term.client|default:"client" }} files yet.</p>
+    <a href="{% url 'clients:client_create' %}" role="button">Create the first one</a>
+</div>
+{% endif %}
+{% endblock %}

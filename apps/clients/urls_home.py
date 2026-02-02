@@ -6,7 +6,8 @@ from django.urls import path
 
 @login_required
 def home(request):
-    return render(request, "clients/home.html")
+    # Initial view shows empty search — results load via HTMX
+    return render(request, "clients/home.html", {"results": [], "query": ""})
 
 
 urlpatterns = [

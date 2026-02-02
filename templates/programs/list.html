@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}{{ term.program_plural|default:"Programs" }} — {{ site.product_name|default:"KoNote" }}{% endblock %}
+
+{% block content %}
+<hgroup>
+    <h1>{{ term.program_plural|default:"Programs" }}</h1>
+    <p>Manage organisational {{ term.program_plural|default:"programs" }}.</p>
+</hgroup>
+
+<p><a href="{% url 'programs:program_create' %}" role="button">New {{ term.program|default:"Program" }}</a></p>
+
+{% if program_data %}
+<figure>
+<table role="grid">
+    <thead>
+        <tr>
+            <th scope="col">{{ term.program|default:"Program" }}</th>
+            <th scope="col">Status</th>
+            <th scope="col">Staff</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in program_data %}
+        <tr>
+            <td>
+                <span class="program-dot" style="background-color: {{ item.program.colour_hex }}" aria-hidden="true"></span>
+                <a href="{% url 'programs:program_detail' program_id=item.program.pk %}">{{ item.program.name }}</a>
+            </td>
+            <td>
+                {% if item.program.status == "active" %}
+                    <span class="badge badge-success">Active</span>
+                {% else %}
+                    <span class="badge badge-neutral">Archived</span>
+                {% endif %}
+            </td>
+            <td>{{ item.user_count }}</td>
+            <td><a href="{% url 'programs:program_edit' program_id=item.program.pk %}">Edit</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</figure>
+{% else %}
+<div class="empty-state">
+    <p>No {{ term.program_plural|default:"programs" }} yet.</p>
+</div>
+{% endif %}
+{% endblock %}

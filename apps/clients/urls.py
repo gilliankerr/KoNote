@@ -1,7 +1,20 @@
 from django.urls import path
 
+from . import views
+
 app_name = "clients"
 
 urlpatterns = [
-    # Phase 2: Client CRUD views will go here
+    path("", views.client_list, name="client_list"),
+    path("create/", views.client_create, name="client_create"),
+    path("search/", views.client_search, name="client_search"),
+    path("<int:client_id>/", views.client_detail, name="client_detail"),
+    path("<int:client_id>/edit/", views.client_edit, name="client_edit"),
+    path("<int:client_id>/custom-fields/", views.client_save_custom_fields, name="client_save_custom_fields"),
+    # Custom field admin (FIELD1)
+    path("admin/fields/", views.custom_field_admin, name="custom_field_admin"),
+    path("admin/fields/groups/create/", views.custom_field_group_create, name="custom_field_group_create"),
+    path("admin/fields/groups/<int:group_id>/edit/", views.custom_field_group_edit, name="custom_field_group_edit"),
+    path("admin/fields/create/", views.custom_field_def_create, name="custom_field_def_create"),
+    path("admin/fields/<int:field_id>/edit/", views.custom_field_def_edit, name="custom_field_def_edit"),
 ]

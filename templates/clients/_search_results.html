@@ -1,0 +1,38 @@
+{% if results %}
+<table role="grid">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Record ID</th>
+            <th scope="col">Status</th>
+            <th scope="col">{{ term.program_plural|default:"Programs" }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in results %}
+        <tr>
+            <td><a href="{% url 'clients:client_detail' client_id=item.client.pk %}">{{ item.name }}</a></td>
+            <td>{{ item.client.record_id|default:"—" }}</td>
+            <td>
+                {% if item.client.status == "active" %}
+                    <span class="badge badge-success">Active</span>
+                {% elif item.client.status == "inactive" %}
+                    <span class="badge badge-warning">Inactive</span>
+                {% else %}
+                    <span class="badge badge-neutral">Discharged</span>
+                {% endif %}
+            </td>
+            <td>
+                {% for prog in item.programs %}
+                <span class="program-dot" style="background-color: {{ prog.colour_hex }}" aria-hidden="true"></span>{{ prog.name }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% elif query %}
+<div class="empty-state">
+    <p>No {{ term.client_plural|default:"clients" }} match "{{ query }}".</p>
+</div>
+{% endif %}
