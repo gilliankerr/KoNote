@@ -32,16 +32,16 @@
         </ul>
         <ul>
             {% if not is_admin_only %}
-            <li><a href="/">{{ term.client_plural|default:"Clients" }}</a></li>
+            <li><a href="/"{% if nav_active == "clients" %} class="nav-active"{% endif %}>{{ term.client_plural|default:"Clients" }}</a></li>
             {% endif %}
             {% if features.programs %}
-            <li><a href="/programs/">{{ term.program_plural|default:"Programs" }}</a></li>
+            <li><a href="/programs/"{% if nav_active == "programs" %} class="nav-active"{% endif %}>{{ term.program_plural|default:"Programs" }}</a></li>
             {% endif %}
             {% if user.is_admin %}
-            <li><a href="/reports/export/">Reports</a></li>
+            <li><a href="/reports/export/"{% if nav_active == "reports" %} class="nav-active"{% endif %}>Reports</a></li>
             <li>
                 <details class="dropdown" role="list">
-                    <summary aria-haspopup="listbox">Admin</summary>
+                    <summary aria-haspopup="listbox"{% if nav_active == "admin" %} class="nav-active"{% endif %}>Admin</summary>
                     <ul role="listbox">
                         <li><a href="/plans/admin/metrics/">{{ term.metric_plural|default:"Metrics" }}</a></li>
                         <li><a href="/admin/templates/">Templates</a></li>

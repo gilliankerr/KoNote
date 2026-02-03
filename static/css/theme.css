@@ -10,6 +10,7 @@
     --kn-primary: #0d7377;
     --kn-primary-hover: #0a5c5f;
     --kn-primary-focus: rgba(13, 115, 119, 0.25);
+    --kn-primary-subtle: rgba(13, 115, 119, 0.08);
     --kn-secondary: #4a5568;
 
     /* --- Status colours --- */
@@ -25,32 +26,59 @@
     --kn-neutral-fg: #495057;
 
     /* --- Surfaces --- */
-    --kn-page-bg: #fafaf8;
+    --kn-page-bg: #f7f6f3;
     --kn-card-bg: #ffffff;
+    --kn-card-hover-bg: #fefefe;
     --kn-border: #d1d5db;
-    --kn-border-light: #e5e7eb;
+    --kn-border-light: #e8e6e1;
 
     /* --- Text --- */
     --kn-text: #1a202c;
+    --kn-text-secondary: #4a5568;
     --kn-text-muted: #718096;
+    --kn-text-faint: #a0aec0;
     --kn-text-inverse: #ffffff;
 
-    /* --- Spacing --- */
+    /* --- Spacing (4px grid) --- */
+    --kn-space-xs: 4px;
+    --kn-space-sm: 8px;
+    --kn-space-md: 12px;
+    --kn-space-base: 16px;
+    --kn-space-lg: 24px;
+    --kn-space-xl: 32px;
+    --kn-space-2xl: 48px;
     --kn-section-gap: 2rem;
 
     /* --- Radii --- */
-    --kn-radius-badge: 0.25rem;
-    --kn-radius-card: 0.5rem;
+    --kn-radius-badge: 4px;
+    --kn-radius-card: 8px;
+    --kn-radius-sm: 4px;
+
+    /* --- Shadows --- */
+    --kn-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+    --kn-shadow-card-hover: 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+    --kn-shadow-nav: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+    /* --- Transitions --- */
+    --kn-transition: 150ms ease;
 
     /* --- Override Pico defaults --- */
     --pico-primary: var(--kn-primary);
     --pico-primary-hover: var(--kn-primary-hover);
     --pico-primary-focus: var(--kn-primary-focus);
     --pico-background-color: var(--kn-page-bg);
+    --pico-card-background-color: var(--kn-card-bg);
+    --pico-card-border-radius: var(--kn-radius-card);
+    --pico-card-box-shadow: var(--kn-shadow-card);
+    --pico-border-radius: var(--kn-radius-sm);
+    --pico-form-element-spacing-vertical: 0.5rem;
+    --pico-form-element-spacing-horizontal: 0.75rem;
 }
 
 /* --- Dark mode --- */
 [data-theme="dark"] {
+    --kn-primary-subtle: rgba(13, 115, 119, 0.15);
+
     --kn-success-bg: #1a3a2a;
     --kn-success-fg: #a3d9b1;
     --kn-info-bg: #1a3040;
@@ -64,9 +92,16 @@
 
     --kn-page-bg: var(--pico-background-color);
     --kn-card-bg: #1e2533;
+    --kn-card-hover-bg: #242d3d;
     --kn-border: #4a5568;
     --kn-border-light: #2d3748;
 
     --kn-text: #e2e8f0;
+    --kn-text-secondary: #cbd5e0;
     --kn-text-muted: #a0aec0;
+    --kn-text-faint: #718096;
+
+    --kn-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 0 0.5px rgba(255, 255, 255, 0.05);
+    --kn-shadow-card-hover: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
+    --kn-shadow-nav: 0 1px 2px rgba(0, 0, 0, 0.15);
 }

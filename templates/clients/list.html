@@ -3,16 +3,16 @@
 {% block title %}{{ term.client_plural|default:"Clients" }} — {{ site.product_name|default:"KoNote" }}{% endblock %}
 
 {% block content %}
-<hgroup>
+<div class="page-header">
     <h1>{{ term.client_plural|default:"Clients" }}</h1>
     <p>All {{ term.client|default:"client" }} files you have access to.</p>
-</hgroup>
+</div>
 
 <p><a href="{% url 'clients:client_create' %}" role="button">New {{ term.client|default:"Client" }}</a></p>
 
 {% if page.object_list %}
 <figure>
-<table role="grid">
+<table role="grid" class="client-table">
     <thead>
         <tr>
             <th scope="col">Name</th>
@@ -47,7 +47,7 @@
 </figure>
 
 {% if page.has_other_pages %}
-<nav aria-label="Pagination">
+<nav class="pagination" aria-label="Pagination">
     {% if page.has_previous %}
     <a href="?page={{ page.previous_page_number }}">Previous</a>
     {% endif %}

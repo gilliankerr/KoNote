@@ -204,10 +204,11 @@ def note_create(request, client_id):
                     template=form.cleaned_data.get("template"),
                     summary=form.cleaned_data.get("summary", ""),
                 )
-                if form.cleaned_data.get("backdate"):
+                session_date = form.cleaned_data.get("session_date")
+                if session_date and session_date != timezone.localdate():
                     note.backdate = timezone.make_aware(
                         timezone.datetime.combine(
-                            form.cleaned_data["backdate"],
+                            session_date,
                             timezone.datetime.min.time(),
                         )
                     )
@@ -241,7 +242,7 @@ def note_create(request, client_id):
             messages.success(request, "Progress note saved.")
             return redirect("notes:note_list", client_id=client.pk)
     else:
-        form = FullNoteForm()
+        form = FullNoteForm(initial={"session_date": timezone.localdate()})
         target_forms = _build_target_forms(client)
 
     return render(request, "notes/note_form.html", {

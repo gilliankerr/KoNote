@@ -3,10 +3,10 @@
 {% block title %}{{ term.client_plural|default:"Clients" }} — {{ site.product_name|default:"KoNote" }}{% endblock %}
 
 {% block content %}
-<hgroup>
+<div class="page-header">
     <h1>{{ term.client_plural|default:"Clients" }}</h1>
     <p>Search and manage {{ term.client|default:"client" }} files.</p>
-</hgroup>
+</div>
 
 <!-- Quick actions -->
 <div role="group">
@@ -32,23 +32,23 @@
 </div>
 
 <!-- Dashboard -->
-<div class="grid" style="margin-top: 1.5rem;">
+<div class="dashboard-grid">
     <!-- Quick stats -->
-    <article>
-        <header><strong>Quick Stats</strong></header>
-        <dl>
-            <dt>Active {{ term.client_plural|default:"clients" }}</dt>
-            <dd><strong>{{ active_count }}</strong></dd>
-            <dt>Total {{ term.client_plural|default:"clients" }}</dt>
-            <dd>{{ total_count }}</dd>
-        </dl>
+    <article class="stat-hero">
+        <div class="card-header">Quick Stats</div>
+        <div class="stat-number">{{ active_count }}</div>
+        <div class="stat-label">Active {{ term.client_plural|default:"clients" }}</div>
+        <div style="margin-top: var(--kn-space-md);">
+            <span class="stat-secondary">{{ total_count }}</span>
+            <span class="stat-label"> total</span>
+        </div>
     </article>
 
     <!-- Active alerts -->
-    <article>
-        <header><strong>Active Alerts</strong></header>
+    <article{% if active_alerts %} class="card-alert"{% endif %}>
+        <div class="card-header">Active Alerts</div>
         {% if active_alerts %}
-        <ul>
+        <ul class="card-list">
             {% for alert in active_alerts %}
             <li>
                 <a href="{% url 'clients:client_detail' client_id=alert.client_file.pk %}">
@@ -65,12 +65,12 @@
     </article>
 </div>
 
-<div class="grid">
+<div class="dashboard-grid">
     <!-- Recently viewed -->
     <article>
-        <header><strong>Recently Viewed</strong></header>
+        <div class="card-header">Recently Viewed</div>
         {% if recent_clients %}
-        <ul>
+        <ul class="card-list">
             {% for item in recent_clients %}
             <li><a href="{% url 'clients:client_detail' client_id=item.client.pk %}">{{ item.name }}</a></li>
             {% endfor %}
@@ -81,11 +81,11 @@
     </article>
 
     <!-- Needs attention -->
-    <article>
-        <header><strong>Needs Attention</strong></header>
-        <small>{{ term.client_plural|default:"Clients" }} with no notes in the last 30 days</small>
+    <article{% if needs_attention %} class="card-warning"{% endif %}>
+        <div class="card-header">Needs Attention</div>
+        <small class="secondary">{{ term.client_plural|default:"Clients" }} with no notes in the last 30 days</small>
         {% if needs_attention %}
-        <ul>
+        <ul class="card-list">
             {% for item in needs_attention %}
             <li><a href="{% url 'clients:client_detail' client_id=item.client.pk %}">{{ item.name }}</a></li>
             {% endfor %}

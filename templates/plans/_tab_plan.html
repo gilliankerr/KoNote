@@ -1,6 +1,6 @@
 <!-- Partial: Plan tab content -->
 {% if can_edit %}
-<div role="group" style="margin-bottom: 1rem;">
+<div class="action-bar">
     <a href="{% url 'plans:section_create' client_id=client.pk %}" role="button" class="outline">
         Add {{ term.section|default:"Section" }}
     </a>
@@ -16,11 +16,13 @@
     <form method="post" action="{% url 'plans:section_create' client_id=client.pk %}">
         {% csrf_token %}
         {% for field in section_form %}
-        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field }}
-        {% if field.errors %}
-        <small class="error" role="alert">{{ field.errors.0 }}</small>
-        {% endif %}
+        <div class="form-row">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <small class="error" role="alert">{{ field.errors.0 }}</small>
+            {% endif %}
+        </div>
         {% endfor %}
         <div role="group">
             <button type="submit">Save</button>
@@ -32,7 +34,7 @@
 
 {% if active_sections %}
 {% for section in active_sections %}
-<article id="section-{{ section.pk }}" aria-label="{{ term.section|default:'Section' }}: {{ section.name }}">
+<article class="section-card" id="section-{{ section.pk }}" aria-label="{{ term.section|default:'Section' }}: {{ section.name }}">
     {% include "plans/_section.html" with section=section can_edit=can_edit %}
 </article>
 {% endfor %}
@@ -42,7 +44,7 @@
 <details>
     <summary>Completed &amp; deactivated {{ term.section_plural|default:"sections" }} ({{ inactive_sections|length }})</summary>
     {% for section in inactive_sections %}
-    <article id="section-{{ section.pk }}" aria-label="{{ term.section|default:'Section' }}: {{ section.name }}">
+    <article class="section-card" id="section-{{ section.pk }}" aria-label="{{ term.section|default:'Section' }}: {{ section.name }}">
         {% include "plans/_section.html" with section=section can_edit=can_edit %}
     </article>
     {% endfor %}
@@ -50,7 +52,7 @@
 {% endif %}
 
 {% if not active_sections and not inactive_sections and not show_section_form %}
-<article aria-label="Empty plan">
-    <p>No {{ term.section_plural|default:"sections" }} yet. {% if can_edit %}Use the button above to add one, or apply a template.{% endif %}</p>
-</article>
+<div class="empty-state">
+    <p>No {{ term.section_plural|default:"sections" }} yet.{% if can_edit %} Use the button above to add one, or apply a template.{% endif %}</p>
+</div>
 {% endif %}

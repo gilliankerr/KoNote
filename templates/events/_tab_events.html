@@ -1,5 +1,5 @@
 <!-- Partial: Events tab content -->
-<div role="group">
+<div class="action-bar">
     <a href="{% url 'events:event_create' client_id=client.pk %}" role="button">New Event</a>
     <a href="{% url 'events:alert_create' client_id=client.pk %}" role="button" class="outline">New Alert</a>
 </div>
@@ -7,9 +7,9 @@
 <!-- Active alerts -->
 {% for alert in alerts %}
 {% if alert.status == "default" %}
-<article aria-label="alert" style="border-left: 4px solid #EF4444;">
+<article class="alert-card" aria-label="alert">
     <header><strong>Alert</strong> — {{ alert.created_at|date:"Y-m-d" }}
-        {% if alert.author %}<small>by {{ alert.author.display_name|default:alert.author }}</small>{% endif %}
+        {% if alert.author %}<small class="secondary">by {{ alert.author.display_name|default:alert.author }}</small>{% endif %}
     </header>
     <p>{{ alert.content }}</p>
     <footer>
@@ -17,13 +17,13 @@
     </footer>
 </article>
 {% elif alert.status == "cancelled" %}
-<article aria-label="cancelled alert" style="border-left: 4px solid #6B7280; opacity: 0.6;">
+<article class="alert-card alert-card-cancelled" aria-label="cancelled alert">
     <header>
         <span class="badge badge-danger">Cancelled</span>
         <strong>Alert</strong> — {{ alert.created_at|date:"Y-m-d" }}
     </header>
     <p><del>{{ alert.content }}</del></p>
-    {% if alert.status_reason %}<p><small>Reason: {{ alert.status_reason }}</small></p>{% endif %}
+    {% if alert.status_reason %}<p><small class="secondary">Reason: {{ alert.status_reason }}</small></p>{% endif %}
 </article>
 {% endif %}
 {% endfor %}
@@ -61,7 +61,7 @@
             <strong>{{ entry.date|date:"Y-m-d" }}</strong>
             — {{ entry.obj.author.display_name|default:entry.obj.author }}
             {% if entry.obj.author_program %}
-                <small>({{ entry.obj.author_program.name }})</small>
+                <small class="secondary">({{ entry.obj.author_program.name }})</small>
             {% endif %}
         </div>
         {% if entry.obj.status == "cancelled" %}
@@ -74,5 +74,7 @@
     {% endfor %}
 </div>
 {% else %}
-<p class="empty-state">No events or notes recorded yet. Add events or progress notes to build a timeline.</p>
+<div class="empty-state">
+    <p>No events or notes recorded yet. Add events or progress notes to build a timeline.</p>
+</div>
 {% endif %}

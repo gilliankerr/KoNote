@@ -31,16 +31,16 @@ class FullNoteForm(forms.Form):
     template = forms.ModelChoiceField(
         queryset=ProgressNoteTemplate.objects.filter(status="active"),
         required=False,
-        empty_label="Blank note (no template)",
+        empty_label="No template",
+    )
+    session_date = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "date"}),
+        required=False,
+        help_text="Change if this note is for a different day.",
     )
     summary = forms.CharField(
         widget=forms.Textarea(attrs={"rows": 3, "placeholder": "Optional summary..."}),
         required=False,
-    )
-    backdate = forms.DateField(
-        required=False,
-        widget=forms.DateInput(attrs={"type": "date"}),
-        help_text="Leave blank to use today's date.",
     )
 
 

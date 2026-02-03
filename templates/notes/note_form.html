@@ -11,19 +11,16 @@
 <form method="post">
     {% csrf_token %}
 
-    <!-- Note settings -->
-    <fieldset>
-        <legend>Note Settings</legend>
+    <!-- Template (determines note structure) -->
+    <label for="{{ form.template.id_for_label }}">Template</label>
+    {{ form.template }}
+    {% if form.template.errors %}<small class="error" role="alert">{{ form.template.errors.0 }}</small>{% endif %}
 
-        <label for="{{ form.template.id_for_label }}">Template</label>
-        {{ form.template }}
-        {% if form.template.errors %}<small class="error" role="alert">{{ form.template.errors.0 }}</small>{% endif %}
-
-        <label for="{{ form.backdate.id_for_label }}">Session Date</label>
-        {{ form.backdate }}
-        <small>{{ form.backdate.help_text }}</small>
-        {% if form.backdate.errors %}<small class="error" role="alert">{{ form.backdate.errors.0 }}</small>{% endif %}
-    </fieldset>
+    <!-- Session date — pre-filled with today -->
+    <label for="{{ form.session_date.id_for_label }}">Session Date</label>
+    {{ form.session_date }}
+    <small>{{ form.session_date.help_text }}</small>
+    {% if form.session_date.errors %}<small class="error" role="alert">{{ form.session_date.errors.0 }}</small>{% endif %}
 
     <!-- Target selection — staff pick which targets they worked on -->
     {% if target_forms %}
@@ -72,12 +69,9 @@
     {% endif %}
 
     <!-- Summary -->
-    <fieldset>
-        <legend>Summary</legend>
-        <label for="{{ form.summary.id_for_label }}">Summary (optional)</label>
-        {{ form.summary }}
-        {% if form.summary.errors %}<small class="error" role="alert">{{ form.summary.errors.0 }}</small>{% endif %}
-    </fieldset>
+    <label for="{{ form.summary.id_for_label }}">Summary (optional)</label>
+    {{ form.summary }}
+    {% if form.summary.errors %}<small class="error" role="alert">{{ form.summary.errors.0 }}</small>{% endif %}
 
     <div role="group">
         <button type="submit">Save {{ term.progress_note|default:"Note" }}</button>
