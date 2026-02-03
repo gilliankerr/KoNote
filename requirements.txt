@@ -2,6 +2,7 @@
 Django>=5.1,<5.2
 gunicorn>=22.0
 psycopg[binary]>=3.2
+psycopg2-binary>=2.9
 
 # Authentication
 authlib>=1.3
