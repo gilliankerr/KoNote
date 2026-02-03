@@ -10,7 +10,6 @@ _Nothing flagged._
 
 - [x] Fix test suite configuration error — (TEST2)
 - [x] Add CSV export for all client data — (EXP1)
-- [ ] Create first-run setup wizard — (SETUP1)
 - [ ] Add backup automation examples to docs — (OPS1)
 - [ ] Add client search filters (program, status, date) — (UX19)
 - [ ] Add note auto-save / draft recovery — (UX21)
@@ -84,7 +83,7 @@ These features are intentionally excluded. See technical documentation for ratio
 - [ ] PIPEDA/PHIPA consent workflow — block note entry until client consent recorded — (PRIV1)
 - [ ] GDPR toolkit UI — data export, right to erasure, consent management — (GDPR1)
 - [ ] Mobile-responsive optimisation pass — (UI1)
-- [ ] First-run setup wizard for new instances — (SETUP1)
+- [ ] First-run setup wizard — Claude skill + import command — See `tasks/setup-wizard-design.md` (SETUP1)
 - [ ] Automated backups documentation — (OPS1)
 - [ ] Encrypted search optimisation (search hash field) for large client lists — (PERF1)
 - [ ] Bulk operations for discharge, assign, export — (UX17)
