@@ -1,0 +1,1 @@
+# Registration app template tags

@@ -8,6 +8,7 @@ from apps.clients.models import CustomFieldDefinition
 
 from .forms import PublicRegistrationForm
 from .models import RegistrationLink, RegistrationSubmission
+from .utils import approve_submission
 
 
 # Rate limiting constants
@@ -108,24 +109,19 @@ def public_registration_form(request, slug):
     except RegistrationLink.DoesNotExist:
         raise Http404("Registration form not found.")
 
-    # Check if the link is active
-    if not registration_link.is_active:
-        raise Http404("Registration form not found.")
+    # Check if registration is open - use model's is_closed_reason property
+    closed_reason = registration_link.is_closed_reason
+    is_open = closed_reason is None
 
-    # Get capacity info
+    # If closed, show the closed page with appropriate message
+    if closed_reason:
+        return render(request, "registration/closed.html", {
+            "registration_link": registration_link,
+            "reason": closed_reason,
+        })
+
+    # Get capacity info for display
     capacity = _get_capacity_info(registration_link)
-
-    # Check if registration is open
-    is_open = registration_link.is_open()
-    closed_reason = None
-
-    if not is_open:
-        if registration_link.closes_at and timezone.now() > registration_link.closes_at:
-            closed_reason = "deadline"
-        elif capacity["has_limit"] and capacity["remaining"] == 0:
-            closed_reason = "full"
-        else:
-            closed_reason = "inactive"
 
     # Get grouped custom fields for display
     grouped_fields = _get_grouped_custom_fields(registration_link)
@@ -136,11 +132,11 @@ def public_registration_form(request, slug):
     context = {
         "registration_link": registration_link,
         "is_open": is_open,
-        "closed_reason": closed_reason,
         "capacity": capacity,
         "grouped_fields": grouped_fields,
         "is_rate_limited": is_rate_limited,
         "remaining_submissions": remaining_submissions,
+        "spots_remaining": registration_link.spots_remaining,
     }
 
     if request.method == "GET":
@@ -149,10 +145,13 @@ def public_registration_form(request, slug):
             context["form"] = form
         return render(request, "registration/public_form.html", context)
 
-    # POST handling
-    if not is_open:
-        # Shouldn't happen with normal form submission, but handle it
-        return render(request, "registration/public_form.html", context)
+    # POST handling - re-check if still open (race condition protection)
+    closed_reason = registration_link.is_closed_reason
+    if closed_reason:
+        return render(request, "registration/closed.html", {
+            "registration_link": registration_link,
+            "reason": closed_reason,
+        })
 
     if is_rate_limited:
         context["rate_limit_error"] = True
@@ -178,11 +177,12 @@ def public_registration_form(request, slug):
     # Store custom field values
     submission.field_values = form.get_custom_field_values()
 
-    # Check if auto-approve is enabled
-    if registration_link.auto_approve:
-        submission.status = "approved"
-
+    # Save the submission first
     submission.save()
+
+    # Handle auto-approve if enabled - this creates ClientFile and enrolment
+    if registration_link.auto_approve:
+        approve_submission(submission, reviewed_by=None)
 
     # Record submission for rate limiting
     _record_submission(request)

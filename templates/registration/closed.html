@@ -1,0 +1,49 @@
+{% extends "registration/base_public.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Registration Closed" %} — {{ registration_link.title }}{% endblock %}
+
+{% block content %}
+<article style="text-align: center;">
+    <!-- Closed icon -->
+    <div style="font-size: 4rem; margin-bottom: 1rem;" aria-hidden="true">
+        &#128683;
+    </div>
+
+    <!-- Header -->
+    <hgroup>
+        <h1>{% trans "Registration Closed" %}</h1>
+        <p>{{ registration_link.title }}</p>
+    </hgroup>
+
+    <!-- Reason message -->
+    <div style="margin: 2rem 0;">
+        {% if reason == "deadline" %}
+        <p>{% trans "The registration deadline has passed." %}</p>
+        {% if registration_link.closes_at %}
+        <p style="color: var(--pico-muted-color);">
+            {% blocktrans with deadline=registration_link.closes_at|date:"F j, Y" time=registration_link.closes_at|time:"g:i A" %}
+            Registration closed on {{ deadline }} at {{ time }}.
+            {% endblocktrans %}
+        </p>
+        {% endif %}
+
+        {% elif reason == "capacity" %}
+        <p>{% trans "This registration has reached capacity." %}</p>
+        <p style="color: var(--pico-muted-color);">
+            {% trans "All available spots have been filled." %}
+        </p>
+
+        {% else %}
+        <!-- reason == "inactive" or unknown -->
+        <p>{% trans "Registration is not currently available." %}</p>
+        <p style="color: var(--pico-muted-color);">
+            {% trans "Please check back later or contact us for more information." %}
+        </p>
+        {% endif %}
+    </div>
+
+    <!-- Thank you message -->
+    <p>{% trans "Thank you for your interest." %}</p>
+</article>
+{% endblock %}
