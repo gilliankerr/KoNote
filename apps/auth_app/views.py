@@ -39,8 +39,10 @@ def _local_login(request):
                     _audit_login(request, user)
                     return redirect("/")
                 else:
+                    _audit_failed_login(request, username, "invalid_password")
                     error = "Invalid username or password."
             except User.DoesNotExist:
+                _audit_failed_login(request, username, "user_not_found")
                 error = "Invalid username or password."
         else:
             error = "Please enter both username and password."
@@ -168,6 +170,24 @@ def _audit_login(request, user):
             ip_address=request.META.get("REMOTE_ADDR", ""),
             action="login",
             resource_type="session",
+        )
+    except Exception:
+        pass
+
+
+def _audit_failed_login(request, attempted_username, reason):
+    """Record failed login attempt in audit log for security monitoring."""
+    try:
+        from apps.audit.models import AuditLog
+
+        AuditLog.objects.using("audit").create(
+            event_timestamp=timezone.now(),
+            user_id=None,
+            user_display=f"[failed: {attempted_username}]",
+            ip_address=request.META.get("REMOTE_ADDR", ""),
+            action="login_failed",
+            resource_type="session",
+            metadata={"reason": reason},
         )
     except Exception:
         pass

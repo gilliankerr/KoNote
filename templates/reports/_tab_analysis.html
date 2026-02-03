@@ -13,8 +13,9 @@
     </section>
     {% endfor %}
 
+{{ chart_data_json|json_script:"chart-data" }}
 <script>
-const chartData = {{ chart_data_json|safe }};
+const chartData = JSON.parse(document.getElementById('chart-data').textContent);
 chartData.forEach(function(chart, index) {
     const ctx = document.getElementById('chart-' + (index + 1)).getContext('2d');
     const datasets = [{

@@ -152,11 +152,13 @@ def export_form(request):
 
 
 def _get_client_or_403(request, client_id):
-    """Return client if user has access, otherwise None."""
+    """Return client if user has access via program roles, otherwise None.
+
+    Admins without program roles cannot access client data — consistent with
+    the RBAC model where admin-only users manage system config, not client records.
+    """
     client = get_object_or_404(ClientFile, pk=client_id)
     user = request.user
-    if user.is_admin:
-        return client
     user_program_ids = set(
         UserProgramRole.objects.filter(user=user, status="active")
         .values_list("program_id", flat=True)

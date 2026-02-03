@@ -13,6 +13,7 @@ class AuditLog(models.Model):
         ("update", "Update"),
         ("delete", "Delete"),
         ("login", "Login"),
+        ("login_failed", "Login Failed"),
         ("logout", "Logout"),
         ("export", "Export"),
         ("view", "View"),
