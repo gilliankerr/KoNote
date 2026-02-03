@@ -1,17 +1,61 @@
-"""Production settings — secure defaults."""
+"""
+Production settings — secure defaults for all deployment platforms.
+
+Supported platforms (auto-detected):
+- Railway: Sets RAILWAY_ENVIRONMENT, provides PORT
+- Azure App Service: Sets WEBSITE_SITE_NAME, provides PORT
+- Elestio: Sets ELESTIO_VM_NAME
+- Docker/self-hosted: Set DATABASE_URL and other required vars
+
+Required environment variables for all platforms:
+- DATABASE_URL: PostgreSQL connection string
+- AUDIT_DATABASE_URL: PostgreSQL connection string (can be same as DATABASE_URL)
+- SECRET_KEY: Random string for cryptographic signing
+- FIELD_ENCRYPTION_KEY: Fernet key for PII encryption
+
+Optional but recommended:
+- ALLOWED_HOSTS: Comma-separated list of allowed domains (auto-detected for known platforms)
+"""
 import os
 from .base import *  # noqa: F401, F403
 
 DEBUG = False
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 
-# Auto-detect Railway and add common domain patterns
+# ALLOWED_HOSTS — start with explicit configuration, then auto-detect
+_allowed_hosts = os.environ.get("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts if h.strip()]
+
+# Auto-detect platform and add appropriate domains
+# ─────────────────────────────────────────────────────────────────────
+
+# Railway
 if os.environ.get("RAILWAY_ENVIRONMENT"):
-    # Ensure Railway domains are always allowed
-    railway_domains = [".railway.app", ".up.railway.app"]
-    for domain in railway_domains:
-        if domain not in ALLOWED_HOSTS:
-            ALLOWED_HOSTS.append(domain)
+    ALLOWED_HOSTS.extend([".railway.app", ".up.railway.app"])
+
+# Azure App Service
+if os.environ.get("WEBSITE_SITE_NAME"):
+    site_name = os.environ.get("WEBSITE_SITE_NAME")
+    ALLOWED_HOSTS.extend([
+        f"{site_name}.azurewebsites.net",
+        ".azurewebsites.net",
+    ])
+
+# Elestio
+if os.environ.get("ELESTIO_VM_NAME"):
+    # Elestio provides CNAME or custom domain via env vars
+    elestio_domain = os.environ.get("ELESTIO_DOMAIN", "")
+    if elestio_domain:
+        ALLOWED_HOSTS.append(elestio_domain)
+    ALLOWED_HOSTS.append(".elest.io")
+
+# Docker/self-hosted — allow localhost and local network for testing
+# In production, clients should set ALLOWED_HOSTS explicitly
+if not ALLOWED_HOSTS:
+    # Fallback: allow common local development hosts
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+
+# Remove duplicates while preserving order
+ALLOWED_HOSTS = list(dict.fromkeys(ALLOWED_HOSTS))
 
 # HTTPS — Railway handles TLS at the edge, so we don't redirect internally.
 # SECURE_PROXY_SSL_HEADER tells Django to trust the proxy's forwarded header.

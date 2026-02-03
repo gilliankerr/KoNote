@@ -401,6 +401,7 @@ def client_analysis(request, client_id):
         "chart_data": chart_data,
         "chart_data_json": json.dumps(chart_data, default=str),
         "active_tab": "analysis",
+        "user_role": getattr(request, "user_program_role", None),
     }
     if request.headers.get("HX-Request"):
         return render(request, "reports/_tab_analysis.html", context)

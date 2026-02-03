@@ -164,12 +164,20 @@ class Command(BaseCommand):
             missing.append("AUDIT_DATABASE_URL")
 
         if missing:
-            hint = ""
-            if os.environ.get("RAILWAY_ENVIRONMENT"):
-                hint = " (use ${{ServiceName.DATABASE_URL}} syntax in Railway)"
+            hint = self._get_platform_hint()
             return False, f"Missing database configuration: {', '.join(missing)}{hint}"
 
         return True, "Database URLs configured"
+
+    def _get_platform_hint(self):
+        """Return platform-specific hint for configuring DATABASE_URL."""
+        if os.environ.get("RAILWAY_ENVIRONMENT"):
+            return " (Railway: use ${{ServiceName.DATABASE_URL}} syntax)"
+        if os.environ.get("WEBSITE_SITE_NAME"):
+            return " (Azure: configure in App Service > Configuration)"
+        if os.environ.get("ELESTIO_VM_NAME"):
+            return " (Elestio: configure in service environment variables)"
+        return " (Docker: set in docker-compose.yml or -e flag)"
 
     def _check_encryption_key(self):
         """Verify FIELD_ENCRYPTION_KEY is set and valid."""

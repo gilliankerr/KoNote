@@ -57,6 +57,32 @@ Consider engaging IT support if:
 
 ---
 
+## Automatic Platform Detection
+
+KoNote automatically detects which platform it's running on and configures itself appropriately:
+
+| Platform | How It's Detected | What's Auto-Configured |
+|----------|-------------------|------------------------|
+| **Railway** | `RAILWAY_ENVIRONMENT` variable | Production settings, `.railway.app` domains allowed |
+| **Azure App Service** | `WEBSITE_SITE_NAME` variable | Production settings, `.azurewebsites.net` domains allowed |
+| **Elestio** | `ELESTIO_VM_NAME` variable | Production settings, `.elest.io` domains allowed |
+| **Docker/Self-hosted** | `DATABASE_URL` is set | Production settings, localhost allowed by default |
+
+This means you only need to set the **essential** variables for each platform — KoNote handles the rest.
+
+### Essential Variables (All Platforms)
+
+| Variable | Purpose |
+|----------|---------|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `AUDIT_DATABASE_URL` | PostgreSQL connection for audit logs |
+| `SECRET_KEY` | Random string for session signing |
+| `FIELD_ENCRYPTION_KEY` | Fernet key for PII encryption |
+
+If something is missing, the startup check will tell you exactly what's wrong and give platform-specific hints on how to fix it.
+
+---
+
 ## Prerequisites
 
 ### All Platforms
@@ -185,16 +211,20 @@ KoNote needs **two** PostgreSQL databases (main + audit).
 
 ### Step 3: Configure Environment Variables
 
-In your Railway project, add these variables:
+In your Railway project, click **Variables** on your app service and add:
 
 | Variable | Value |
 |----------|-------|
 | `SECRET_KEY` | Your generated key |
 | `FIELD_ENCRYPTION_KEY` | Your generated key |
-| `ALLOWED_HOSTS` | `*` (temporarily; update with your domain later) |
-| `AUTH_MODE` | `local` |
-| `DATABASE_URL` | Copy from first PostgreSQL plugin |
-| `AUDIT_DATABASE_URL` | Copy from second PostgreSQL plugin |
+| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (use your first database's name) |
+| `AUDIT_DATABASE_URL` | `${{Postgres-XXXX.DATABASE_URL}}` (use your second database's name) |
+
+**Note:** The `${{ServiceName.DATABASE_URL}}` syntax tells Railway to pull the URL from your Postgres service. Check your database service names in the Railway dashboard.
+
+Optional variables (auto-detected, only set if needed):
+- `ALLOWED_HOSTS` — Auto-includes `.railway.app` domains
+- `AUTH_MODE` — Defaults to `local`, set to `azure` for SSO
 
 ### Step 4: Redeploy
 
@@ -315,13 +345,14 @@ In Azure Portal, go to your Container App → Containers → Environment variabl
 
 | Variable | Value |
 |----------|-------|
-| `DJANGO_SETTINGS_MODULE` | `konote.settings.production` |
 | `SECRET_KEY` | Your generated key |
 | `FIELD_ENCRYPTION_KEY` | Your generated key |
 | `DATABASE_URL` | `postgresql://konote:PASSWORD@konote-db.postgres.database.azure.com:5432/konote` |
 | `AUDIT_DATABASE_URL` | `postgresql://audit_writer:PASSWORD@konote-audit-db.postgres.database.azure.com:5432/konote_audit` |
-| `ALLOWED_HOSTS` | Your domain |
-| `AUTH_MODE` | `azure` or `local` |
+
+Optional (auto-detected):
+- `ALLOWED_HOSTS` — Auto-includes `.azurewebsites.net` domains; add custom domains if needed
+- `AUTH_MODE` — Defaults to `local`, set to `azure` for Azure AD SSO
 
 ### Step 7: Run Migrations
 
@@ -367,9 +398,10 @@ Add these in the Elestio dashboard:
 | `FIELD_ENCRYPTION_KEY` | Your generated key |
 | `DATABASE_URL` | `postgresql://konote:konote@db:5432/konote` |
 | `AUDIT_DATABASE_URL` | `postgresql://audit_writer:audit_pass@audit_db:5432/konote_audit` |
-| `DJANGO_SETTINGS_MODULE` | `konote.settings.production` |
-| `ALLOWED_HOSTS` | Your domain |
-| `AUTH_MODE` | `local` or `azure` |
+
+Optional (auto-detected):
+- `ALLOWED_HOSTS` — Auto-includes `.elest.io` domains; add custom domains if needed
+- `AUTH_MODE` — Defaults to `local`, set to `azure` for Azure AD SSO
 
 ### Step 3: Connect GitHub Repository
 
@@ -383,10 +415,12 @@ Add these in the Elestio dashboard:
 In the Elestio console, run:
 
 ```bash
-python manage.py migrate --settings=konote.settings.production
-python manage.py migrate --database=audit --settings=konote.settings.production
-python manage.py lockdown_audit_db --settings=konote.settings.production
+python manage.py migrate
+python manage.py migrate --database=audit
+python manage.py lockdown_audit_db
 ```
+
+KoNote auto-detects Elestio and uses production settings automatically.
 
 ### Step 5: Configure Domain and TLS
 

@@ -9,6 +9,7 @@ from django.template.response import TemplateResponse
 CLIENT_URL_PATTERNS = [
     (re.compile(r"^/clients/(?P<client_id>\d+)"), "client_id"),
     (re.compile(r"^/notes/client/(?P<client_id>\d+)"), "client_id"),
+    (re.compile(r"^/reports/client/(?P<client_id>\d+)"), "client_id"),
 ]
 
 # URL patterns for note-specific routes (look up client from note)
