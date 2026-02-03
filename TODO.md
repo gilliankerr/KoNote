@@ -6,12 +6,7 @@ _Nothing flagged._
 
 ## Active Work
 
-### Pre-Pilot Testing Fixes
-
-- [x] Fix test suite configuration error — (TEST2)
-- [x] Add CSV export for all client data — (EXP1)
-- [x] Add backup automation examples to docs — (OPS1)
-- [x] Create "Quick Start for Staff" training doc — (DOC18)
+_No active work. Ready for pilot testing._
 
 ## Roadmap — Prioritized Extensions
 
@@ -84,9 +79,7 @@ These features are intentionally excluded. See technical documentation for ratio
 
 ## Parking Lot
 
-- [ ] Delete archived docs after verifying new structure works — `docs/archive/` — (DOC19)
 - [ ] GDPR toolkit UI — data export, right to erasure, consent management — (GDPR1)
-- [ ] Mobile-responsive optimisation pass — (UI1)
 - [ ] First-run setup wizard — Claude skill + import command — See `tasks/setup-wizard-design.md` (SETUP1)
 - [ ] Encrypted search optimisation (search hash field) for large client lists — (PERF1)
 - [ ] Bulk operations for discharge, assign, export — (UX17)
@@ -95,6 +88,9 @@ These features are intentionally excluded. See technical documentation for ratio
 
 ## Recently Done
 
+- [x] Move old docs to archive folder — 2026-02-03 (DOC19)
+- [x] Create "Quick Start for Staff" training doc — 2026-02-03 (DOC18)
+- [x] Fix test suite configuration error — 2026-02-03 (TEST2)
 - [x] PIPEDA/PHIPA consent workflow — block note entry until client consent recorded — 2026-02-03 (PRIV1)
 - [x] Note follow-up dates on home page — 2026-02-03 (FU1)
 - [x] Add backup automation examples to docs — 2026-02-03 (OPS1)
@@ -102,67 +98,5 @@ These features are intentionally excluded. See technical documentation for ratio
 - [x] Note auto-save / draft recovery — 2026-02-03 (UX21)
 - [x] Mobile responsiveness pass — 2026-02-03 (UI1)
 - [x] Add CSV export for all client data — 2026-02-03 (EXP1)
-- [x] Add consent checkbox to note entry — 2026-02-03 (PRIV2)
-- [x] Iframe embed support for registration forms — 2026-02-03 (REG8)
-- [x] Phase E: Self-service registration complete (REG1–REG7) — 2026-02-03
-- [x] Add "What You'll Need" pre-flight checklist to getting-started.md — 2026-02-03 (DOC12)
-- [x] Add "What just happened?" explanations after key generation steps — 2026-02-03 (DOC13)
-- [x] Add expected output examples showing what success looks like — 2026-02-03 (DOC14)
-- [x] Add glossary section: terminal, repository, migration, container — 2026-02-03 (DOC15)
-- [x] Create "Before You Enter Real Data" checkpoint document — 2026-02-03 (DOC16)
-- [x] Fix placeholders to obviously fake values like REPLACE_THIS — 2026-02-03 (DOC17)
-- [x] French UI translation — Django i18n setup + ~500 strings — 2026-02-03 (I18N1)
-- [x] Document folder button — link to client folder in SharePoint/Google Drive — 2026-02-03 (DOC5)
-- [x] Terminology override by language — extend model for fr/en terms — 2026-02-03 (I18N2)
-- [x] Create getting-started.md — complete local dev setup with Docker option — 2026-02-03 (DOC8)
-- [x] Create security-operations.md — security tests, audit logs, key rotation — 2026-02-03 (DOC9)
-- [x] Enhance README Quick Start — add key generation commands — 2026-02-03 (DOC10)
-- [x] Add inline comments to .env.example — explain each variable — 2026-02-03 (DOC11)
-- [x] "What KoNote Is and Isn't" documentation page — set scope expectations — 2026-02-03 (DOC6)
-- [x] Show custom fields in read-only mode by default with edit toggle — 2026-02-03 (UX12)
-- [x] Add date-only toggle to event form — 2026-02-03 (UX13)
-- [x] Style permission error pages with navigation and helpful text — 2026-02-03 (UX14)
-- [x] Add status and program filters to client list page — 2026-02-03 (UX15)
-- [x] Auto-dismiss success messages after 3 seconds; keep errors persistent — 2026-02-03 (UX16)
-- [x] Harden startup: raise ImproperlyConfigured if secrets missing; remove hardcoded fallbacks — 2026-02-02 (CR1)
-- [x] Fix CSS bug: `align-items: centre` → `center` — 2026-02-02 (CR8)
-- [x] Add encryption ceiling note to agency-setup.md — 2026-02-02 (CR5)
-- [x] Add `role="alert"` and `aria-live="polite"` to templates (18 files) — 2026-02-02 (CR9)
-- [x] Create ModelForm classes for login, feature toggle, custom fields, AI endpoints — 2026-02-02 (CR4)
-- [x] Add tests for auth views, plan CRUD, and AI endpoints (60 tests) — 2026-02-02 (CR6)
-- [x] Code review: DEBUG, CSRF, migrations, empty states verified — 2026-02-02 (CR2, CR3, CR7, CR10)
-- [x] Staff dashboard with recent clients, alerts, quick stats, needs-attention list — 2026-02-02 (UX1)
-- [x] HTMX-powered client detail tabs (no full page reloads) — 2026-02-02 (UX2)
-- [x] Target selection checkboxes on note form — 2026-02-02 (UX3)
-- [x] Notes list filtering (type, date, author) and pagination — 2026-02-02 (UX4)
-- [x] Fix N+1 queries in client search/list with prefetch_related — 2026-02-02 (UX5)
-- [x] Fix note collapse to use HTMX instead of location.reload() — 2026-02-02 (UX6)
-- [x] Add hx-confirm to destructive plan actions — 2026-02-02 (UX7)
-- [x] Group admin nav items under dropdown menu — 2026-02-02 (UX8)
-- [x] Autofocus search input on home page — 2026-02-02 (UX9)
-- [x] Select All / Deselect All for metric export checkboxes — 2026-02-02 (UX10)
-- [x] Error toasts persist until dismissed; added close button — 2026-02-02 (UX11)
-- [x] PDF exports: individual client progress reports + bulk funder reports (WeasyPrint) — 2026-02-02 (RPT2)
-- [x] Phase 7: Audit DB lockdown, CSP tuning, rate limiting, key rotation command, deployment guides (Azure, Elest.io, Railway), agency setup guide, backup/restore docs — 2026-02-02 (SEC1, SEC4, SEC5, SEED1, DOC1, DOC2, DOC3, DOC4, OPS2)
-- [x] Phase 6: Terminology, feature toggles, instance settings, user management admin UIs, cache invalidation signals — 2026-02-02 (CUST1, CUST2, CUST3, USR1)
-- [x] Phase 5: Charts, events, alerts, combined timeline, funder report export, audit log viewer — 2026-02-02 (VIZ1, EVT1, EVT2, VIZ2, RPT1, AUD1)
-- [x] Phase 4: Quick notes, full structured notes, metric recording, templates admin, timeline, cancellation — 2026-02-02 (NOTE1–NOTE5)
-- [x] Phase 3: Plan sections, targets, metrics, templates, apply-to-client, revision history — 2026-02-02 (PLAN1–PLAN6)
-- [x] Phase 2: Program CRUD, role assignment, client CRUD, enrolment, custom fields, search — 2026-02-02 (PROG1–CLI3)
-- [x] Create theme.css with design tokens (swappable per agency) — 2026-02-02 (DES1)
-- [x] Replace badge colours with semantic token classes — 2026-02-02 (DES2)
-- [x] Redesign login page with wordmark and brand colour — 2026-02-02 (DES3)
-- [x] Add skip-nav, aria-live regions, branded focus style — 2026-02-02 (A11Y1)
-- [x] Create empty state, loading bar, and toast patterns — 2026-02-02 (DES4)
-- [x] Move login inline styles to CSS class — 2026-02-02 (DES5)
-- [x] Generate Django migrations for all 8 apps — 2026-02-02 (FIX1)
-- [x] Create test suite: 15 tests for RBAC + PII encryption — 2026-02-02 (TEST1)
-- [x] Add HTMX global error handler + toast to app.js — 2026-02-02 (FIX2)
-- [x] Register all models in admin.py (8 apps) + enable Django admin — 2026-02-02 (FIX3)
-- [x] Phase 1: Django project scaffold, settings, Docker — 2026-02-02 (FOUND1)
-- [x] Phase 1: Security middleware (RBAC, audit, CSP, CSRF) — 2026-02-02 (FOUND2)
-- [x] Phase 1: All data models (clients, plans, notes, events, metrics) — 2026-02-02 (FOUND3)
-- [x] Phase 1: Azure AD + local auth with Argon2 — 2026-02-02 (FOUND4)
-- [x] Phase 1: PII encryption utilities (Fernet) — 2026-02-02 (FOUND5)
-- [x] Phase 1: Metric library seed data (24 metrics) — 2026-02-02 (FOUND6)
-- [x] Phase 1: Base templates (Pico CSS, HTMX) — 2026-02-02 (FOUND7)
+
+_Older completed tasks moved to [tasks/ARCHIVE.md](tasks/ARCHIVE.md)._
