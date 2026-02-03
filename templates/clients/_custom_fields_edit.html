@@ -1,0 +1,91 @@
+{# Partial: Editable form for custom fields with cancel toggle #}
+<div class="custom-fields-header">
+    <h2 id="custom-fields-heading">Additional Details</h2>
+    <button type="button"
+            class="outline secondary"
+            hx-get="{% url 'clients:client_custom_fields_display' client_id=client.pk %}"
+            hx-target="#custom-fields-section"
+            hx-swap="innerHTML"
+            aria-describedby="custom-fields-heading"
+            aria-label="Cancel editing and return to read-only view">
+        Cancel
+    </button>
+</div>
+
+<form method="post"
+      action="{% url 'clients:client_save_custom_fields' client_id=client.pk %}"
+      hx-post="{% url 'clients:client_save_custom_fields' client_id=client.pk %}"
+      hx-target="#custom-fields-section"
+      hx-swap="innerHTML">
+    {% csrf_token %}
+    {% for group in custom_data %}
+    <fieldset aria-labelledby="edit-group-{{ group.group.pk }}">
+        <legend id="edit-group-{{ group.group.pk }}">{{ group.group.title }}</legend>
+        {% for item in group.fields %}
+        <div class="form-row">
+            <label for="custom_{{ item.field_def.pk }}">
+                {{ item.field_def.name }}
+                {% if item.is_editable and item.field_def.is_required %}<abbr title="required">*</abbr>{% endif %}
+                {% if item.field_def.is_sensitive %}<small class="secondary">(encrypted)</small>{% endif %}
+            </label>
+            {% if item.is_editable %}
+                {# Editable field: show input #}
+                {% if item.field_def.input_type == "textarea" %}
+                    <textarea name="custom_{{ item.field_def.pk }}"
+                              id="custom_{{ item.field_def.pk }}"
+                              rows="3"
+                              placeholder="{{ item.field_def.placeholder }}"
+                              {% if item.field_def.is_required %}required aria-required="true"{% endif %}>{{ item.value }}</textarea>
+                {% elif item.field_def.input_type == "select" %}
+                    <select name="custom_{{ item.field_def.pk }}"
+                            id="custom_{{ item.field_def.pk }}"
+                            {% if item.field_def.is_required %}required aria-required="true"{% endif %}>
+                        <option value="">Select…</option>
+                        {% for opt in item.field_def.options_json %}
+                        <option value="{{ opt }}" {% if item.value == opt %}selected{% endif %}>{{ opt }}</option>
+                        {% endfor %}
+                    </select>
+                {% elif item.field_def.input_type == "date" %}
+                    <input type="date"
+                           name="custom_{{ item.field_def.pk }}"
+                           id="custom_{{ item.field_def.pk }}"
+                           value="{{ item.value }}"
+                           {% if item.field_def.is_required %}required aria-required="true"{% endif %}>
+                {% elif item.field_def.input_type == "number" %}
+                    <input type="number"
+                           name="custom_{{ item.field_def.pk }}"
+                           id="custom_{{ item.field_def.pk }}"
+                           value="{{ item.value }}"
+                           placeholder="{{ item.field_def.placeholder }}"
+                           {% if item.field_def.is_required %}required aria-required="true"{% endif %}>
+                {% else %}
+                    <input type="text"
+                           name="custom_{{ item.field_def.pk }}"
+                           id="custom_{{ item.field_def.pk }}"
+                           value="{{ item.value }}"
+                           placeholder="{{ item.field_def.placeholder }}"
+                           {% if item.field_def.is_required %}required aria-required="true"{% endif %}>
+                {% endif %}
+            {% else %}
+                {# Read-only field: show as disabled input for visual consistency #}
+                <input type="text"
+                       id="custom_{{ item.field_def.pk }}_readonly"
+                       value="{{ item.value|default:'—' }}"
+                       disabled
+                       aria-label="{{ item.field_def.name }} (read-only)">
+            {% endif %}
+        </div>
+        {% endfor %}
+    </fieldset>
+    {% endfor %}
+    <div role="group">
+        <button type="submit">Save</button>
+        <button type="button"
+                class="outline secondary"
+                hx-get="{% url 'clients:client_custom_fields_display' client_id=client.pk %}"
+                hx-target="#custom-fields-section"
+                hx-swap="innerHTML">
+            Cancel
+        </button>
+    </div>
+</form>

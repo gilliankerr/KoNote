@@ -2,6 +2,11 @@
 from django.contrib import admin
 from django.urls import include, path
 
+from konote.error_views import permission_denied_view
+
+# Custom error handlers
+handler403 = permission_denied_view
+
 urlpatterns = [
     path("auth/", include("apps.auth_app.urls")),
     path("clients/", include("apps.clients.urls")),

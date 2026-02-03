@@ -12,11 +12,7 @@ _All code review items complete._
 
 ### Phase 8 — UX Improvements for Frontline Staff
 
-- [ ] 🔨 Show custom fields in read-only mode by default with edit toggle — (UX12)
-- [x] Add date-only toggle to event form — 2026-02-03 (UX13)
-- [ ] 🔨 Style permission error pages with navigation and helpful text — (UX14)
-- [ ] 🔨 Add status and program filters to client list page — (UX15)
-- [ ] 🔨 Auto-dismiss success messages after 3 seconds; keep errors persistent — (UX16)
+_All Phase 8 tasks complete._
 
 ## Roadmap — Prioritized Extensions
 
@@ -81,6 +77,11 @@ These features are intentionally excluded. See technical documentation for ratio
 
 ## Recently Done
 
+- [x] Show custom fields in read-only mode by default with edit toggle — 2026-02-03 (UX12)
+- [x] Add date-only toggle to event form — 2026-02-03 (UX13)
+- [x] Style permission error pages with navigation and helpful text — 2026-02-03 (UX14)
+- [x] Add status and program filters to client list page — 2026-02-03 (UX15)
+- [x] Auto-dismiss success messages after 3 seconds; keep errors persistent — 2026-02-03 (UX16)
 - [x] Harden startup: raise ImproperlyConfigured if secrets missing; remove hardcoded fallbacks — 2026-02-02 (CR1)
 - [x] Fix CSS bug: `align-items: centre` → `center` — 2026-02-02 (CR8)
 - [x] Add encryption ceiling note to agency-setup.md — 2026-02-02 (CR5)

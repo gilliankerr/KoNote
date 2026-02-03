@@ -501,6 +501,42 @@ details.filter-bar summary {
 .filter-bar input {
     font-size: 0.8125rem;
 }
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--kn-space-base);
+    align-items: flex-end;
+}
+.filter-field {
+    flex: 1;
+    min-width: 150px;
+    max-width: 250px;
+}
+.filter-field label {
+    display: block;
+}
+.filter-field select {
+    margin-bottom: 0;
+}
+.filter-actions {
+    display: flex;
+    align-items: flex-end;
+}
+.filter-actions a[role="button"] {
+    font-size: 0.8125rem;
+    padding: var(--kn-space-sm) var(--kn-space-base);
+    margin-bottom: 0;
+}
+@media (max-width: 600px) {
+    .filter-field {
+        flex: 1 1 100%;
+        max-width: none;
+    }
+    .filter-actions {
+        flex: 1 1 100%;
+        margin-top: var(--kn-space-sm);
+    }
+}
 
 /* ---- Timeline ---- */
 .timeline {
@@ -777,10 +813,73 @@ nav.pagination a {
     color: var(--kn-success-fg);
 }
 
+/* ---- Auto-dismiss messages ---- */
+/* Fade-out animation for auto-dismissing messages */
+@keyframes message-fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* Success messages get auto-dismiss styling */
+article.success[aria-label="notification"] {
+    position: relative;
+}
+
+/* Close button for dismissible messages */
+.message-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    font-size: 1.25rem;
+    line-height: 1;
+    color: inherit;
+    opacity: 0.7;
+    transition: opacity var(--kn-transition);
+}
+.message-close:hover,
+.message-close:focus {
+    opacity: 1;
+}
+
+/* Fade-out class applied before removal */
+article[aria-label="notification"].fading-out {
+    animation: message-fade-out 0.3s ease-out forwards;
+}
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    article[aria-label="notification"].fading-out {
+        animation: none;
+        opacity: 0;
+    }
+}
+
 /* ---- Utility: secondary text colour ---- */
 .secondary {
     color: var(--kn-text-muted);
 }
 .text-sm {
     font-size: 0.8125rem;
+}
+
+/* ---- Custom fields header (read/edit toggle) ---- */
+.custom-fields-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--kn-space-sm);
+    margin-bottom: var(--kn-space-base);
+}
+.custom-fields-header h2 {
+    margin: 0;
+}
+.custom-fields-header button {
+    font-size: 0.8125rem;
+    padding: var(--kn-space-xs) var(--kn-space-base);
+    margin: 0;
 }

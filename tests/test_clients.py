@@ -112,6 +112,76 @@ class ClientViewsTest(TestCase):
         resp = self.client.get("/clients/search/?q=")
         self.assertEqual(resp.status_code, 200)
 
+    def test_filter_by_status(self):
+        """Filter clients by status (active/discharged)."""
+        active = self._create_client("Active", "Client", [self.prog_a])
+        discharged = self._create_client("Discharged", "Client", [self.prog_a])
+        discharged.status = "discharged"
+        discharged.save()
+
+        self.client.login(username="staff", password="testpass123")
+
+        # Filter to active only
+        resp = self.client.get("/clients/?status=active")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Active Client")
+        self.assertNotContains(resp, "Discharged Client")
+
+        # Filter to discharged only
+        resp = self.client.get("/clients/?status=discharged")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Discharged Client")
+        self.assertNotContains(resp, "Active Client")
+
+    def test_filter_by_program(self):
+        """Filter clients by program enrolment."""
+        UserProgramRole.objects.create(user=self.staff, program=self.prog_b, role="staff")
+        alice = self._create_client("Alice", "Alpha", [self.prog_a])
+        bob = self._create_client("Bob", "Beta", [self.prog_b])
+
+        self.client.login(username="staff", password="testpass123")
+
+        # Filter to Program A
+        resp = self.client.get(f"/clients/?program={self.prog_a.pk}")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Alice Alpha")
+        self.assertNotContains(resp, "Bob Beta")
+
+        # Filter to Program B
+        resp = self.client.get(f"/clients/?program={self.prog_b.pk}")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Bob Beta")
+        self.assertNotContains(resp, "Alice Alpha")
+
+    def test_filter_combined_status_and_program(self):
+        """Filter clients by both status and program."""
+        UserProgramRole.objects.create(user=self.staff, program=self.prog_b, role="staff")
+        alice_active = self._create_client("Alice", "Active", [self.prog_a])
+        alice_discharged = self._create_client("Alice", "Discharged", [self.prog_a])
+        alice_discharged.status = "discharged"
+        alice_discharged.save()
+        bob = self._create_client("Bob", "Beta", [self.prog_b])
+
+        self.client.login(username="staff", password="testpass123")
+
+        # Filter to Program A + Active
+        resp = self.client.get(f"/clients/?program={self.prog_a.pk}&status=active")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Alice Active")
+        self.assertNotContains(resp, "Alice Discharged")
+        self.assertNotContains(resp, "Bob Beta")
+
+    def test_htmx_filter_returns_partial(self):
+        """HTMX requests should return only the table partial."""
+        self._create_client("Jane", "Doe", [self.prog_a])
+        self.client.login(username="staff", password="testpass123")
+        resp = self.client.get("/clients/?status=active", HTTP_HX_REQUEST="true")
+        self.assertEqual(resp.status_code, 200)
+        # Should NOT contain page structure elements (no extends base.html)
+        self.assertNotContains(resp, "<!DOCTYPE")
+        # Should contain table content
+        self.assertContains(resp, "Jane Doe")
+
 
 @override_settings(FIELD_ENCRYPTION_KEY=TEST_KEY)
 class CustomFieldTest(TestCase):

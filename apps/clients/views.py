@@ -5,6 +5,7 @@ from django.core.paginator import Paginator
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 
+from apps.auth_app.decorators import minimum_role
 from apps.programs.models import Program, UserProgramRole
 
 from .forms import ClientFileForm, CustomFieldDefinitionForm, CustomFieldGroupForm, CustomFieldValuesForm
@@ -44,23 +45,54 @@ def _get_accessible_clients(user):
 @login_required
 def client_list(request):
     clients = _get_accessible_clients(request.user)
+    accessible_programs = _get_accessible_programs(request.user)
+
+    # Get filter values from query params
+    status_filter = request.GET.get("status", "")
+    program_filter = request.GET.get("program", "")
+
     # Decrypt names and build display list
     client_data = []
     for client in clients:
+        # Apply status filter (in Python because we're already iterating)
+        if status_filter and client.status != status_filter:
+            continue
+
         programs = [e.program for e in client.enrolments.all() if e.status == "enrolled"]
+
+        # Apply program filter
+        if program_filter:
+            program_ids = [p.pk for p in programs]
+            if int(program_filter) not in program_ids:
+                continue
+
         client_data.append({
             "client": client,
             "name": f"{client.first_name} {client.last_name}",
             "programs": programs,
         })
+
     # Sort by name
     client_data.sort(key=lambda c: c["name"].lower())
     paginator = Paginator(client_data, 25)
     page = paginator.get_page(request.GET.get("page"))
-    return render(request, "clients/list.html", {"page": page})
+
+    context = {
+        "page": page,
+        "accessible_programs": accessible_programs,
+        "status_filter": status_filter,
+        "program_filter": program_filter,
+    }
+
+    # HTMX request — return only the table partial
+    if request.headers.get("HX-Request"):
+        return render(request, "clients/_client_list_table.html", context)
+
+    return render(request, "clients/list.html", context)
 
 
 @login_required
+@minimum_role("staff")
 def client_create(request):
     available_programs = _get_accessible_programs(request.user)
     if request.method == "POST":
@@ -85,6 +117,7 @@ def client_create(request):
 
 
 @login_required
+@minimum_role("staff")
 def client_edit(request, client_id):
     client = get_object_or_404(ClientFile, pk=client_id)
     available_programs = _get_accessible_programs(request.user)
@@ -143,12 +176,20 @@ def client_detail(request, client_id):
     recent.insert(0, client_id)
     request.session["recent_clients"] = recent[:10]
 
+    user_role = getattr(request, "user_program_role", None)
+    is_receptionist = user_role == "receptionist"
+
     enrolments = ClientProgramEnrolment.objects.filter(client_file=client, status="enrolled").select_related("program")
-    # Custom fields for Info tab
+    # Custom fields for Info tab — filter by role visibility
     groups = CustomFieldGroup.objects.filter(status="active").prefetch_related("fields")
     custom_data = []
+    has_editable_fields = False
     for group in groups:
-        fields = group.fields.filter(status="active")
+        if is_receptionist:
+            # Receptionists only see fields with view or edit access
+            fields = group.fields.filter(status="active", receptionist_access__in=["view", "edit"])
+        else:
+            fields = group.fields.filter(status="active")
         field_values = []
         for field_def in fields:
             try:
@@ -156,14 +197,22 @@ def client_detail(request, client_id):
                 value = cdv.get_value()
             except ClientDetailValue.DoesNotExist:
                 value = ""
-            field_values.append({"field_def": field_def, "value": value})
-        custom_data.append({"group": group, "fields": field_values})
+            # Track if field is editable (staff can edit all, receptionist only if access=edit)
+            is_editable = not is_receptionist or field_def.receptionist_access == "edit"
+            if is_editable:
+                has_editable_fields = True
+            field_values.append({"field_def": field_def, "value": value, "is_editable": is_editable})
+        # Only include groups that have visible fields
+        if field_values:
+            custom_data.append({"group": group, "fields": field_values})
     context = {
         "client": client,
         "enrolments": enrolments,
         "custom_data": custom_data,
+        "has_editable_fields": has_editable_fields,
         "active_tab": "info",
-        "user_role": getattr(request, "user_program_role", None),
+        "user_role": user_role,
+        "is_receptionist": is_receptionist,
     }
     # HTMX tab switch — return only the tab content partial
     if request.headers.get("HX-Request"):
@@ -171,27 +220,115 @@ def client_detail(request, client_id):
     return render(request, "clients/detail.html", context)
 
 
+def _get_custom_fields_context(client, user_role):
+    """Build custom fields context for display/edit templates.
+
+    Returns a dict with custom_data, has_editable_fields, client, and is_receptionist.
+    """
+    is_receptionist = user_role == "receptionist"
+    groups = CustomFieldGroup.objects.filter(status="active").prefetch_related("fields")
+    custom_data = []
+    has_editable_fields = False
+
+    for group in groups:
+        if is_receptionist:
+            fields = group.fields.filter(status="active", receptionist_access__in=["view", "edit"])
+        else:
+            fields = group.fields.filter(status="active")
+        field_values = []
+        for field_def in fields:
+            try:
+                cdv = ClientDetailValue.objects.get(client_file=client, field_def=field_def)
+                value = cdv.get_value()
+            except ClientDetailValue.DoesNotExist:
+                value = ""
+            is_editable = not is_receptionist or field_def.receptionist_access == "edit"
+            if is_editable:
+                has_editable_fields = True
+            field_values.append({"field_def": field_def, "value": value, "is_editable": is_editable})
+        if field_values:
+            custom_data.append({"group": group, "fields": field_values})
+
+    return {
+        "client": client,
+        "custom_data": custom_data,
+        "has_editable_fields": has_editable_fields,
+        "is_receptionist": is_receptionist,
+    }
+
+
+@login_required
+def client_custom_fields_display(request, client_id):
+    """HTMX: Return read-only custom fields partial."""
+    client = get_object_or_404(ClientFile, pk=client_id)
+    user_role = getattr(request, "user_program_role", None)
+    context = _get_custom_fields_context(client, user_role)
+    return render(request, "clients/_custom_fields_display.html", context)
+
+
+@login_required
+def client_custom_fields_edit(request, client_id):
+    """HTMX: Return editable custom fields form partial."""
+    client = get_object_or_404(ClientFile, pk=client_id)
+    user_role = getattr(request, "user_program_role", None)
+    context = _get_custom_fields_context(client, user_role)
+
+    # Only allow edit mode if user has editable fields
+    if not context["has_editable_fields"]:
+        return HttpResponseForbidden("You do not have permission to edit any fields.")
+
+    return render(request, "clients/_custom_fields_edit.html", context)
+
+
 @login_required
 def client_save_custom_fields(request, client_id):
-    """HTMX: save custom field values for a client."""
+    """Save custom field values for a client.
+
+    Receptionists can only save fields with receptionist_access='edit'.
+    Staff and managers can save all fields.
+    Returns the read-only display partial for HTMX, or redirects for non-HTMX.
+    """
     client = get_object_or_404(ClientFile, pk=client_id)
+    user_role = getattr(request, "user_program_role", None)
+    is_receptionist = user_role == "receptionist"
+
     if request.method == "POST":
         groups = CustomFieldGroup.objects.filter(status="active").prefetch_related("fields")
-        all_field_defs = [
-            fd for group in groups for fd in group.fields.filter(status="active")
-        ]
-        form = CustomFieldValuesForm(request.POST, field_definitions=all_field_defs)
+
+        # Get field definitions the user can edit
+        if is_receptionist:
+            editable_field_defs = [
+                fd for group in groups
+                for fd in group.fields.filter(status="active", receptionist_access="edit")
+            ]
+        else:
+            editable_field_defs = [
+                fd for group in groups
+                for fd in group.fields.filter(status="active")
+            ]
+
+        # Block if no editable fields
+        if not editable_field_defs:
+            return HttpResponseForbidden("You do not have permission to edit any fields.")
+
+        form = CustomFieldValuesForm(request.POST, field_definitions=editable_field_defs)
         if form.is_valid():
-            for field_def in all_field_defs:
+            for field_def in editable_field_defs:
                 raw_value = form.cleaned_data.get(f"custom_{field_def.pk}", "")
                 cdv, _ = ClientDetailValue.objects.get_or_create(
                     client_file=client, field_def=field_def,
                 )
                 cdv.set_value(raw_value)
                 cdv.save()
-            messages.success(request, "Custom fields saved.")
+            messages.success(request, "Saved.")
         else:
-            messages.error(request, "Please correct the errors in the custom fields.")
+            messages.error(request, "Please correct the errors.")
+
+    # For HTMX requests, return the read-only display partial
+    if request.headers.get("HX-Request"):
+        context = _get_custom_fields_context(client, user_role)
+        return render(request, "clients/_custom_fields_display.html", context)
+
     return redirect("clients:client_detail", client_id=client.pk)
 
 

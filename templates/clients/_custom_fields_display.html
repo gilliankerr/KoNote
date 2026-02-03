@@ -1,0 +1,30 @@
+{# Partial: Read-only display of custom fields with edit toggle #}
+<div class="custom-fields-header">
+    <h2 id="custom-fields-heading">Additional Details</h2>
+    {% if has_editable_fields %}
+    <button type="button"
+            class="outline secondary"
+            hx-get="{% url 'clients:client_custom_fields_edit' client_id=client.pk %}"
+            hx-target="#custom-fields-section"
+            hx-swap="innerHTML"
+            aria-describedby="custom-fields-heading"
+            aria-label="Edit additional details">
+        Edit
+    </button>
+    {% endif %}
+</div>
+
+{% for group in custom_data %}
+<section aria-labelledby="group-{{ group.group.pk }}">
+    <h3 id="group-{{ group.group.pk }}">{{ group.group.title }}</h3>
+    <dl class="info-grid">
+        {% for item in group.fields %}
+        <dt>
+            {{ item.field_def.name }}
+            {% if item.field_def.is_sensitive %}<small class="secondary">(encrypted)</small>{% endif %}
+        </dt>
+        <dd>{{ item.value|default:"—" }}</dd>
+        {% endfor %}
+    </dl>
+</section>
+{% endfor %}

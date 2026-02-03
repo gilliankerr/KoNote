@@ -1,7 +1,7 @@
 """RBAC middleware enforcing program-scoped data access."""
 import re
 
-from django.http import HttpResponseForbidden
+from django.template.response import TemplateResponse
 
 
 # URL patterns that require program-level access checks
@@ -46,7 +46,10 @@ class ProgramAccessMiddleware:
         for pattern in ADMIN_ONLY_PATTERNS:
             if pattern.match(path):
                 if not request.user.is_admin:
-                    return HttpResponseForbidden("Access denied. Admin privileges required.")
+                    return self._forbidden_response(
+                        request,
+                        "Access denied. Admin privileges are required to view this page."
+                    )
                 return self.get_response(request)
 
         # Client-scoped routes — check program overlap (admins are NOT exempt)
@@ -56,11 +59,15 @@ class ProgramAccessMiddleware:
                 client_id = match.group("client_id")
                 if not self._user_can_access_client(request.user, client_id):
                     if request.user.is_admin:
-                        return HttpResponseForbidden(
+                        return self._forbidden_response(
+                            request,
                             "Administrators cannot access individual client records. "
-                            "Ask another admin to assign you a program role if you need client access."
+                            "Ask another admin to assign you a programme role if you need client access."
                         )
-                    return HttpResponseForbidden("Access denied. You are not assigned to this client's program.")
+                    return self._forbidden_response(
+                        request,
+                        "Access denied. You are not assigned to this client's programme."
+                    )
                 # Store for use in views
                 request.accessible_client_id = int(client_id)
                 # Store user's highest role for this client's programs
@@ -76,11 +83,15 @@ class ProgramAccessMiddleware:
                 if client_id:
                     if not self._user_can_access_client(request.user, client_id):
                         if request.user.is_admin:
-                            return HttpResponseForbidden(
+                            return self._forbidden_response(
+                                request,
                                 "Administrators cannot access individual client records. "
-                                "Ask another admin to assign you a program role if you need client access."
+                                "Ask another admin to assign you a programme role if you need client access."
                             )
-                        return HttpResponseForbidden("Access denied. You are not assigned to this client's program.")
+                        return self._forbidden_response(
+                            request,
+                            "Access denied. You are not assigned to this client's programme."
+                        )
                     request.accessible_client_id = client_id
                     request.user_program_role = self._get_role_for_client(request.user, client_id)
                 break
@@ -136,3 +147,15 @@ class ProgramAccessMiddleware:
             ).first()
         except (ValueError, TypeError):
             return None
+
+    def _forbidden_response(self, request, message):
+        """Render a styled 403 error page with the given message."""
+        response = TemplateResponse(
+            request,
+            "403.html",
+            {"exception": message},
+            status=403,
+        )
+        # Render immediately so context processors populate the template
+        response.render()
+        return response

@@ -1,8 +1,12 @@
 <!-- Partial: Info tab content -->
 <div class="action-bar">
+    {% if not is_receptionist %}
     <a href="{% url 'clients:client_edit' client_id=client.pk %}" role="button" class="outline">Edit</a>
+    {% endif %}
     <a href="{% url 'clients:client_list' %}" role="button" class="outline secondary">Back to List</a>
+    {% if not is_receptionist %}
     <a href="{% url 'reports:client_progress_pdf' client_id=client.pk %}" role="button" class="outline secondary">Export PDF</a>
+    {% endif %}
 </div>
 
 <section>
@@ -29,40 +33,8 @@
 
     {% if custom_data %}
     <hr>
-    <h2>Additional Details</h2>
-    <form method="post" action="{% url 'clients:client_save_custom_fields' client_id=client.pk %}">
-        {% csrf_token %}
-        {% for group in custom_data %}
-        <fieldset>
-            <legend>{{ group.group.title }}</legend>
-            {% for item in group.fields %}
-            <div class="form-row">
-                <label for="custom_{{ item.field_def.pk }}">
-                    {{ item.field_def.name }}
-                    {% if item.field_def.is_required %}<abbr title="required">*</abbr>{% endif %}
-                    {% if item.field_def.is_sensitive %}<small class="secondary">(encrypted)</small>{% endif %}
-                </label>
-                {% if item.field_def.input_type == "textarea" %}
-                    <textarea name="custom_{{ item.field_def.pk }}" id="custom_{{ item.field_def.pk }}" rows="3" placeholder="{{ item.field_def.placeholder }}" {% if item.field_def.is_required %}required{% endif %}>{{ item.value }}</textarea>
-                {% elif item.field_def.input_type == "select" %}
-                    <select name="custom_{{ item.field_def.pk }}" id="custom_{{ item.field_def.pk }}" {% if item.field_def.is_required %}required{% endif %}>
-                        <option value="">Select…</option>
-                        {% for opt in item.field_def.options_json %}
-                        <option value="{{ opt }}" {% if item.value == opt %}selected{% endif %}>{{ opt }}</option>
-                        {% endfor %}
-                    </select>
-                {% elif item.field_def.input_type == "date" %}
-                    <input type="date" name="custom_{{ item.field_def.pk }}" id="custom_{{ item.field_def.pk }}" value="{{ item.value }}" {% if item.field_def.is_required %}required{% endif %}>
-                {% elif item.field_def.input_type == "number" %}
-                    <input type="number" name="custom_{{ item.field_def.pk }}" id="custom_{{ item.field_def.pk }}" value="{{ item.value }}" placeholder="{{ item.field_def.placeholder }}" {% if item.field_def.is_required %}required{% endif %}>
-                {% else %}
-                    <input type="text" name="custom_{{ item.field_def.pk }}" id="custom_{{ item.field_def.pk }}" value="{{ item.value }}" placeholder="{{ item.field_def.placeholder }}" {% if item.field_def.is_required %}required{% endif %}>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </fieldset>
-        {% endfor %}
-        <button type="submit">Save Custom Fields</button>
-    </form>
+    <div id="custom-fields-section">
+        {% include "clients/_custom_fields_display.html" %}
+    </div>
     {% endif %}
 </section>
