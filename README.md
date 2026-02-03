@@ -223,7 +223,7 @@ See the [Agency Setup Guide](docs/agency-setup.md) for detailed instructions.
 | [Deploy to Azure](docs/deploy-azure.md) | Azure App Service deployment |
 | [Deploy to Elestio/VPS](docs/deploy-elestio.md) | Self-hosted Docker deployment |
 | [Technical Documentation](docs/technical-documentation.md) | Architecture, security, API reference |
-| [Backup & Restore](docs/backup-restore.md) | Database backup procedures |
+| [Backup & Restore](docs/backup-restore.md) | Database backups, automation scripts, cloud storage |
 | [PDF Setup](docs/pdf-setup.md) | WeasyPrint dependencies for PDF exports |
 
 ---

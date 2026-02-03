@@ -176,6 +176,14 @@ python manage.py migrate
 python manage.py migrate --database=audit
 ```
 
+### Backups
+
+Both databases should be backed up regularly. See [Backup & Restore Guide](backup-restore.md) for:
+- Manual backup commands for Docker Compose, Railway, and Azure
+- Automated backup scripts (Windows Task Scheduler, cron)
+- Cloud storage integration (Azure Blob, S3, Google Cloud)
+- Monitoring and alerting for backup failures
+
 ### PostgreSQL Role Security
 
 For production, the audit database user should have INSERT-only permissions:

@@ -444,5 +444,5 @@ KoNote provides technical controls, but compliance also requires:
 
 - [Getting Started Guide](getting-started.md) — Local development setup
 - [Technical Documentation](technical-documentation.md) — Architecture details
-- [Backup & Restore](backup-restore.md) — Database backup procedures
+- [Backup & Restore](backup-restore.md) — Database backups, automation scripts, monitoring alerts
 - [SECURITY.md](../SECURITY.md) — Security policy and vulnerability reporting
