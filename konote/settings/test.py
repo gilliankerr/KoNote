@@ -5,7 +5,7 @@ import os
 os.environ.setdefault("SECRET_KEY", "test-secret-key-not-for-production")
 os.environ.setdefault("DATABASE_URL", "sqlite://:memory:")
 os.environ.setdefault("AUDIT_DATABASE_URL", "sqlite://:memory:")
-os.environ.setdefault("FIELD_ENCRYPTION_KEY", "dGVzdC1rZXktMzItYnl0ZXMtcGFkZGVkMTIzNA==")
+os.environ.setdefault("FIELD_ENCRYPTION_KEY", "ly6OqAlMm32VVf08PoPJigrLCIxGd_tW1-kfWhXxXj8=")
 
 from .base import *  # noqa: F401, F403
 

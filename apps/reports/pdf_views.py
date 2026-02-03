@@ -1,6 +1,7 @@
 """PDF export views for client progress reports and funder reports."""
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
+from django.shortcuts import render
 from django.utils import timezone
 
 from apps.clients.models import ClientProgramEnrolment
@@ -8,13 +9,33 @@ from apps.events.models import Event
 from apps.notes.models import MetricValue, ProgressNote
 from apps.plans.models import PlanSection, PlanTarget, PlanTargetMetric
 
-from .pdf_utils import audit_pdf_export, render_pdf
+from .pdf_utils import (
+    audit_pdf_export,
+    get_pdf_unavailable_reason,
+    is_pdf_available,
+    render_pdf,
+)
 from .views import _get_client_or_403
+
+
+def _pdf_unavailable_response(request):
+    """Return a user-friendly response when PDF generation is unavailable."""
+    return render(
+        request,
+        "reports/pdf_unavailable.html",
+        {
+            "reason": get_pdf_unavailable_reason(),
+        },
+        status=503,
+    )
 
 
 @login_required
 def client_progress_pdf(request, client_id):
     """Generate a PDF progress report for an individual client."""
+    if not is_pdf_available():
+        return _pdf_unavailable_response(request)
+
     client = _get_client_or_403(request, client_id)
     if client is None:
         return HttpResponseForbidden("You do not have access to this client.")
@@ -110,8 +131,42 @@ def client_progress_pdf(request, client_id):
     return render_pdf("reports/pdf_client_progress.html", context, filename)
 
 
-def generate_funder_pdf(request, program, selected_metrics, date_from, date_to, rows, unique_clients):
-    """Generate a PDF funder report. Called from export_form view."""
+def generate_funder_pdf(
+    request, program, selected_metrics, date_from, date_to, rows, unique_clients,
+    grouping_type="none", grouping_label=None, achievement_summary=None,
+):
+    """Generate a PDF funder report. Called from export_form view.
+
+    Args:
+        request: The HTTP request.
+        program: The Programme object.
+        selected_metrics: List of MetricDefinition objects.
+        date_from: Start date for the report.
+        date_to: End date for the report.
+        rows: List of row dicts with metric data.
+        unique_clients: Set of unique client IDs in the report.
+        grouping_type: "none", "age_range", or "custom_field".
+        grouping_label: Human-readable label for the grouping (e.g., "Age Range", "Gender").
+        achievement_summary: Optional dict from get_achievement_summary() with achievement rates.
+    """
+    if not is_pdf_available():
+        return _pdf_unavailable_response(request)
+
+    # Group rows by demographic if grouping is enabled
+    grouped_rows = {}
+    if grouping_type != "none" and grouping_label:
+        for row in rows:
+            group = row.get("demographic_group", "Unknown")
+            if group not in grouped_rows:
+                grouped_rows[group] = []
+            grouped_rows[group].append(row)
+        # Sort groups alphabetically, but put "Unknown" at the end
+        sorted_groups = sorted(
+            grouped_rows.keys(),
+            key=lambda x: (x == "Unknown", x)
+        )
+        grouped_rows = {k: grouped_rows[k] for k in sorted_groups}
+
     context = {
         "program": program,
         "metrics": selected_metrics,
@@ -122,11 +177,15 @@ def generate_funder_pdf(request, program, selected_metrics, date_from, date_to, 
         "total_data_points": len(rows),
         "generated_at": timezone.now(),
         "generated_by": request.user.display_name,
+        "grouping_type": grouping_type,
+        "grouping_label": grouping_label,
+        "grouped_rows": grouped_rows if grouping_type != "none" else None,
+        "achievement_summary": achievement_summary,
     }
 
     filename = f"funder_report_{program.name.replace(' ', '_')}_{date_from}_{date_to}.pdf"
 
-    audit_pdf_export(request, "export", "funder_report_pdf", {
+    audit_metadata = {
         "program": program.name,
         "metrics": [m.name for m in selected_metrics],
         "date_from": str(date_from),
@@ -134,6 +193,47 @@ def generate_funder_pdf(request, program, selected_metrics, date_from, date_to, 
         "total_clients": len(unique_clients),
         "total_data_points": len(rows),
         "format": "pdf",
-    })
+    }
+    if grouping_type != "none":
+        audit_metadata["grouped_by"] = grouping_label
+    if achievement_summary:
+        audit_metadata["include_achievement_rate"] = True
+        audit_metadata["achievement_rate"] = achievement_summary.get("overall_rate")
+
+    audit_pdf_export(request, "export", "funder_report_pdf", audit_metadata)
 
     return render_pdf("reports/pdf_funder_report.html", context, filename)
+
+
+def generate_cmt_pdf(request, cmt_data):
+    """
+    Generate a PDF for United Way CMT (Community Monitoring Tool) report.
+
+    Args:
+        request: The HTTP request.
+        cmt_data: Dict returned by generate_cmt_data() containing all CMT report data.
+
+    Returns:
+        HttpResponse with PDF attachment.
+    """
+    if not is_pdf_available():
+        return _pdf_unavailable_response(request)
+
+    context = {
+        "cmt_data": cmt_data,
+        "generated_by": request.user.display_name,
+    }
+
+    safe_name = cmt_data["programme_name"].replace(" ", "_").replace("/", "-")
+    fy_label = cmt_data["reporting_period"].replace(" ", "_")
+    filename = f"CMT_Report_{safe_name}_{fy_label}.pdf"
+
+    audit_pdf_export(request, "export", "cmt_report_pdf", {
+        "programme": cmt_data["programme_name"],
+        "organisation": cmt_data["organisation_name"],
+        "reporting_period": cmt_data["reporting_period"],
+        "total_individuals_served": cmt_data["total_individuals_served"],
+        "format": "pdf",
+    })
+
+    return render_pdf("reports/pdf_cmt_report.html", context, filename)

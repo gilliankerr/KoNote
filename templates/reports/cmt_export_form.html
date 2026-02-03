@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "United Way CMT Export" %} — {{ site.product_name|default:"KoNote" }}{% endblock %}
+
+{% block content %}
+<hgroup>
+    <h1>{% trans "United Way CMT Export" %}</h1>
+    <p>{% trans "Generate a funder report formatted for United Way Canada's Community Monitoring Tool (CMT)." %}</p>
+</hgroup>
+
+<article aria-label="{% trans 'About CMT Reports' %}">
+    <h3>{% trans "What's included in a CMT report?" %}</h3>
+    <ul>
+        <li>{% trans "Organisation and programme information" %}</li>
+        <li>{% trans "Service statistics (total individuals served, new clients, total contacts)" %}</li>
+        <li>{% trans "Age demographics using United Way's standard categories" %}</li>
+        <li>{% trans "Outcome achievement rates for all metrics with defined targets" %}</li>
+    </ul>
+</article>
+
+<form method="post">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+    <article class="pico-background-red-100" aria-label="{% trans 'Form errors' %}" role="alert">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+    </article>
+    {% endif %}
+
+    {# Programme dropdown #}
+    <label for="{{ form.program.id_for_label }}">
+        {{ form.program.label }}
+        {{ form.program }}
+    </label>
+    {% if form.program.errors %}
+    <small class="error" role="alert">{{ form.program.errors.0 }}</small>
+    {% endif %}
+
+    {# Fiscal year selection #}
+    <label for="{{ form.fiscal_year.id_for_label }}">
+        {{ form.fiscal_year.label }}
+        {{ form.fiscal_year }}
+        {% if form.fiscal_year.help_text %}
+        <small>{{ form.fiscal_year.help_text }}</small>
+        {% endif %}
+        {% if form.fiscal_year.errors %}
+        <small class="error" role="alert">{{ form.fiscal_year.errors.0 }}</small>
+        {% endif %}
+    </label>
+
+    {# Export format #}
+    <fieldset>
+        <legend>{{ form.format.label }}</legend>
+        {% for radio in form.format %}
+        <label>
+            {{ radio.tag }}
+            {{ radio.choice_label }}
+        </label>
+        {% endfor %}
+    </fieldset>
+
+    <button type="submit">{% trans "Generate CMT Report" %}</button>
+</form>
+
+<details>
+    <summary>{% trans "About United Way CMT Reports" %}</summary>
+    <p>
+        {% blocktrans %}
+        The Community Monitoring Tool (CMT) is United Way Canada's standardised
+        reporting framework. Many Canadian nonprofits receiving United Way funding
+        are required to submit CMT data as part of their reporting obligations.
+        {% endblocktrans %}
+    </p>
+    <p>
+        {% blocktrans %}
+        This export generates a report with the standard CMT sections. You can
+        download it as a CSV file (for spreadsheet use) or as a PDF (for printing
+        or sharing with funders).
+        {% endblocktrans %}
+    </p>
+    <h4>{% trans "CMT Age Categories" %}</h4>
+    <p>{% trans "United Way uses these standard age groupings:" %}</p>
+    <ul>
+        <li>{% trans "Child (0-12)" %}</li>
+        <li>{% trans "Youth (13-17)" %}</li>
+        <li>{% trans "Young Adult (18-24)" %}</li>
+        <li>{% trans "Adult (25-64)" %}</li>
+        <li>{% trans "Senior (65+)" %}</li>
+    </ul>
+    <h4>{% trans "Data Sources" %}</h4>
+    <ul>
+        <li>{% trans "Organisation name: From your Instance Settings" %}</li>
+        <li>{% trans "Service statistics: Based on progress notes recorded in the period" %}</li>
+        <li>{% trans "Demographics: Calculated from client birth dates" %}</li>
+        <li>{% trans "Outcomes: Based on metric targets defined in your outcome metrics" %}</li>
+    </ul>
+</details>
+{% endblock %}

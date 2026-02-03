@@ -1,4 +1,4 @@
-"""Report views — aggregate metric CSV export and client analysis charts."""
+"""Report views — aggregate metric CSV export, CMT export, and client analysis charts."""
 import csv
 import json
 from datetime import datetime, time
@@ -14,7 +14,93 @@ from apps.clients.models import ClientFile, ClientProgramEnrolment
 from apps.notes.models import MetricValue, ProgressNote
 from apps.plans.models import PlanTarget, PlanTargetMetric
 from apps.programs.models import UserProgramRole
-from .forms import MetricExportForm
+from .achievements import get_achievement_summary, format_achievement_summary
+from .cmt_export import generate_cmt_data, generate_cmt_csv_rows
+from .demographics import aggregate_by_demographic, get_age_range, parse_grouping_choice
+from .forms import CMTExportForm, MetricExportForm
+
+
+def _build_demographic_map(metric_values, grouping_type, grouping_field, as_of_date):
+    """
+    Build a mapping of client IDs to their demographic group labels.
+
+    Args:
+        metric_values: QuerySet of MetricValue objects.
+        grouping_type: "age_range" or "custom_field".
+        grouping_field: CustomFieldDefinition for custom_field grouping.
+        as_of_date: Date to use for age calculations.
+
+    Returns:
+        Dict mapping client_id to demographic group label.
+    """
+    from apps.clients.models import ClientDetailValue, ClientFile
+
+    client_demographic_map = {}
+
+    # Collect all unique client IDs
+    client_ids = set()
+    for mv in metric_values:
+        client_ids.add(mv.progress_note_target.progress_note.client_file_id)
+
+    if grouping_type == "age_range":
+        # Load clients to access encrypted birth_date
+        clients = ClientFile.objects.filter(pk__in=client_ids)
+        for client in clients:
+            client_demographic_map[client.pk] = get_age_range(client.birth_date, as_of_date)
+
+    elif grouping_type == "custom_field" and grouping_field:
+        # Build option labels lookup for dropdown fields
+        option_labels = {}
+        if grouping_field.input_type == "select" and grouping_field.options_json:
+            for option in grouping_field.options_json:
+                if isinstance(option, dict):
+                    option_labels[option.get("value", "")] = option.get("label", option.get("value", ""))
+                else:
+                    option_labels[option] = option
+
+        # Get custom field values for all clients
+        values = ClientDetailValue.objects.filter(
+            client_file_id__in=client_ids,
+            field_def=grouping_field,
+        )
+
+        for cv in values:
+            raw_value = cv.get_value()
+            if not raw_value:
+                client_demographic_map[cv.client_file_id] = "Unknown"
+            else:
+                display_value = option_labels.get(raw_value, raw_value)
+                client_demographic_map[cv.client_file_id] = display_value
+
+        # Mark clients without a value as Unknown
+        for client_id in client_ids:
+            if client_id not in client_demographic_map:
+                client_demographic_map[client_id] = "Unknown"
+
+    return client_demographic_map
+
+
+def _get_grouping_label(group_by_value, grouping_field):
+    """
+    Get a human-readable label for the grouping type.
+
+    Args:
+        group_by_value: The raw form value (e.g., "age_range", "custom_123").
+        grouping_field: The CustomFieldDefinition if applicable.
+
+    Returns:
+        String label for the grouping (e.g., "Age Range", "Gender").
+    """
+    if not group_by_value:
+        return None
+
+    if group_by_value == "age_range":
+        return "Age Range"
+
+    if grouping_field:
+        return grouping_field.name
+
+    return "Demographic Group"
 
 
 @login_required
@@ -38,6 +124,11 @@ def export_form(request):
     selected_metrics = form.cleaned_data["metrics"]
     date_from = form.cleaned_data["date_from"]
     date_to = form.cleaned_data["date_to"]
+    group_by_value = form.cleaned_data.get("group_by", "")
+    include_achievement = form.cleaned_data.get("include_achievement_rate", False)
+
+    # Parse the grouping choice
+    grouping_type, grouping_field = parse_grouping_choice(group_by_value)
 
     # Find clients enrolled in the selected programme
     client_ids = ClientProgramEnrolment.objects.filter(
@@ -80,6 +171,16 @@ def export_form(request):
             },
         )
 
+    # Build demographic lookup for each client if grouping is enabled
+    client_demographic_map = {}
+    if grouping_type != "none":
+        client_demographic_map = _build_demographic_map(
+            metric_values, grouping_type, grouping_field, date_to
+        )
+
+    # Get grouping label for display
+    grouping_label = _get_grouping_label(group_by_value, grouping_field)
+
     # Count unique clients in the result set
     unique_clients = set()
     rows = []
@@ -87,14 +188,30 @@ def export_form(request):
         note = mv.progress_note_target.progress_note
         client = note.client_file
         unique_clients.add(client.pk)
-        rows.append(
-            {
-                "record_id": client.record_id,
-                "metric_name": mv.metric_def.name,
-                "value": mv.value,
-                "date": note.effective_date.strftime("%Y-%m-%d"),
-                "author": note.author.display_name,
-            }
+
+        row = {
+            "record_id": client.record_id,
+            "metric_name": mv.metric_def.name,
+            "value": mv.value,
+            "date": note.effective_date.strftime("%Y-%m-%d"),
+            "author": note.author.display_name,
+        }
+
+        # Add demographic group if grouping is enabled
+        if grouping_type != "none":
+            row["demographic_group"] = client_demographic_map.get(client.pk, "Unknown")
+
+        rows.append(row)
+
+    # Calculate achievement rates if requested
+    achievement_summary = None
+    if include_achievement:
+        achievement_summary = get_achievement_summary(
+            program,
+            date_from=date_from,
+            date_to=date_to,
+            metric_defs=list(selected_metrics),
+            use_latest=True,
         )
 
     export_format = form.cleaned_data["format"]
@@ -104,6 +221,9 @@ def export_form(request):
         return generate_funder_pdf(
             request, program, selected_metrics,
             date_from, date_to, rows, unique_clients,
+            grouping_type=grouping_type,
+            grouping_label=grouping_label,
+            achievement_summary=achievement_summary,
         )
 
     # Build CSV response
@@ -117,35 +237,84 @@ def export_form(request):
     writer.writerow([f"# Date Range: {date_from} to {date_to}"])
     writer.writerow([f"# Total Clients: {len(unique_clients)}"])
     writer.writerow([f"# Total Data Points: {len(rows)}"])
+    if grouping_type != "none":
+        writer.writerow([f"# Grouped By: {grouping_label}"])
+
+    # Achievement rate summary if requested
+    if achievement_summary:
+        writer.writerow([])  # blank separator
+        writer.writerow(["# ===== ACHIEVEMENT RATE SUMMARY ====="])
+        if achievement_summary["total_clients"] > 0:
+            writer.writerow([
+                f"# Overall: {achievement_summary['clients_met_any_target']} of "
+                f"{achievement_summary['total_clients']} clients "
+                f"({achievement_summary['overall_rate']}%) met at least one target"
+            ])
+        else:
+            writer.writerow(["# No client data available for achievement calculation"])
+
+        for metric in achievement_summary.get("by_metric", []):
+            if metric["has_target"]:
+                writer.writerow([
+                    f"# {metric['metric_name']}: {metric['clients_met_target']} of "
+                    f"{metric['total_clients']} clients ({metric['achievement_rate']}%) "
+                    f"met target of {metric['target_value']}"
+                ])
+            else:
+                writer.writerow([
+                    f"# {metric['metric_name']}: {metric['total_clients']} clients "
+                    "(no target defined)"
+                ])
+
     writer.writerow([])  # blank separator
 
-    # Column headers
-    writer.writerow(["Client Record ID", "Metric Name", "Value", "Date", "Author"])
+    # Column headers — include demographic column if grouping enabled
+    if grouping_type != "none":
+        writer.writerow([grouping_label, "Client Record ID", "Metric Name", "Value", "Date", "Author"])
+    else:
+        writer.writerow(["Client Record ID", "Metric Name", "Value", "Date", "Author"])
 
     for row in rows:
-        writer.writerow([
-            row["record_id"],
-            row["metric_name"],
-            row["value"],
-            row["date"],
-            row["author"],
-        ])
+        if grouping_type != "none":
+            writer.writerow([
+                row.get("demographic_group", "Unknown"),
+                row["record_id"],
+                row["metric_name"],
+                row["value"],
+                row["date"],
+                row["author"],
+            ])
+        else:
+            writer.writerow([
+                row["record_id"],
+                row["metric_name"],
+                row["value"],
+                row["date"],
+                row["author"],
+            ])
 
     # Audit log
+    audit_metadata = {
+        "program": program.name,
+        "metrics": [m.name for m in selected_metrics],
+        "date_from": str(date_from),
+        "date_to": str(date_to),
+        "total_clients": len(unique_clients),
+        "total_data_points": len(rows),
+    }
+    if grouping_type != "none":
+        audit_metadata["grouped_by"] = grouping_label
+    if achievement_summary:
+        audit_metadata["include_achievement_rate"] = True
+        audit_metadata["achievement_rate"] = achievement_summary.get("overall_rate")
+
     AuditLog.objects.using("audit").create(
         event_timestamp=timezone.now(),
         user_id=request.user.pk,
         user_display=request.user.display_name,
         action="export",
         resource_type="metric_report",
-        metadata={
-            "program": program.name,
-            "metrics": [m.name for m in selected_metrics],
-            "date_from": str(date_from),
-            "date_to": str(date_to),
-            "total_clients": len(unique_clients),
-            "total_data_points": len(rows),
-        },
+        metadata=audit_metadata,
     )
 
     return response
@@ -236,3 +405,78 @@ def client_analysis(request, client_id):
     if request.headers.get("HX-Request"):
         return render(request, "reports/_tab_analysis.html", context)
     return render(request, "reports/analysis.html", context)
+
+
+@login_required
+def cmt_export_form(request):
+    """
+    United Way CMT (Community Monitoring Tool) export.
+
+    GET  — display the CMT export form.
+    POST — generate and return the CMT-formatted report.
+
+    CMT reports are structured for United Way Canada's funder reporting
+    requirements, including:
+    - Organisation and programme information
+    - Service statistics (individuals served, contacts)
+    - Age demographics (CMT standard categories)
+    - Outcome achievement rates
+    """
+    if not request.user.is_admin:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+
+    if request.method != "POST":
+        form = CMTExportForm()
+        return render(request, "reports/cmt_export_form.html", {"form": form})
+
+    form = CMTExportForm(request.POST)
+    if not form.is_valid():
+        return render(request, "reports/cmt_export_form.html", {"form": form})
+
+    program = form.cleaned_data["program"]
+    date_from = form.cleaned_data["date_from"]
+    date_to = form.cleaned_data["date_to"]
+    fiscal_year_label = form.cleaned_data["fiscal_year_label"]
+    export_format = form.cleaned_data["format"]
+
+    # Generate CMT data
+    cmt_data = generate_cmt_data(
+        program,
+        date_from=date_from,
+        date_to=date_to,
+        fiscal_year_label=fiscal_year_label,
+    )
+
+    # Audit log
+    AuditLog.objects.using("audit").create(
+        event_timestamp=timezone.now(),
+        user_id=request.user.pk,
+        user_display=request.user.display_name,
+        action="export",
+        resource_type="cmt_report",
+        metadata={
+            "program": program.name,
+            "fiscal_year": fiscal_year_label,
+            "date_from": str(date_from),
+            "date_to": str(date_to),
+            "format": export_format,
+            "total_individuals_served": cmt_data["total_individuals_served"],
+        },
+    )
+
+    if export_format == "pdf":
+        from .pdf_views import generate_cmt_pdf
+        return generate_cmt_pdf(request, cmt_data)
+
+    # Generate CSV response
+    response = HttpResponse(content_type="text/csv")
+    safe_name = program.name.replace(" ", "_").replace("/", "-")
+    filename = f"CMT_Report_{safe_name}_{fiscal_year_label.replace(' ', '_')}.csv"
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+
+    writer = csv.writer(response)
+    csv_rows = generate_cmt_csv_rows(cmt_data)
+    for row in csv_rows:
+        writer.writerow(row)
+
+    return response
