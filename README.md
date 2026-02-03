@@ -95,9 +95,9 @@ KoNote Web is a ground-up reimplementation using modern Python/Django, designed 
 
 ## Quick Start
 
-> **Not a developer?** That's fine. If you've installed WordPress or used Excel competently, you can set up KoNote. Our [Getting Started Guide](docs/getting-started.md) explains every step in plain language. Plan for about 2 hours for your first setup — the technical steps are quick, but you'll be learning new concepts along the way.
+> **Not a developer?** That's fine. If you've installed WordPress or used Excel competently, you can set up KoNote. Our [Deploying KoNote](docs/deploying-konote.md) guide explains every step in plain language.
 >
-> **Important:** Running your own instance means taking responsibility for client data security. KoNote has strong protections built in, but you need to configure them correctly and maintain them over time. The Getting Started Guide includes a [security responsibility section](docs/getting-started.md#before-you-begin-understanding-your-responsibility) to help you understand what that involves.
+> **Important:** Running your own instance means taking responsibility for client data security. KoNote has strong protections built in, but you need to configure them correctly. See the [security responsibility section](docs/deploying-konote.md#understanding-your-responsibility) to understand what that involves.
 
 ### Prerequisites
 
@@ -152,7 +152,7 @@ KoNote Web is a ground-up reimplementation using modern Python/Django, designed 
    ```
 
    > **Getting `konote.E001` error?** Your encryption key is missing or invalid.
-   > See [Getting Started Guide](docs/getting-started.md#troubleshooting) for help.
+   > See [Deploying KoNote](docs/deploying-konote.md#troubleshooting) for help.
 
 5. **Run migrations**
    ```bash
@@ -176,11 +176,12 @@ Visit `http://localhost:8000` to access the application.
 
 ## Deployment
 
-KoNote Web is designed to run on your own infrastructure. We provide deployment guides for:
+KoNote Web is designed to run on your own infrastructure. See [Deploying KoNote](docs/deploying-konote.md) for complete instructions, including:
 
-- **[Railway](docs/deploy-railway.md)** — Platform-as-a-Service, easy setup
-- **[Azure](docs/deploy-azure.md)** — Azure App Service + managed PostgreSQL
-- **[Elestio / Self-hosted](docs/deploy-elestio.md)** — Docker Compose on a VPS
+- **[Local Development (Docker)](docs/deploying-konote.md#local-development-docker)** — Try KoNote locally
+- **[Railway](docs/deploying-konote.md#deploy-to-railway)** — Platform-as-a-Service, easy setup
+- **[Azure](docs/deploying-konote.md#deploy-to-azure)** — Azure Container Apps + managed PostgreSQL
+- **[Elestio](docs/deploying-konote.md#deploy-to-elestio)** — Docker Compose on managed hosting
 
 ### Docker
 
@@ -207,24 +208,20 @@ After deployment, configure your instance through the web interface:
 5. **Templates** — build reusable plan and note structures
 6. **Custom Fields** — add agency-specific intake fields
 
-See the [Agency Setup Guide](docs/agency-setup.md) for detailed instructions.
+See [Administering KoNote](docs/administering-konote.md) for detailed instructions.
 
 ---
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [Getting Started](docs/getting-started.md) | Local development setup (Python or Docker) |
-| [What KoNote Is](docs/what-konote-is.md) | Feature scope, boundaries, and design philosophy |
-| [Security Operations](docs/security-operations.md) | Security checks, audit logs, key management |
-| [Agency Setup Guide](docs/agency-setup.md) | Configure your instance after deployment |
-| [Deploy to Railway](docs/deploy-railway.md) | Step-by-step Railway deployment |
-| [Deploy to Azure](docs/deploy-azure.md) | Azure App Service deployment |
-| [Deploy to Elestio/VPS](docs/deploy-elestio.md) | Self-hosted Docker deployment |
-| [Technical Documentation](docs/technical-documentation.md) | Architecture, security, API reference |
-| [Backup & Restore](docs/backup-restore.md) | Database backups, automation scripts, cloud storage |
-| [PDF Setup](docs/pdf-setup.md) | WeasyPrint dependencies for PDF exports |
+Start with the [Documentation Index](docs/index.md) to find what you need.
+
+| Document | Audience | Description |
+|----------|----------|-------------|
+| [Deploying KoNote](docs/deploying-konote.md) | IT / Technical lead | Local setup, cloud deployments, PDF setup |
+| [Administering KoNote](docs/administering-konote.md) | Program managers / Admins | Configuration, users, backups, security |
+| [Using KoNote](docs/using-konote.md) | Front-line staff | Day-to-day usage guide |
+| [Technical Reference](docs/technical-documentation.md) | Developers | Architecture, security, data models |
 
 ---
 
@@ -238,7 +235,7 @@ KoNote Web is designed for sensitive client data:
 - **Session security** — Database-backed sessions, configurable timeout
 - **HTTP security** — HSTS, CSP, X-Frame-Options, secure cookies
 
-See [Technical Documentation](docs/technical-documentation.md) for security architecture details.
+See [Administering KoNote](docs/administering-konote.md#security-operations) for security operations and [Technical Reference](docs/technical-documentation.md) for architecture details.
 
 ---
 
@@ -286,5 +283,5 @@ This project is open source. See [LICENSE](LICENSE) for details.
 ## Support
 
 - **Documentation issues**: Open an issue in this repository
-- **Security vulnerabilities**: Please report privately to [your contact email]
-- **General questions**: See the [Agency Setup Guide](docs/agency-setup.md)
+- **Security vulnerabilities**: Please report privately (see SECURITY.md)
+- **General questions**: See [Administering KoNote](docs/administering-konote.md)
