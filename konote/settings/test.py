@@ -9,6 +9,10 @@ os.environ.setdefault("FIELD_ENCRYPTION_KEY", "ly6OqAlMm32VVf08PoPJigrLCIxGd_tW1
 
 from .base import *  # noqa: F401, F403
 
+DEBUG = True
+ALLOWED_HOSTS = ["*"]
+SESSION_COOKIE_SECURE = False
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
