@@ -39,6 +39,14 @@ def home(request):
         client_file_id__in=accessible_ids,
         status="default",
     ).select_related("client_file").order_by("-created_at")[:5]
+    alert_count = active_alerts.count()
+
+    # --- Notes recorded today ---
+    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    notes_today_count = ProgressNote.objects.filter(
+        client_file_id__in=accessible_ids,
+        created_at__gte=today_start,
+    ).count()
 
     # --- Clients not seen in 30+ days ---
     thirty_days_ago = timezone.now() - timedelta(days=30)
@@ -59,6 +67,10 @@ def home(request):
             })
         if len(needs_attention) >= 10:
             break
+    needs_attention_count = len(needs_attention)
+
+    # --- Organization name (placeholder — will come from settings later) ---
+    org_name = "LogicalOutcomes"
 
     return render(request, "clients/home.html", {
         "results": [],
@@ -67,7 +79,11 @@ def home(request):
         "active_count": active_count,
         "total_count": total_count,
         "active_alerts": active_alerts,
+        "alert_count": alert_count,
+        "notes_today_count": notes_today_count,
         "needs_attention": needs_attention,
+        "needs_attention_count": needs_attention_count,
+        "org_name": org_name,
     })
 
 

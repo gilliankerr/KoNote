@@ -1,98 +1,142 @@
 {% extends "base.html" %}
 
-{% block title %}{{ term.client_plural|default:"Clients" }} — {{ site.product_name|default:"KoNote" }}{% endblock %}
+{% block title %}Home — {{ site.product_name|default:"KoNote" }}{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1>{{ term.client_plural|default:"Clients" }}</h1>
-    <p>Search and manage {{ term.client|default:"client" }} files.</p>
+<!-- Organization header -->
+<header class="org-header">
+    <div class="org-brand">
+        <h1 class="org-name">{{ org_name }}</h1>
+        <p class="org-tagline">Client Outcome Management</p>
+    </div>
+    <div class="org-welcome">
+        Welcome back, <strong>{{ user.first_name|default:user.display_name }}</strong>
+    </div>
+</header>
+
+<!-- Search and actions bar -->
+<div class="search-bar">
+    <div class="search-input-wrapper">
+        <label for="client-search" class="search-label">Search {{ term.client_plural|default:"clients" }}</label>
+        <input type="search"
+               id="client-search"
+               name="q"
+               placeholder="Name or ID..."
+               aria-label="Search {{ term.client_plural|default:'clients' }}"
+               hx-get="{% url 'clients:client_search' %}"
+               hx-trigger="input changed delay:300ms"
+               hx-target="#search-results"
+               hx-indicator="#loading-bar">
+    </div>
+    <div class="search-actions" role="group">
+        <a href="{% url 'clients:client_create' %}" role="button">+ New {{ term.client|default:"Client" }}</a>
+        <a href="{% url 'clients:client_list' %}" role="button" class="outline">View All</a>
+    </div>
 </div>
 
-<!-- Quick actions -->
-<div role="group">
-    <a href="{% url 'clients:client_create' %}" role="button">New {{ term.client|default:"Client" }}</a>
-    <a href="{% url 'clients:client_list' %}" role="button" class="outline">View All</a>
-</div>
-
-<!-- Search -->
-<div role="search">
-    <input type="search"
-           name="q"
-           placeholder="Search by name or ID..."
-           autofocus
-           aria-label="Search {{ term.client_plural|default:'clients' }}"
-           hx-get="{% url 'clients:client_search' %}"
-           hx-trigger="input changed delay:300ms"
-           hx-target="#client-list"
-           hx-indicator="#loading-bar">
-</div>
-
-<div id="client-list" aria-live="polite">
+<!-- Search results (hidden until search) -->
+<div id="search-results" aria-live="polite">
     {% include "clients/_search_results.html" %}
 </div>
 
-<!-- Dashboard -->
+<!-- Stats row -->
+<div class="stats-row">
+    <dl class="stat-card">
+        <dt>Active {{ term.client_plural|default:"Clients" }}</dt>
+        <dd class="stat-value">{{ active_count }}</dd>
+        <dd class="stat-subtext">of {{ total_count }} total</dd>
+    </dl>
+    <dl class="stat-card{% if alert_count > 0 %} stat-card-alert{% endif %}">
+        <dt>{% if alert_count > 0 %}<span class="stat-icon" aria-hidden="true">&#9888;</span> {% endif %}Active Alerts</dt>
+        <dd class="stat-value">{{ alert_count }}</dd>
+        <dd class="stat-subtext">requiring action</dd>
+    </dl>
+    <dl class="stat-card{% if needs_attention_count > 0 %} stat-card-warning{% endif %}">
+        <dt>Needs Attention</dt>
+        <dd class="stat-value">{{ needs_attention_count }}</dd>
+        <dd class="stat-subtext">no notes in 30 days</dd>
+    </dl>
+    <dl class="stat-card">
+        <dt>Notes Today</dt>
+        <dd class="stat-value">{{ notes_today_count }}</dd>
+        <dd class="stat-subtext">recorded</dd>
+    </dl>
+</div>
+
+<!-- Two-column dashboard -->
 <div class="dashboard-grid">
-    <!-- Quick stats -->
-    <article class="stat-hero">
-        <div class="card-header">Quick Stats</div>
-        <div class="stat-number">{{ active_count }}</div>
-        <div class="stat-label">Active {{ term.client_plural|default:"clients" }}</div>
-        <div style="margin-top: var(--kn-space-md);">
-            <span class="stat-secondary">{{ total_count }}</span>
-            <span class="stat-label"> total</span>
+    <!-- Priority items (alerts + needs attention) -->
+    <article>
+        <header class="card-header">
+            <span>Priority Items</span>
+            {% if alert_count > 0 or needs_attention_count > 0 %}
+            <span class="badge badge-warning">{{ alert_count|add:needs_attention_count }}</span>
+            {% endif %}
+        </header>
+        {% if active_alerts %}
+        <div class="priority-section">
+            <h4 class="priority-label"><span class="stat-icon" aria-hidden="true">&#9888;</span> Alerts</h4>
+            <ul class="card-list">
+                {% for alert in active_alerts %}
+                <li class="priority-item priority-alert">
+                    <a href="{% url 'clients:client_detail' client_id=alert.client_file.pk %}">
+                        {{ alert.client_file.first_name }} {{ alert.client_file.last_name }}
+                    </a>
+                    <span class="priority-detail">{{ alert.content|truncatechars:40 }}</span>
+                    <small class="secondary">{{ alert.created_at|date:"M j" }}</small>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
+        {% endif %}
+        {% if needs_attention %}
+        <div class="priority-section">
+            <h4 class="priority-label">No Recent Notes</h4>
+            <ul class="card-list">
+                {% for item in needs_attention %}
+                <li class="priority-item">
+                    <a href="{% url 'clients:client_detail' client_id=item.client.pk %}">{{ item.name }}</a>
+                    <span class="priority-detail secondary">30+ days without notes</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% if not active_alerts and not needs_attention %}
+        <p class="empty-message"><em>All caught up! No items need attention.</em></p>
+        {% endif %}
     </article>
 
-    <!-- Active alerts -->
-    <article{% if active_alerts %} class="card-alert"{% endif %}>
-        <div class="card-header">Active Alerts</div>
-        {% if active_alerts %}
+    <!-- Recent activity -->
+    <article>
+        <header class="card-header">
+            <span>Recently Viewed</span>
+        </header>
+        {% if recent_clients %}
         <ul class="card-list">
-            {% for alert in active_alerts %}
+            {% for item in recent_clients %}
             <li>
-                <a href="{% url 'clients:client_detail' client_id=alert.client_file.pk %}">
-                    {{ alert.client_file.first_name }} {{ alert.client_file.last_name }}
-                </a>
-                — {{ alert.content|truncatechars:60 }}
-                <small class="secondary">({{ alert.created_at|date:"Y-m-d" }})</small>
+                <a href="{% url 'clients:client_detail' client_id=item.client.pk %}">{{ item.name }}</a>
             </li>
             {% endfor %}
         </ul>
         {% else %}
-        <p class="secondary"><em>No active alerts.</em></p>
+        <p class="empty-message"><em>No recent {{ term.client_plural|default:"clients" }} yet. Start by searching above.</em></p>
         {% endif %}
     </article>
 </div>
 
-<div class="dashboard-grid">
-    <!-- Recently viewed -->
-    <article>
-        <div class="card-header">Recently Viewed</div>
-        {% if recent_clients %}
-        <ul class="card-list">
-            {% for item in recent_clients %}
-            <li><a href="{% url 'clients:client_detail' client_id=item.client.pk %}">{{ item.name }}</a></li>
-            {% endfor %}
-        </ul>
-        {% else %}
-        <p class="secondary"><em>No recent {{ term.client_plural|default:"clients" }} yet.</em></p>
-        {% endif %}
-    </article>
-
-    <!-- Needs attention -->
-    <article{% if needs_attention %} class="card-warning"{% endif %}>
-        <div class="card-header">Needs Attention</div>
-        <small class="secondary">{{ term.client_plural|default:"Clients" }} with no notes in the last 30 days</small>
-        {% if needs_attention %}
-        <ul class="card-list">
-            {% for item in needs_attention %}
-            <li><a href="{% url 'clients:client_detail' client_id=item.client.pk %}">{{ item.name }}</a></li>
-            {% endfor %}
-        </ul>
-        {% else %}
-        <p class="secondary"><em>All {{ term.client_plural|default:"clients" }} are up to date.</em></p>
-        {% endif %}
-    </article>
-</div>
+<!-- Quick links (if features enabled) -->
+{% if features.programs or user.is_admin %}
+<nav class="quick-links" aria-label="Quick links">
+    <span class="quick-links-label">Quick links:</span>
+    {% if features.programs %}
+    <a href="/programs/">{{ term.program_plural|default:"Programs" }}</a>
+    {% endif %}
+    {% if user.is_admin %}
+    <a href="/reports/export/">Reports</a>
+    <a href="/admin/settings/">Settings</a>
+    {% endif %}
+</nav>
+{% endif %}
 {% endblock %}
