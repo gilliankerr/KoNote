@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Funder Report Export — {{ site.product_name|default:"KoNote" }}{% endblock %}
+
+{% block content %}
+<hgroup>
+    <h1>Funder Report Export</h1>
+    <p>Generate a CSV of aggregate metric data for a programme and date range.</p>
+</hgroup>
+
+{% if no_data %}
+<article aria-label="No results">
+    <p><strong>No data found.</strong> There are no metric values matching the selected programme, metrics, and date range. Try adjusting your filters.</p>
+</article>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+    <article class="pico-background-red-100" aria-label="Form errors">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+    </article>
+    {% endif %}
+
+    {# Programme dropdown #}
+    <label for="{{ form.program.id_for_label }}">
+        {{ form.program.label }}
+        {{ form.program }}
+    </label>
+    {% if form.program.errors %}
+    <small class="error">{{ form.program.errors.0 }}</small>
+    {% endif %}
+
+    {# Date range #}
+    <div class="grid">
+        <label for="{{ form.date_from.id_for_label }}">
+            {{ form.date_from.label }}
+            {{ form.date_from }}
+            {% if form.date_from.errors %}
+            <small class="error">{{ form.date_from.errors.0 }}</small>
+            {% endif %}
+        </label>
+        <label for="{{ form.date_to.id_for_label }}">
+            {{ form.date_to.label }}
+            {{ form.date_to }}
+            {% if form.date_to.errors %}
+            <small class="error">{{ form.date_to.errors.0 }}</small>
+            {% endif %}
+        </label>
+    </div>
+
+    {# Metric checkboxes #}
+    <fieldset>
+        <legend>{{ form.metrics.label }}</legend>
+        {% if form.metrics.errors %}
+        <small class="error">{{ form.metrics.errors.0 }}</small>
+        {% endif %}
+        {% for checkbox in form.metrics %}
+        <label>
+            {{ checkbox.tag }}
+            {{ checkbox.choice_label }}
+        </label>
+        {% endfor %}
+    </fieldset>
+
+    <button type="submit">Generate CSV</button>
+</form>
+{% endblock %}
