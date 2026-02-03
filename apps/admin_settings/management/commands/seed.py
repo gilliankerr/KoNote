@@ -161,3 +161,8 @@ class Command(BaseCommand):
                 )
 
         self.stdout.write("  Demo data: users, program, and sample clients created.")
+
+        # Populate demo clients with rich data for charts and reports
+        from django.core.management import call_command
+
+        call_command("seed_demo_data", stdout=self.stdout)
