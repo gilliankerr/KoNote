@@ -100,26 +100,30 @@ class Command(BaseCommand):
         self.stdout.write(f"  Instance settings: {created} created.")
 
     def _seed_demo_data(self):
-        """Create demo users, a demo program, and sample clients when DEMO_MODE is on."""
+        """Create demo users, programs, and sample clients when DEMO_MODE is on."""
         from apps.auth_app.models import User
         from apps.clients.models import ClientFile, ClientProgramEnrolment
         from apps.programs.models import Program, UserProgramRole
 
-        # Create demo program
-        program, _ = Program.objects.get_or_create(
+        # Create demo programs
+        program1, _ = Program.objects.get_or_create(
             name="Demo Program",
             defaults={"description": "A sample program for exploring KoNote.", "colour_hex": "#6366F1"},
         )
+        program2, _ = Program.objects.get_or_create(
+            name="Youth Services",
+            defaults={"description": "Youth outreach and support services.", "colour_hex": "#10B981"},
+        )
 
-        # Demo users: (username, display_name, role, is_admin)
+        # Demo users: (username, display_name, is_admin)
         demo_users = [
-            ("demo-receptionist", "Dana Receptionist", "receptionist", False),
-            ("demo-counsellor", "Casey Counsellor", "staff", False),
-            ("demo-manager", "Morgan Manager", "program_manager", False),
-            ("demo-admin", "Alex Admin", None, True),
+            ("demo-receptionist", "Dana Receptionist", False),
+            ("demo-counsellor", "Casey Counsellor", False),
+            ("demo-manager", "Morgan Manager", False),
+            ("demo-admin", "Alex Admin", True),
         ]
 
-        for username, display_name, role, is_admin in demo_users:
+        for username, display_name, is_admin in demo_users:
             user, created = User.objects.get_or_create(
                 username=username,
                 defaults={
@@ -130,15 +134,43 @@ class Command(BaseCommand):
             if created:
                 user.set_password("demo1234")
                 user.save()
-            # Assign program role (non-admin users)
-            if role:
-                UserProgramRole.objects.get_or_create(
-                    user=user, program=program,
-                    defaults={"role": role},
-                )
 
-        # Create sample clients
-        sample_clients = [
+        # Assign program roles with specific access patterns:
+        # - Receptionist: both programs (can see list of everyone)
+        # - Counsellor: only Demo Program (limited access to demonstrate permissions)
+        # - Manager: both programs (can see details of everyone)
+        receptionist = User.objects.get(username="demo-receptionist")
+        counsellor = User.objects.get(username="demo-counsellor")
+        manager = User.objects.get(username="demo-manager")
+
+        # Receptionist gets access to both programs
+        UserProgramRole.objects.get_or_create(
+            user=receptionist, program=program1,
+            defaults={"role": "receptionist"},
+        )
+        UserProgramRole.objects.get_or_create(
+            user=receptionist, program=program2,
+            defaults={"role": "receptionist"},
+        )
+
+        # Counsellor gets access to only Demo Program (not Youth Services)
+        UserProgramRole.objects.get_or_create(
+            user=counsellor, program=program1,
+            defaults={"role": "staff"},
+        )
+
+        # Manager gets access to both programs
+        UserProgramRole.objects.get_or_create(
+            user=manager, program=program1,
+            defaults={"role": "program_manager"},
+        )
+        UserProgramRole.objects.get_or_create(
+            user=manager, program=program2,
+            defaults={"role": "program_manager"},
+        )
+
+        # Sample clients for Demo Program (DEMO-001 to DEMO-005)
+        program1_clients = [
             ("Jordan", "Rivera", "2000-03-15", "DEMO-001"),
             ("Taylor", "Chen", "1995-07-22", "DEMO-002"),
             ("Avery", "Johnson", "1988-11-03", "DEMO-003"),
@@ -146,7 +178,16 @@ class Command(BaseCommand):
             ("Sam", "Williams", "1992-06-18", "DEMO-005"),
         ]
 
-        for first, last, dob, record_id in sample_clients:
+        # Sample clients for Youth Services (DEMO-006 to DEMO-010)
+        program2_clients = [
+            ("Jayden", "Martinez", "2007-05-12", "DEMO-006"),
+            ("Maya", "Thompson", "2006-09-28", "DEMO-007"),
+            ("Ethan", "Nguyen", "2008-01-15", "DEMO-008"),
+            ("Zara", "Ahmed", "2005-11-03", "DEMO-009"),
+            ("Liam", "O'Connor", "2007-08-22", "DEMO-010"),
+        ]
+
+        for first, last, dob, record_id in program1_clients:
             existing = ClientFile.objects.filter(record_id=record_id).first()
             if not existing:
                 client = ClientFile()
@@ -157,10 +198,27 @@ class Command(BaseCommand):
                 client.status = "active"
                 client.save()
                 ClientProgramEnrolment.objects.create(
-                    client_file=client, program=program, status="enrolled",
+                    client_file=client, program=program1, status="enrolled",
                 )
 
-        self.stdout.write("  Demo data: users, program, and sample clients created.")
+        for first, last, dob, record_id in program2_clients:
+            existing = ClientFile.objects.filter(record_id=record_id).first()
+            if not existing:
+                client = ClientFile()
+                client.first_name = first
+                client.last_name = last
+                client.birth_date = dob
+                client.record_id = record_id
+                client.status = "active"
+                client.save()
+                ClientProgramEnrolment.objects.create(
+                    client_file=client, program=program2, status="enrolled",
+                )
+
+        self.stdout.write("  Demo data: users, 2 programs, and 10 sample clients created.")
+        self.stdout.write("    - Receptionist: sees all 10 clients (both programs)")
+        self.stdout.write("    - Counsellor: sees only 5 clients (Demo Program only)")
+        self.stdout.write("    - Manager: sees all 10 clients with full details")
 
         # Populate demo clients with rich data for charts and reports
         from django.core.management import call_command

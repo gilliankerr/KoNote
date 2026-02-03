@@ -42,8 +42,12 @@ User = get_user_model()
 #   note_texts_quick / note_texts_full: sample narrative snippets
 
 CLIENT_PLANS = {
+    # =========================================================================
+    # Demo Program clients (DEMO-001 to DEMO-005)
+    # =========================================================================
     "DEMO-001": {
         "label": "Jordan Rivera — steady improvement",
+        "program": "Demo Program",
         "trend": "improving",
         "note_count": 10,
         "sections": [
@@ -76,6 +80,7 @@ CLIENT_PLANS = {
     },
     "DEMO-002": {
         "label": "Taylor Chen — struggling, slow progress",
+        "program": "Demo Program",
         "trend": "struggling",
         "note_count": 12,
         "sections": [
@@ -108,6 +113,7 @@ CLIENT_PLANS = {
     },
     "DEMO-003": {
         "label": "Avery Johnson — mixed results",
+        "program": "Demo Program",
         "trend": "mixed",
         "note_count": 10,
         "sections": [
@@ -150,6 +156,7 @@ CLIENT_PLANS = {
     },
     "DEMO-004": {
         "label": "Riley Patel — youth, crisis then improving",
+        "program": "Demo Program",
         "trend": "crisis_then_improving",
         "note_count": 10,
         "sections": [
@@ -192,6 +199,7 @@ CLIENT_PLANS = {
     },
     "DEMO-005": {
         "label": "Sam Williams — stable, near discharge",
+        "program": "Demo Program",
         "trend": "stable",
         "note_count": 8,
         "sections": [
@@ -212,6 +220,164 @@ CLIENT_PLANS = {
                         "name": "Maintain employment",
                         "desc": "Keep current part-time job and explore full-time.",
                         "metrics": ["Employment Status", "Hours Worked (past week)"],
+                    },
+                ],
+            },
+        ],
+    },
+    # =========================================================================
+    # Youth Services clients (DEMO-006 to DEMO-010)
+    # =========================================================================
+    "DEMO-006": {
+        "label": "Jayden Martinez — new to program, showing promise",
+        "program": "Youth Services",
+        "trend": "improving",
+        "note_count": 8,
+        "sections": [
+            {
+                "name": "Education",
+                "targets": [
+                    {
+                        "name": "Improve academic engagement",
+                        "desc": "Increase participation and grades in core subjects.",
+                        "metrics": ["School Attendance Rate", "Goal Progress (1-10)"],
+                    },
+                ],
+            },
+            {
+                "name": "Life Skills",
+                "targets": [
+                    {
+                        "name": "Develop conflict resolution skills",
+                        "desc": "Learn to manage disagreements without escalation.",
+                        "metrics": ["Coping Skills Rating"],
+                    },
+                ],
+            },
+        ],
+    },
+    "DEMO-007": {
+        "label": "Maya Thompson — overcoming social anxiety",
+        "program": "Youth Services",
+        "trend": "crisis_then_improving",
+        "note_count": 10,
+        "sections": [
+            {
+                "name": "Mental Health",
+                "targets": [
+                    {
+                        "name": "Manage social anxiety",
+                        "desc": "Reduce avoidance behaviours and increase social activities.",
+                        "metrics": ["GAD-7 (Anxiety)", "Wellness Scale"],
+                    },
+                ],
+            },
+            {
+                "name": "Social Connection",
+                "targets": [
+                    {
+                        "name": "Build peer relationships",
+                        "desc": "Participate in group activities and make new friends.",
+                        "metrics": ["Social Support Network", "Service Engagement"],
+                    },
+                ],
+            },
+        ],
+    },
+    "DEMO-008": {
+        "label": "Ethan Nguyen — struggling with family conflict",
+        "program": "Youth Services",
+        "trend": "struggling",
+        "note_count": 9,
+        "sections": [
+            {
+                "name": "Family & Relationships",
+                "targets": [
+                    {
+                        "name": "Improve family communication",
+                        "desc": "Work with family on healthier communication patterns.",
+                        "metrics": ["Family Connection Score"],
+                    },
+                ],
+            },
+            {
+                "name": "Mental Health",
+                "targets": [
+                    {
+                        "name": "Reduce emotional distress",
+                        "desc": "Build coping strategies for family stress.",
+                        "metrics": ["K10 (Psychological Distress)", "Coping Skills Rating"],
+                    },
+                ],
+            },
+            {
+                "name": "Education",
+                "targets": [
+                    {
+                        "name": "Maintain school attendance",
+                        "desc": "Stay engaged despite home challenges.",
+                        "metrics": ["School Attendance Rate"],
+                    },
+                ],
+            },
+        ],
+    },
+    "DEMO-009": {
+        "label": "Zara Ahmed — leadership potential, mixed focus",
+        "program": "Youth Services",
+        "trend": "mixed",
+        "note_count": 11,
+        "sections": [
+            {
+                "name": "Youth Development",
+                "targets": [
+                    {
+                        "name": "Develop leadership skills",
+                        "desc": "Take on peer mentorship and group facilitation roles.",
+                        "metrics": ["Goal Progress (1-10)", "Service Engagement"],
+                    },
+                    {
+                        "name": "Balance commitments",
+                        "desc": "Manage school, work, and program activities.",
+                        "metrics": ["Life Skills Assessment"],
+                    },
+                ],
+            },
+            {
+                "name": "Education",
+                "targets": [
+                    {
+                        "name": "Prepare for post-secondary",
+                        "desc": "Research options and prepare applications.",
+                        "metrics": ["Job Readiness Score"],
+                    },
+                ],
+            },
+        ],
+    },
+    "DEMO-010": {
+        "label": "Liam O'Connor — stable, transitioning out",
+        "program": "Youth Services",
+        "trend": "stable",
+        "note_count": 7,
+        "sections": [
+            {
+                "name": "Life Skills",
+                "targets": [
+                    {
+                        "name": "Prepare for independent living",
+                        "desc": "Master budgeting, cooking, and self-care routines.",
+                        "metrics": ["Life Skills Assessment", "Goal Progress (1-10)"],
+                    },
+                ],
+            },
+            {
+                "name": "Employment",
+                "targets": [
+                    {
+                        "name": "Secure part-time employment",
+                        "desc": "Balance work with school and maintain income.",
+                        "metrics": ["Job Readiness Score", "Hours Worked (past week)"],
                     },
                 ],
             },
@@ -333,6 +499,7 @@ def _generate_trend_values(trend, count, metric_name, metric_def):
 
 # Events to create per client
 CLIENT_EVENTS = {
+    # Demo Program clients
     "DEMO-001": [
         {"type": "Intake", "title": "Initial intake assessment", "days_ago": 175},
         {"type": "Follow-up", "title": "30-day check-in", "days_ago": 145},
@@ -364,6 +531,38 @@ CLIENT_EVENTS = {
         {"type": "Follow-up", "title": "90-day review", "days_ago": 90},
         {"type": "Follow-up", "title": "Discharge planning meeting", "days_ago": 15},
     ],
+    # Youth Services clients
+    "DEMO-006": [
+        {"type": "Intake", "title": "Youth Services intake", "days_ago": 120},
+        {"type": "Follow-up", "title": "School liaison meeting", "days_ago": 90},
+        {"type": "Follow-up", "title": "Progress review", "days_ago": 45},
+    ],
+    "DEMO-007": [
+        {"type": "Intake", "title": "Initial intake assessment", "days_ago": 150},
+        {"type": "Crisis", "title": "Panic attack at school", "days_ago": 130},
+        {"type": "Follow-up", "title": "Post-crisis support session", "days_ago": 125},
+        {"type": "Follow-up", "title": "Monthly check-in", "days_ago": 60},
+        {"type": "Follow-up", "title": "Group activity participation", "days_ago": 25},
+    ],
+    "DEMO-008": [
+        {"type": "Intake", "title": "Family referral intake", "days_ago": 140},
+        {"type": "Follow-up", "title": "Family mediation session", "days_ago": 110},
+        {"type": "Crisis", "title": "Ran away from home overnight", "days_ago": 85},
+        {"type": "Follow-up", "title": "Safety planning session", "days_ago": 80},
+        {"type": "Follow-up", "title": "Monthly review", "days_ago": 30},
+    ],
+    "DEMO-009": [
+        {"type": "Intake", "title": "Self-referral intake", "days_ago": 160},
+        {"type": "Follow-up", "title": "Leadership workshop participation", "days_ago": 100},
+        {"type": "Follow-up", "title": "Post-secondary planning meeting", "days_ago": 55},
+        {"type": "Referral", "title": "Referred to career counselling", "days_ago": 30},
+    ],
+    "DEMO-010": [
+        {"type": "Intake", "title": "Program intake", "days_ago": 180},
+        {"type": "Follow-up", "title": "Life skills assessment", "days_ago": 120},
+        {"type": "Follow-up", "title": "Employment support session", "days_ago": 60},
+        {"type": "Follow-up", "title": "Transition planning meeting", "days_ago": 20},
+    ],
 }
 
 
@@ -388,10 +587,27 @@ class Command(BaseCommand):
             return
 
         try:
-            program = Program.objects.get(name="Demo Program")
-        except Program.DoesNotExist:
+            manager = User.objects.get(username="demo-manager")
+        except User.DoesNotExist:
+            self.stdout.write(self.style.ERROR("demo-manager user not found. Run seed first."))
+            return
+
+        # Fetch both programs
+        programs_by_name = {p.name: p for p in Program.objects.all()}
+        if "Demo Program" not in programs_by_name:
             self.stdout.write(self.style.ERROR("Demo Program not found. Run seed first."))
             return
+        if "Youth Services" not in programs_by_name:
+            self.stdout.write(self.style.ERROR("Youth Services not found. Run seed first."))
+            return
+
+        # Map programs to their note authors:
+        # - Demo Program notes written by demo-counsellor
+        # - Youth Services notes written by demo-manager (counsellor doesn't have access)
+        program_authors = {
+            "Demo Program": counsellor,
+            "Youth Services": manager,
+        }
 
         # Cache metric definitions by name
         metrics_by_name = {m.name: m for m in MetricDefinition.objects.filter(is_library=True)}
@@ -408,7 +624,16 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.WARNING(f"  Client {record_id} not found. Skipping."))
                 continue
 
-            self.stdout.write(f"  Seeding {record_id}: {plan_config['label']}...")
+            # Get the program and author for this client
+            program_name = plan_config.get("program", "Demo Program")
+            program = programs_by_name.get(program_name)
+            author = program_authors.get(program_name, counsellor)
+
+            if not program:
+                self.stdout.write(self.style.WARNING(f"  Program '{program_name}' not found. Skipping {record_id}."))
+                continue
+
+            self.stdout.write(f"  Seeding {record_id}: {plan_config['label']} ({program_name})...")
 
             # ----------------------------------------------------------
             # 1. Create plan sections, targets, and link metrics
@@ -438,7 +663,7 @@ class Command(BaseCommand):
                         name=target.name,
                         description=target.description,
                         status="default",
-                        changed_by=counsellor,
+                        changed_by=author,
                     )
 
                     # Link metrics
@@ -487,7 +712,7 @@ class Command(BaseCommand):
                 note = ProgressNote.objects.create(
                     client_file=client,
                     note_type=note_type,
-                    author=counsellor,
+                    author=author,
                     author_program=program,
                     backdate=backdate,
                     notes_text=(
@@ -539,15 +764,29 @@ class Command(BaseCommand):
                 Alert.objects.create(
                     client_file=client,
                     content="Housing instability — currently staying in emergency shelter. Check in weekly.",
-                    author=counsellor,
+                    author=author,
                     author_program=program,
                 )
             elif record_id == "DEMO-004":
                 Alert.objects.create(
                     client_file=client,
                     content="Safety concern flagged during school suspension. Updated safety plan on file.",
-                    author=counsellor,
+                    author=author,
+                    author_program=program,
+                )
+            elif record_id == "DEMO-007":
+                Alert.objects.create(
+                    client_file=client,
+                    content="Social anxiety — avoid large group settings initially. Build up gradually.",
+                    author=author,
+                    author_program=program,
+                )
+            elif record_id == "DEMO-008":
+                Alert.objects.create(
+                    client_file=client,
+                    content="Family conflict — youth has run away before. Maintain weekly contact.",
+                    author=author,
                     author_program=program,
                 )
 
-        self.stdout.write(self.style.SUCCESS("  Demo rich data seeded successfully."))
+        self.stdout.write(self.style.SUCCESS("  Demo rich data seeded successfully (10 clients across 2 programs)."))
