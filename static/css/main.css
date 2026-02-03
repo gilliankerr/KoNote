@@ -858,6 +858,37 @@ article[aria-label="notification"].fading-out {
     }
 }
 
+/* ---- Draft recovery banner ---- */
+.draft-recovery-banner {
+    background: var(--kn-info-bg);
+    border-left: 4px solid var(--kn-primary);
+    padding: var(--kn-space-base);
+    margin-bottom: var(--kn-space-lg);
+    border-radius: var(--kn-radius-card);
+}
+.draft-recovery-banner p {
+    margin: 0 0 var(--kn-space-sm) 0;
+    font-size: 0.9375rem;
+}
+.draft-recovery-banner [role="group"] {
+    display: flex;
+    gap: var(--kn-space-sm);
+    flex-wrap: wrap;
+}
+.draft-recovery-banner button {
+    font-size: 0.8125rem;
+    padding: var(--kn-space-xs) var(--kn-space-base);
+    margin: 0;
+}
+@media (max-width: 480px) {
+    .draft-recovery-banner [role="group"] {
+        flex-direction: column;
+    }
+    .draft-recovery-banner button {
+        width: 100%;
+    }
+}
+
 /* ---- Utility: secondary text colour ---- */
 .secondary {
     color: var(--kn-text-muted);

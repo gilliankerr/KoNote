@@ -197,3 +197,240 @@ document.addEventListener("click", function (event) {
         setupMobileNav();
     }
 })();
+
+// --- Note Auto-Save / Draft Recovery ---
+// Saves form data to localStorage as user types, restores on page load
+(function () {
+    var AUTOSAVE_DELAY = 1000; // Save 1 second after user stops typing
+    var STORAGE_PREFIX = "konote_draft_";
+
+    // Debounce helper
+    function debounce(fn, delay) {
+        var timer = null;
+        return function () {
+            var context = this;
+            var args = arguments;
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                fn.apply(context, args);
+            }, delay);
+        };
+    }
+
+    // Get storage key for a form
+    function getStorageKey(form) {
+        var clientId = form.getAttribute("data-client-id");
+        var formType = form.getAttribute("data-form-type") || "note";
+        if (!clientId) return null;
+        return STORAGE_PREFIX + formType + "_" + clientId;
+    }
+
+    // Collect form data into an object
+    function collectFormData(form) {
+        var data = {};
+        var inputs = form.querySelectorAll("input, textarea, select");
+        inputs.forEach(function (el) {
+            // Skip CSRF token, submit buttons, and consent checkbox
+            if (el.name === "csrfmiddlewaretoken" || el.type === "submit") return;
+            if (el.name === "consent_confirmed") return; // Don't save consent - must be re-confirmed
+
+            if (el.type === "checkbox") {
+                // For checkboxes, store checked state with unique key
+                var key = el.name || el.getAttribute("data-target-id");
+                if (el.classList.contains("target-selector")) {
+                    key = "target_selector_" + el.getAttribute("data-target-id");
+                }
+                data[key] = el.checked;
+            } else if (el.type === "radio") {
+                if (el.checked) {
+                    data[el.name] = el.value;
+                }
+            } else {
+                data[el.name] = el.value;
+            }
+        });
+        return data;
+    }
+
+    // Restore form data from saved object
+    function restoreFormData(form, data) {
+        var inputs = form.querySelectorAll("input, textarea, select");
+        inputs.forEach(function (el) {
+            if (el.name === "csrfmiddlewaretoken" || el.type === "submit") return;
+            if (el.name === "consent_confirmed") return;
+
+            if (el.type === "checkbox") {
+                var key = el.name || el.getAttribute("data-target-id");
+                if (el.classList.contains("target-selector")) {
+                    key = "target_selector_" + el.getAttribute("data-target-id");
+                }
+                if (data.hasOwnProperty(key)) {
+                    el.checked = data[key];
+                    // Trigger change event for target selectors to show/hide details
+                    if (el.classList.contains("target-selector")) {
+                        el.dispatchEvent(new Event("change"));
+                    }
+                }
+            } else if (el.type === "radio") {
+                if (data[el.name] === el.value) {
+                    el.checked = true;
+                }
+            } else if (data.hasOwnProperty(el.name)) {
+                el.value = data[el.name];
+            }
+        });
+    }
+
+    // Check if form data has meaningful content worth saving
+    function hasContent(data) {
+        for (var key in data) {
+            if (!data.hasOwnProperty(key)) continue;
+            var val = data[key];
+            // Check for non-empty text values (ignore dates/dropdowns set to defaults)
+            if (typeof val === "string" && val.trim() !== "" && key !== "session_date" && key !== "template") {
+                return true;
+            }
+            // Check for checked target selectors
+            if (key.startsWith("target_selector_") && val === true) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Save draft to localStorage
+    function saveDraft(form) {
+        var key = getStorageKey(form);
+        if (!key) return;
+
+        var data = collectFormData(form);
+        if (hasContent(data)) {
+            data._savedAt = new Date().toISOString();
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+            } catch (e) {
+                // localStorage might be full or disabled - fail silently
+                console.warn("Could not save draft:", e);
+            }
+        }
+    }
+
+    // Load draft from localStorage
+    function loadDraft(form) {
+        var key = getStorageKey(form);
+        if (!key) return null;
+
+        try {
+            var stored = localStorage.getItem(key);
+            if (stored) {
+                return JSON.parse(stored);
+            }
+        } catch (e) {
+            console.warn("Could not load draft:", e);
+        }
+        return null;
+    }
+
+    // Clear draft from localStorage
+    function clearDraft(form) {
+        var key = getStorageKey(form);
+        if (!key) return;
+        try {
+            localStorage.removeItem(key);
+        } catch (e) {
+            // Ignore errors
+        }
+    }
+
+    // Format saved time for display
+    function formatSavedTime(isoString) {
+        try {
+            var date = new Date(isoString);
+            var now = new Date();
+            var diffMs = now - date;
+            var diffMins = Math.floor(diffMs / 60000);
+
+            if (diffMins < 1) return "just now";
+            if (diffMins === 1) return "1 minute ago";
+            if (diffMins < 60) return diffMins + " minutes ago";
+
+            var diffHours = Math.floor(diffMins / 60);
+            if (diffHours === 1) return "1 hour ago";
+            if (diffHours < 24) return diffHours + " hours ago";
+
+            // Show date for older drafts
+            return date.toLocaleDateString();
+        } catch (e) {
+            return "earlier";
+        }
+    }
+
+    // Create and show the draft recovery banner
+    function showRecoveryBanner(form, draft) {
+        var savedTime = draft._savedAt ? formatSavedTime(draft._savedAt) : "earlier";
+
+        var banner = document.createElement("article");
+        banner.className = "draft-recovery-banner";
+        banner.setAttribute("role", "alert");
+        banner.innerHTML =
+            '<p><strong>Draft found</strong> — You have unsaved work from ' + savedTime + '.</p>' +
+            '<div role="group">' +
+            '<button type="button" class="draft-restore">Restore draft</button>' +
+            '<button type="button" class="draft-discard outline secondary">Discard</button>' +
+            '</div>';
+
+        // Insert banner before the form
+        form.parentNode.insertBefore(banner, form);
+
+        // Handle restore
+        banner.querySelector(".draft-restore").addEventListener("click", function () {
+            restoreFormData(form, draft);
+            banner.remove();
+            showToast("Draft restored", false);
+        });
+
+        // Handle discard
+        banner.querySelector(".draft-discard").addEventListener("click", function () {
+            clearDraft(form);
+            banner.remove();
+        });
+    }
+
+    // Initialize auto-save on a form
+    function initAutoSave(form) {
+        var key = getStorageKey(form);
+        if (!key) return; // Form doesn't have required data attributes
+
+        // Check for existing draft and show recovery banner
+        var draft = loadDraft(form);
+        if (draft && hasContent(draft)) {
+            showRecoveryBanner(form, draft);
+        }
+
+        // Set up auto-save on input
+        var debouncedSave = debounce(function () {
+            saveDraft(form);
+        }, AUTOSAVE_DELAY);
+
+        form.addEventListener("input", debouncedSave);
+        form.addEventListener("change", debouncedSave);
+
+        // Clear draft on successful form submission
+        form.addEventListener("submit", function () {
+            clearDraft(form);
+        });
+    }
+
+    // Find and initialize all auto-save forms
+    function setupAutoSave() {
+        var forms = document.querySelectorAll("form[data-autosave]");
+        forms.forEach(initAutoSave);
+    }
+
+    // Run on page load
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", setupAutoSave);
+    } else {
+        setupAutoSave();
+    }
+})();

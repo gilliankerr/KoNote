@@ -9,7 +9,7 @@
     <p>{{ client.first_name }} {{ client.last_name }}</p>
 </hgroup>
 
-<form method="post">
+<form method="post" data-autosave data-client-id="{{ client.pk }}" data-form-type="quick">
     {% csrf_token %}
     <label for="{{ form.notes_text.id_for_label }}">{{ term.progress_note|default:"Note" }}</label>
     {{ form.notes_text }}

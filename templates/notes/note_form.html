@@ -9,7 +9,7 @@
     <p>{{ client.first_name }} {{ client.last_name }}</p>
 </hgroup>
 
-<form method="post">
+<form method="post" data-autosave data-client-id="{{ client.pk }}" data-form-type="full">
     {% csrf_token %}
 
     <!-- Template (determines note structure) -->
