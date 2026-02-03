@@ -20,4 +20,4 @@ USER konote
 
 EXPOSE 8000
 
-CMD ["gunicorn", "konote.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120"]
+CMD ["gunicorn", "konote.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "120", "--log-level", "debug", "--error-logfile", "-", "--access-logfile", "-", "--capture-output"]
