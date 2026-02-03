@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Consent Required" %} — {{ client.first_name }} {{ client.last_name }}{% endblock %}
+
+{% block content %}
+<article class="notice-card">
+    <hgroup>
+        <h1>{% trans "Consent Required" %}</h1>
+        <p>{{ client.first_name }} {{ client.last_name }}</p>
+    </hgroup>
+
+    <p class="notice warning" role="alert">
+        <strong>{% trans "Cannot create notes for this" %} {{ term.client|default:"client" }}.</strong>
+    </p>
+
+    <p>
+        {% blocktrans with client=term.client|default:"client" %}
+        Privacy regulations (PIPEDA/PHIPA) require that consent be recorded before creating progress notes.
+        Please record the {{ client }}'s consent on their profile before continuing.
+        {% endblocktrans %}
+    </p>
+
+    <div role="group">
+        <a href="{% url 'clients:client_detail' client_id=client.pk %}" role="button">
+            {% trans "Go to" %} {{ term.client|default:"Client" }} {% trans "Profile" %}
+        </a>
+        <a href="{% url 'notes:note_list' client_id=client.pk %}" role="button" class="outline secondary">
+            {% trans "Back to Notes" %}
+        </a>
+    </div>
+</article>
+{% endblock %}

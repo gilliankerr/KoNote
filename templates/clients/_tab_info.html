@@ -10,6 +10,11 @@
     {% endif %}
 </div>
 
+{# Privacy consent section (PRIV1) #}
+<section id="consent-section" aria-labelledby="consent-heading">
+    {% include "clients/_consent_display.html" %}
+</section>
+
 <section>
     <h2>{% trans "Basic Information" %}</h2>
     <dl class="info-grid">

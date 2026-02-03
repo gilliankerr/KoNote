@@ -1,0 +1,49 @@
+{% load i18n %}
+{# Partial: Consent recording form #}
+<div class="consent-header">
+    <h2 id="consent-heading">{% trans "Record Privacy Consent" %}</h2>
+    <button type="button"
+            class="outline secondary"
+            hx-get="{% url 'clients:client_consent_display' client_id=client.pk %}"
+            hx-target="#consent-section"
+            hx-swap="innerHTML"
+            aria-label="{% trans 'Cancel' %}">
+        {% trans "Cancel" %}
+    </button>
+</div>
+
+<form method="post"
+      action="{% url 'clients:client_consent_save' client_id=client.pk %}"
+      hx-post="{% url 'clients:client_consent_save' client_id=client.pk %}"
+      hx-target="#consent-section"
+      hx-swap="innerHTML">
+    {% csrf_token %}
+
+    <p class="help-text">
+        {% trans "Record when and how the" %} {{ term.client|default:"client" }} {% trans "provided consent for data collection and progress tracking." %}
+    </p>
+
+    <fieldset>
+        <label for="{{ form.consent_type.id_for_label }}">{{ form.consent_type.label }}</label>
+        {{ form.consent_type }}
+        {% if form.consent_type.errors %}
+        <small class="error" role="alert">{{ form.consent_type.errors.0 }}</small>
+        {% endif %}
+
+        <label for="{{ form.consent_date.id_for_label }}">{{ form.consent_date.label }}</label>
+        {{ form.consent_date }}
+        {% if form.consent_date.errors %}
+        <small class="error" role="alert">{{ form.consent_date.errors.0 }}</small>
+        {% endif %}
+
+        <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
+        {{ form.notes }}
+        {% if form.notes.errors %}
+        <small class="error" role="alert">{{ form.notes.errors.0 }}</small>
+        {% endif %}
+    </fieldset>
+
+    <div class="button-row">
+        <button type="submit">{% trans "Save Consent Record" %}</button>
+    </div>
+</form>

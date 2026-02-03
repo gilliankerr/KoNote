@@ -1,9 +1,36 @@
 """Client forms."""
 from django import forms
+from django.utils import timezone
 
 from apps.programs.models import Program
 
 from .models import ClientFile, CustomFieldDefinition, CustomFieldGroup
+
+
+class ConsentRecordForm(forms.Form):
+    """Form to record client consent for data collection (PIPEDA/PHIPA compliance)."""
+
+    CONSENT_TYPE_CHOICES = [
+        ("written", "Written consent"),
+        ("verbal", "Verbal consent"),
+        ("electronic", "Electronic consent"),
+    ]
+
+    consent_type = forms.ChoiceField(
+        choices=CONSENT_TYPE_CHOICES,
+        label="Consent type",
+        initial="written",
+    )
+    consent_date = forms.DateField(
+        label="Date consent was obtained",
+        widget=forms.DateInput(attrs={"type": "date"}),
+        initial=timezone.now,
+    )
+    notes = forms.CharField(
+        required=False,
+        label="Notes (optional)",
+        widget=forms.Textarea(attrs={"rows": 2, "placeholder": "Any additional details about how consent was obtained..."}),
+    )
 
 
 class ClientFileForm(forms.Form):

@@ -345,3 +345,72 @@ class CustomFieldTest(TestCase):
         self.assertEqual(cdv.get_value(), "555-0100")
         # Plain value field should be empty (stored encrypted instead)
         self.assertEqual(cdv.value, "")
+
+
+@override_settings(FIELD_ENCRYPTION_KEY=TEST_KEY)
+class ConsentRecordingTest(TestCase):
+    """Tests for consent recording workflow (PRIV1)."""
+
+    def setUp(self):
+        enc_module._fernet = None
+        self.client = Client()
+        self.staff = User.objects.create_user(username="staff", password="testpass123", is_admin=False)
+        self.receptionist = User.objects.create_user(username="receptionist", password="testpass123", is_admin=False)
+        self.program = Program.objects.create(name="Test Program", colour_hex="#10B981")
+        UserProgramRole.objects.create(user=self.staff, program=self.program, role="staff")
+        UserProgramRole.objects.create(user=self.receptionist, program=self.program, role="receptionist")
+
+        self.cf = ClientFile()
+        self.cf.first_name = "Jane"
+        self.cf.last_name = "Doe"
+        self.cf.save()
+        ClientProgramEnrolment.objects.create(client_file=self.cf, program=self.program)
+
+    def test_consent_display_shows_no_consent(self):
+        """Client detail shows 'no consent' warning when consent not recorded."""
+        self.client.login(username="staff", password="testpass123")
+        resp = self.client.get(f"/clients/{self.cf.pk}/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "No consent on file")
+
+    def test_consent_can_be_recorded(self):
+        """Staff can record consent on a client."""
+        from django.utils import timezone
+        self.client.login(username="staff", password="testpass123")
+        today = timezone.now().strftime("%Y-%m-%d")
+        resp = self.client.post(f"/clients/{self.cf.pk}/consent/", {
+            "consent_type": "written",
+            "consent_date": today,
+            "notes": "Signed consent form on file.",
+        })
+        self.assertEqual(resp.status_code, 302)
+        self.cf.refresh_from_db()
+        self.assertIsNotNone(self.cf.consent_given_at)
+        self.assertEqual(self.cf.consent_type, "written")
+
+    def test_consent_display_shows_consent_recorded(self):
+        """Client detail shows consent status when recorded."""
+        from django.utils import timezone
+        self.cf.consent_given_at = timezone.now()
+        self.cf.consent_type = "verbal"
+        self.cf.save()
+
+        self.client.login(username="staff", password="testpass123")
+        resp = self.client.get(f"/clients/{self.cf.pk}/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Consent recorded")
+        self.assertContains(resp, "verbal")
+
+    def test_receptionist_cannot_record_consent(self):
+        """Receptionists cannot record consent (staff-only action)."""
+        from django.utils import timezone
+        self.client.login(username="receptionist", password="testpass123")
+        today = timezone.now().strftime("%Y-%m-%d")
+        resp = self.client.post(f"/clients/{self.cf.pk}/consent/", {
+            "consent_type": "written",
+            "consent_date": today,
+        })
+        # Should be forbidden (minimum role is staff)
+        self.assertEqual(resp.status_code, 403)
+        self.cf.refresh_from_db()
+        self.assertIsNone(self.cf.consent_given_at)

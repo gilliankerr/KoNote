@@ -85,7 +85,6 @@ These features are intentionally excluded. See technical documentation for ratio
 ## Parking Lot
 
 - [ ] Delete archived docs after verifying new structure works — `docs/archive/` — (DOC19)
-- [ ] 🔨 PIPEDA/PHIPA consent workflow — block note entry until client consent recorded — (PRIV1)
 - [ ] GDPR toolkit UI — data export, right to erasure, consent management — (GDPR1)
 - [ ] Mobile-responsive optimisation pass — (UI1)
 - [ ] First-run setup wizard — Claude skill + import command — See `tasks/setup-wizard-design.md` (SETUP1)
@@ -96,6 +95,7 @@ These features are intentionally excluded. See technical documentation for ratio
 
 ## Recently Done
 
+- [x] PIPEDA/PHIPA consent workflow — block note entry until client consent recorded — 2026-02-03 (PRIV1)
 - [x] Note follow-up dates on home page — 2026-02-03 (FU1)
 - [x] Add backup automation examples to docs — 2026-02-03 (OPS1)
 - [x] Add client search filters (program, status, date) — 2026-02-03 (UX19)

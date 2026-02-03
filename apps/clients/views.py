@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from apps.auth_app.decorators import minimum_role
 from apps.programs.models import Program, UserProgramRole
 
-from .forms import ClientFileForm, CustomFieldDefinitionForm, CustomFieldGroupForm, CustomFieldValuesForm
+from .forms import ClientFileForm, ConsentRecordForm, CustomFieldDefinitionForm, CustomFieldGroupForm, CustomFieldValuesForm
 from .helpers import get_document_folder_url
 from .models import ClientDetailValue, ClientFile, ClientProgramEnrolment, CustomFieldGroup
 
@@ -330,6 +330,83 @@ def client_save_custom_fields(request, client_id):
     if request.headers.get("HX-Request"):
         context = _get_custom_fields_context(client, user_role)
         return render(request, "clients/_custom_fields_display.html", context)
+
+    return redirect("clients:client_detail", client_id=client.pk)
+
+
+# ---- Consent Recording (PRIV1) ----
+
+@login_required
+def client_consent_display(request, client_id):
+    """HTMX: Return read-only consent status partial."""
+    client = get_object_or_404(ClientFile, pk=client_id)
+    user_role = getattr(request, "user_program_role", None)
+    is_receptionist = user_role == "receptionist"
+    return render(request, "clients/_consent_display.html", {
+        "client": client,
+        "is_receptionist": is_receptionist,
+    })
+
+
+@login_required
+@minimum_role("staff")
+def client_consent_edit(request, client_id):
+    """HTMX: Return consent recording form partial."""
+    from django.utils import timezone
+
+    client = get_object_or_404(ClientFile, pk=client_id)
+    initial = {}
+    if client.consent_given_at:
+        initial["consent_date"] = client.consent_given_at.date()
+        initial["consent_type"] = client.consent_type or "written"
+    else:
+        initial["consent_date"] = timezone.now().date()
+    form = ConsentRecordForm(initial=initial)
+    return render(request, "clients/_consent_edit.html", {
+        "client": client,
+        "form": form,
+    })
+
+
+@login_required
+@minimum_role("staff")
+def client_consent_save(request, client_id):
+    """Save consent record for a client.
+
+    Returns the read-only display partial for HTMX, or redirects for non-HTMX.
+    """
+    from django.utils import timezone
+
+    client = get_object_or_404(ClientFile, pk=client_id)
+    user_role = getattr(request, "user_program_role", None)
+    is_receptionist = user_role == "receptionist"
+
+    if request.method == "POST":
+        form = ConsentRecordForm(request.POST)
+        if form.is_valid():
+            # Combine date with current time for the timestamp
+            consent_date = form.cleaned_data["consent_date"]
+            client.consent_given_at = timezone.make_aware(
+                timezone.datetime.combine(consent_date, timezone.datetime.min.time())
+            )
+            client.consent_type = form.cleaned_data["consent_type"]
+            client.save(update_fields=["consent_given_at", "consent_type"])
+            messages.success(request, "Consent recorded.")
+        else:
+            messages.error(request, "Please correct the errors.")
+            # Return to edit form on error
+            if request.headers.get("HX-Request"):
+                return render(request, "clients/_consent_edit.html", {
+                    "client": client,
+                    "form": form,
+                })
+
+    # For HTMX requests, return the read-only display partial
+    if request.headers.get("HX-Request"):
+        return render(request, "clients/_consent_display.html", {
+            "client": client,
+            "is_receptionist": is_receptionist,
+        })
 
     return redirect("clients:client_detail", client_id=client.pk)
 

@@ -3,6 +3,7 @@ from django.test import TestCase, Client, override_settings
 from django.utils import timezone
 from cryptography.fernet import Fernet
 
+from apps.admin_settings.models import FeatureToggle
 from apps.auth_app.models import User
 from apps.programs.models import Program, UserProgramRole
 from apps.clients.models import ClientFile, ClientProgramEnrolment
@@ -32,6 +33,8 @@ class NoteViewsTest(TestCase):
         self.client_file.first_name = "Jane"
         self.client_file.last_name = "Doe"
         self.client_file.status = "active"
+        self.client_file.consent_given_at = timezone.now()  # Set consent for existing tests
+        self.client_file.consent_type = "written"
         self.client_file.save()
         ClientProgramEnrolment.objects.create(client_file=self.client_file, program=self.prog)
 
@@ -255,3 +258,66 @@ class NoteViewsTest(TestCase):
         self.http.login(username="staff", password="pass")
         resp = self.http.get("/admin/settings/note-templates/")
         self.assertEqual(resp.status_code, 403)
+
+    # -- Consent Workflow (PRIV1) --
+
+    def test_note_blocked_without_client_consent(self):
+        """Notes cannot be created when client has no consent recorded."""
+        # Create client without consent
+        client_no_consent = ClientFile()
+        client_no_consent.first_name = "No"
+        client_no_consent.last_name = "Consent"
+        client_no_consent.status = "active"
+        client_no_consent.save()
+        ClientProgramEnrolment.objects.create(client_file=client_no_consent, program=self.prog)
+
+        self.http.login(username="staff", password="pass")
+        resp = self.http.get(f"/notes/client/{client_no_consent.pk}/quick/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Consent Required")
+        self.assertContains(resp, "cannot create notes")
+
+    def test_note_allowed_with_client_consent(self):
+        """Notes can be created when client has consent recorded."""
+        self.http.login(username="staff", password="pass")
+        resp = self.http.post(
+            f"/notes/client/{self.client_file.pk}/quick/",
+            {"notes_text": "Consent is on file.", "consent_confirmed": True},
+        )
+        self.assertEqual(resp.status_code, 302)  # Redirect = success
+        self.assertEqual(ProgressNote.objects.count(), 1)
+
+    def test_consent_feature_toggle_disables_blocking(self):
+        """Disabling the feature toggle allows notes without client consent."""
+        # Create client without consent
+        client_no_consent = ClientFile()
+        client_no_consent.first_name = "Toggle"
+        client_no_consent.last_name = "Test"
+        client_no_consent.status = "active"
+        client_no_consent.save()
+        ClientProgramEnrolment.objects.create(client_file=client_no_consent, program=self.prog)
+
+        # Disable consent requirement
+        FeatureToggle.objects.create(feature_key="require_client_consent", is_enabled=False)
+
+        self.http.login(username="staff", password="pass")
+        resp = self.http.post(
+            f"/notes/client/{client_no_consent.pk}/quick/",
+            {"notes_text": "No consent needed.", "consent_confirmed": True},
+        )
+        self.assertEqual(resp.status_code, 302)  # Redirect = success
+        self.assertEqual(ProgressNote.objects.count(), 1)
+
+    def test_full_note_blocked_without_consent(self):
+        """Full notes are also blocked without client consent."""
+        client_no_consent = ClientFile()
+        client_no_consent.first_name = "Full"
+        client_no_consent.last_name = "Note"
+        client_no_consent.status = "active"
+        client_no_consent.save()
+        ClientProgramEnrolment.objects.create(client_file=client_no_consent, program=self.prog)
+
+        self.http.login(username="staff", password="pass")
+        resp = self.http.get(f"/notes/client/{client_no_consent.pk}/new/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Consent Required")

@@ -96,7 +96,11 @@ DEFAULT_FEATURES = {
     "alerts": "Metric alerts",
     "events": "Event tracking",
     "funder_reports": "Funder report exports",
+    "require_client_consent": "Require client consent before notes (PIPEDA/PHIPA)",
 }
+
+# Features that default to enabled (most default to disabled)
+FEATURES_DEFAULT_ENABLED = {"require_client_consent"}
 
 
 @login_required
@@ -119,10 +123,12 @@ def features(request):
     current_flags = FeatureToggle.get_all_flags()
     feature_rows = []
     for key, description in DEFAULT_FEATURES.items():
+        # Some features default to enabled (e.g., consent requirement for PIPEDA)
+        default_state = key in FEATURES_DEFAULT_ENABLED
         feature_rows.append({
             "key": key,
             "description": description,
-            "is_enabled": current_flags.get(key, False),
+            "is_enabled": current_flags.get(key, default_state),
         })
 
     return render(request, "admin_settings/features.html", {

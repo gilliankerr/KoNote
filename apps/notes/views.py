@@ -61,6 +61,20 @@ def _get_author_program(user, client):
     return None
 
 
+def _check_client_consent(client):
+    """Check if client has recorded consent (PRIV1 - PIPEDA/PHIPA compliance).
+
+    Returns True if consent is recorded or if the feature is disabled.
+    Returns False if consent is required but missing.
+    """
+    from apps.admin_settings.models import FeatureToggle
+    flags = FeatureToggle.get_all_flags()
+    # Default to True (consent required) if toggle doesn't exist
+    if not flags.get("require_client_consent", True):
+        return True  # Feature disabled, allow notes
+    return client.consent_given_at is not None
+
+
 def _build_target_forms(client, post_data=None):
     """Build TargetNoteForm + MetricValueForms for each active plan target.
 
@@ -166,6 +180,10 @@ def quick_note_create(request, client_id):
     if client is None:
         return HttpResponseForbidden("You do not have access to this client.")
 
+    # PRIV1: Check client consent before allowing note creation
+    if not _check_client_consent(client):
+        return render(request, "notes/consent_required.html", {"client": client})
+
     if request.method == "POST":
         form = QuickNoteForm(request.POST)
         if form.is_valid():
@@ -204,6 +222,10 @@ def note_create(request, client_id):
     client = _get_client_or_403(request, client_id)
     if client is None:
         return HttpResponseForbidden("You do not have access to this client.")
+
+    # PRIV1: Check client consent before allowing note creation
+    if not _check_client_consent(client):
+        return render(request, "notes/consent_required.html", {"client": client})
 
     if request.method == "POST":
         form = FullNoteForm(request.POST)
