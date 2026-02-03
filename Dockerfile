@@ -15,9 +15,12 @@ COPY . .
 # Collect static files (errors shown for debugging)
 RUN FIELD_ENCRYPTION_KEY=dummy-build-key SECRET_KEY=dummy-build-key ALLOWED_HOSTS=* python manage.py collectstatic --noinput --settings=konote.settings.production
 
+# Make entrypoint executable
+RUN chmod +x /app/entrypoint.sh
+
 # Switch to non-root user
 USER konote
 
 EXPOSE 8000
 
-CMD ["gunicorn", "konote.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "120", "--log-level", "debug", "--error-logfile", "-", "--access-logfile", "-", "--capture-output"]
+CMD ["/app/entrypoint.sh"]
