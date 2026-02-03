@@ -26,19 +26,31 @@ Based on usability review and expert panel analysis. See `tasks/usability-review
 
 ### Phase B: Funder Reporting (High Priority)
 
-- [ ] Report aggregation functions — count, avg, min, max by grouping — (RPT3)
-- [ ] Demographic grouping in reports — age range, gender, geography — (RPT4)
-- [ ] Outcome achievement rate calculation — % clients meeting target — (RPT5)
-- [ ] United Way CMT export template — pre-built format — (RPT6)
-- [ ] Fiscal year date range filter — April-March for Canadian nonprofits — (RPT7)
+- [x] Report aggregation functions — count, avg, min, max by grouping — (RPT3)
+- [x] Demographic grouping in reports — age range, gender, geography — (RPT4)
+- [x] Outcome achievement rate calculation — % clients meeting target — (RPT5)
+- [x] Funder Report Template — draft export for funders (customise per funder) — (RPT6)
+- [x] Fiscal year date range filter — April-March for Canadian nonprofits — (RPT7)
 
-### Phase C: Field Data Collection (Medium Priority)
+### Phase C: Documentation for Open-Source Adoption (High Priority)
 
-- [ ] KoBoToolbox import API endpoint — POST /api/field-import/ — (FIELD1)
-- [ ] SharePoint Lists webhook receiver — Power Automate integration — (FIELD2)
-- [ ] Field data import documentation — setup guides for KoBoToolbox/SharePoint — (DOC7)
+See `tasks/documentation-improvement-plan.md` for full rationale.
 
-### Phase D: Self-Service Registration (Medium Priority)
+- [x] Create getting-started.md — complete local dev setup guide — (DOC8)
+- [x] Create security-operations.md — security tests, audit logs, key rotation — (DOC9)
+- [x] Enhance README Quick Start — add key generation commands — (DOC10)
+- [x] Add inline comments to .env.example — explain each variable — (DOC11)
+
+**Phase C.2: Non-Developer Accessibility** — See `tasks/documentation-expert-review.md`
+
+- [ ] Add "What You'll Need" pre-flight checklist to getting-started.md — (DOC12)
+- [ ] Add "What just happened?" explanations after key generation steps — (DOC13)
+- [ ] Add screenshots showing expected terminal outputs — (DOC14)
+- [ ] Add glossary section: terminal, repository, migration, container — (DOC15)
+- [ ] Create "Before You Enter Real Data" checkpoint document — (DOC16)
+- [ ] Fix placeholders to obviously fake values like REPLACE_THIS — (DOC17)
+
+### Phase E: Self-Service Registration (Medium Priority)
 
 Public sign-up forms for programs — parents register kids for sports, adults sign up for classes. See `tasks/self-service-registration-design.md` for full design.
 
@@ -50,20 +62,26 @@ Public sign-up forms for programs — parents register kids for sports, adults s
 - [ ] Duplicate detection — match by email/phone, flag for merge — (REG6)
 - [ ] Capacity limits and deadlines — close registration when full or past date — (REG7)
 
+### Planned Extensions (Build When Requested)
+
+These features are designed but deferred until agencies request them. See expert panel rationale in `tasks/field-data-decision.md`.
+
+- [ ] Field data collection integrations — KoBoToolbox, Forms, or other tools — (FIELD1)
+- [ ] CSV bulk client import — simpler alternative to tool-specific integrations — (IMP1)
+
 ### Explicitly Out of Scope
 
 These features are intentionally excluded. See technical documentation for rationale.
 
 - ~~Calendar/scheduling~~ → Recommend Calendly, Google Calendar, Microsoft Bookings
 - ~~Full document storage~~ → Recommend Google Drive, SharePoint, Dropbox
-- ~~Offline PWA~~ → Use KoBoToolbox or paper forms for field work
+- ~~Offline PWA~~ → Paper forms acceptable; integrations available when needed
 - ~~Multi-tenancy~~ → Fork required for coalition implementations
 
 ## Parking Lot
 
 - [ ] PIPEDA/PHIPA consent workflow — block note entry until client consent recorded — (PRIV1)
 - [ ] GDPR toolkit UI — data export, right to erasure, consent management — (GDPR1)
-- [ ] CSV import of all client data from existing systems — migration tool — (IMP1)
 - [ ] CSV export of all client data for migration to future systems — (EXP1)
 - [ ] Mobile-responsive optimisation pass — (UI1)
 - [ ] First-run setup wizard for new instances — (SETUP1)
@@ -77,6 +95,10 @@ These features are intentionally excluded. See technical documentation for ratio
 
 ## Recently Done
 
+- [x] Create getting-started.md — complete local dev setup with Docker option — 2026-02-03 (DOC8)
+- [x] Create security-operations.md — security tests, audit logs, key rotation — 2026-02-03 (DOC9)
+- [x] Enhance README Quick Start — add key generation commands — 2026-02-03 (DOC10)
+- [x] Add inline comments to .env.example — explain each variable — 2026-02-03 (DOC11)
 - [x] "What KoNote Is and Isn't" documentation page — set scope expectations — 2026-02-03 (DOC6)
 - [x] Show custom fields in read-only mode by default with edit toggle — 2026-02-03 (UX12)
 - [x] Add date-only toggle to event form — 2026-02-03 (UX13)
