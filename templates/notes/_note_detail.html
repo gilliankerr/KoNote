@@ -30,6 +30,7 @@
 
     {% if target_entries %}
     {% for entry in target_entries %}
+    {% if entry.plan_target %}
     <details open>
         <summary>{{ entry.plan_target.name }}</summary>
         {% if entry.notes %}<p>{{ entry.notes }}</p>{% endif %}
@@ -38,15 +39,18 @@
             <thead><tr><th>{{ term.metric|default:"Metric" }}</th><th>Value</th></tr></thead>
             <tbody>
             {% for mv in entry.metric_values.all %}
+            {% if mv.metric_def %}
             <tr>
                 <td>{{ mv.metric_def.name }}{% if mv.metric_def.unit %} ({{ mv.metric_def.unit }}){% endif %}</td>
                 <td>{{ mv.value }}</td>
             </tr>
+            {% endif %}
             {% endfor %}
             </tbody>
         </table>
         {% endif %}
     </details>
+    {% endif %}
     {% endfor %}
     {% endif %}
 

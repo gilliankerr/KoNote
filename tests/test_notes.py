@@ -78,7 +78,19 @@ class NoteViewsTest(TestCase):
         )
         self.assertEqual(resp.status_code, 403)
 
-    def test_admin_can_create_note_for_any_client(self):
+    def test_admin_without_program_role_blocked_from_notes(self):
+        """Admins without program roles cannot access client data (RBAC restriction)."""
+        self.http.login(username="admin", password="pass")
+        resp = self.http.post(
+            f"/notes/client/{self.other_client.pk}/quick/",
+            {"notes_text": "Admin note."},
+        )
+        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(ProgressNote.objects.count(), 0)
+
+    def test_admin_with_program_role_can_create_note(self):
+        """Admins who also have a program role can create notes."""
+        UserProgramRole.objects.create(user=self.admin, program=self.prog_b, role="program_manager")
         self.http.login(username="admin", password="pass")
         resp = self.http.post(
             f"/notes/client/{self.other_client.pk}/quick/",
@@ -190,7 +202,24 @@ class NoteViewsTest(TestCase):
         note.refresh_from_db()
         self.assertEqual(note.status, "default")
 
-    def test_admin_can_cancel_any_note(self):
+    def test_admin_without_program_role_blocked_from_cancel(self):
+        """Admins without program roles cannot cancel notes (RBAC restriction)."""
+        note = ProgressNote.objects.create(
+            client_file=self.client_file, note_type="quick",
+            notes_text="Admin cancel", author=self.staff,
+        )
+        self.http.login(username="admin", password="pass")
+        resp = self.http.post(
+            f"/notes/{note.pk}/cancel/",
+            {"status_reason": "Admin override"},
+        )
+        self.assertEqual(resp.status_code, 403)
+        note.refresh_from_db()
+        self.assertEqual(note.status, "default")
+
+    def test_admin_with_program_role_can_cancel_note(self):
+        """Admins who also have a program role can cancel notes in their programs."""
+        UserProgramRole.objects.create(user=self.admin, program=self.prog, role="program_manager")
         note = ProgressNote.objects.create(
             client_file=self.client_file, note_type="quick",
             notes_text="Admin cancel", author=self.staff,

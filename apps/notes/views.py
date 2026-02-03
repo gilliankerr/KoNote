@@ -1,6 +1,7 @@
 # Phase 4: Progress note views
 """Views for progress notes — quick notes, full notes, timeline, cancellation."""
 import datetime
+import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -9,6 +10,8 @@ from django.db import transaction
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 
 from apps.auth_app.decorators import minimum_role
 from apps.clients.models import ClientFile, ClientProgramEnrolment
@@ -256,38 +259,62 @@ def note_create(request, client_id):
 @minimum_role("staff")
 def note_detail(request, note_id):
     """HTMX partial: expanded view of a single note."""
-    note = get_object_or_404(
-        ProgressNote.objects.select_related("author", "author_program", "template"),
-        pk=note_id,
-    )
-    client = _get_client_or_403(request, note.client_file_id)
-    if client is None:
-        return HttpResponseForbidden("You do not have access to this client.")
+    try:
+        note = get_object_or_404(
+            ProgressNote.objects.select_related("author", "author_program", "template"),
+            pk=note_id,
+        )
+        # Middleware already verified access; this is a redundant safety check
+        client = _get_client_or_403(request, note.client_file_id)
+        if client is None:
+            logger.warning(
+                "Permission denied in note_detail for user=%s note=%s client=%s",
+                request.user.pk, note_id, note.client_file_id
+            )
+            return HttpResponseForbidden("You do not have access to this client.")
 
-    target_entries = (
-        ProgressNoteTarget.objects.filter(progress_note=note)
-        .select_related("plan_target")
-        .prefetch_related("metric_values__metric_def")
-    )
-    return render(request, "notes/_note_detail.html", {
-        "note": note,
-        "client": client,
-        "target_entries": target_entries,
-    })
+        # Filter out any orphaned entries (plan_target deleted outside Django)
+        target_entries = (
+            ProgressNoteTarget.objects.filter(progress_note=note, plan_target__isnull=False)
+            .select_related("plan_target")
+            .prefetch_related("metric_values__metric_def")
+        )
+        return render(request, "notes/_note_detail.html", {
+            "note": note,
+            "client": client,
+            "target_entries": target_entries,
+        })
+    except Exception as e:
+        logger.exception(
+            "Unexpected error in note_detail for user=%s note_id=%s: %s",
+            getattr(request, 'user', None), note_id, e
+        )
+        raise
 
 
 @login_required
 @minimum_role("staff")
 def note_summary(request, note_id):
     """HTMX partial: collapsed summary of a single note (reverses note_detail expand)."""
-    note = get_object_or_404(
-        ProgressNote.objects.select_related("author", "author_program"),
-        pk=note_id,
-    )
-    client = _get_client_or_403(request, note.client_file_id)
-    if client is None:
-        return HttpResponseForbidden("You do not have access to this client.")
-    return render(request, "notes/_note_summary.html", {"note": note, "client": client})
+    try:
+        note = get_object_or_404(
+            ProgressNote.objects.select_related("author", "author_program"),
+            pk=note_id,
+        )
+        client = _get_client_or_403(request, note.client_file_id)
+        if client is None:
+            logger.warning(
+                "Permission denied in note_summary for user=%s note=%s client=%s",
+                request.user.pk, note_id, note.client_file_id
+            )
+            return HttpResponseForbidden("You do not have access to this client.")
+        return render(request, "notes/_note_summary.html", {"note": note, "client": client})
+    except Exception as e:
+        logger.exception(
+            "Unexpected error in note_summary for user=%s note_id=%s: %s",
+            getattr(request, 'user', None), note_id, e
+        )
+        raise
 
 
 @login_required
