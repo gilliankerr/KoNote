@@ -1203,3 +1203,191 @@ msgstr "Aucune soumission d'inscription pour le moment."
 
 msgid "Back to Registration Links"
 msgstr "Retour aux liens d'inscription"
+
+#: apps/admin_settings/views.py
+msgid "Access denied. Admin privileges required."
+msgstr "Acces refuse. Privileges d'administrateur requis."
+
+msgid "Terminology updated."
+msgstr "Terminologie mise a jour."
+
+#, python-format
+msgid "Reset '%(term_key)s' to default."
+msgstr "Reinitialisation de '%(term_key)s' a la valeur par defaut."
+
+#, python-format
+msgid "Feature '%(feature)s' enabled."
+msgstr "Fonctionnalite '%(feature)s' activee."
+
+#, python-format
+msgid "Feature '%(feature)s' disabled."
+msgstr "Fonctionnalite '%(feature)s' desactivee."
+
+msgid "Settings updated."
+msgstr "Parametres mis a jour."
+
+#: apps/admin_settings/views.py - Feature descriptions
+msgid "Programs module"
+msgstr "Module Programmes"
+
+msgid "Custom client fields"
+msgstr "Champs clients personnalises"
+
+msgid "Metric alerts"
+msgstr "Alertes de mesures"
+
+msgid "Event tracking"
+msgstr "Suivi des evenements"
+
+msgid "Funder report exports"
+msgstr "Exportations de rapports pour les bailleurs de fonds"
+
+msgid "Require client consent before notes (PIPEDA/PHIPA)"
+msgstr "Exiger le consentement du client avant les notes (PIPEDA/LPRPS)"
+
+#: apps/admin_settings/views.py - Diagnosis messages
+msgid "NO LIBRARY METRICS! Run: python manage.py seed"
+msgstr "AUCUNE MESURE DE BIBLIOTHEQUE! Executez : python manage.py seed"
+
+msgid "NO METRICS LINKED TO TARGETS! Run: python manage.py seed"
+msgstr "AUCUNE MESURE LIEE AUX CIBLES! Executez : python manage.py seed"
+
+msgid "No progress notes linked to targets. Full notes must record data against plan targets."
+msgstr "Aucune note de suivi liee aux cibles. Les notes completes doivent enregistrer des donnees par rapport aux cibles du plan."
+
+msgid "No metric values recorded. Enter values when creating full notes."
+msgstr "Aucune valeur de mesure enregistree. Entrez des valeurs lors de la creation de notes completes."
+
+#, python-format
+msgid "BUG: %(count)s metric values exist but NO charts would display! Check chart simulation below."
+msgstr "BUG : %(count)s valeurs de mesures existent mais AUCUN graphique ne s'afficherait! Verifiez la simulation des graphiques ci-dessous."
+
+#, python-format
+msgid "Data looks good! %(count)s charts should display."
+msgstr "Les donnees semblent bonnes! %(count)s graphiques devraient s'afficher."
+
+#: templates/admin_settings/diagnose_charts.html
+msgid "Chart Diagnostics"
+msgstr "Diagnostic des graphiques"
+
+msgid "This page helps diagnose why the Analysis tab might show no charts."
+msgstr "Cette page aide a diagnostiquer pourquoi l'onglet Analyse pourrait n'afficher aucun graphique."
+
+msgid "System-wide"
+msgstr "A l'echelle du systeme"
+
+msgid "Library metrics"
+msgstr "Mesures de bibliotheque"
+
+msgid "Missing! Run seed command."
+msgstr "Manquantes! Executez la commande seed."
+
+msgid "OK"
+msgstr "OK"
+
+msgid "PlanTargetMetric links"
+msgstr "Liens PlanTargetMetric"
+
+msgid "None! Metrics not linked to targets."
+msgstr "Aucun! Mesures non liees aux cibles."
+
+#, python-format
+msgid "Client: %(record_id)s"
+msgstr "Client : %(record_id)s"
+
+msgid "Check different client:"
+msgstr "Verifier un autre client :"
+
+msgid "e.g., DEMO-001"
+msgstr "par ex., DEMO-001"
+
+msgid "Check"
+msgstr "Verifier"
+
+msgid "Active targets"
+msgstr "Cibles actives"
+
+#, python-format
+msgid "%(count)s metrics linked"
+msgstr "%(count)s mesures liees"
+
+msgid "ProgressNoteTarget entries"
+msgstr "Entrees ProgressNoteTarget"
+
+msgid "MetricValue entries"
+msgstr "Entrees MetricValue"
+
+#, python-format
+msgid "Client \"%(record_id)s\" not found."
+msgstr "Client \"%(record_id)s\" non trouve."
+
+#, python-format
+msgid "Chart Simulation (%(count)s would display)"
+msgstr "Simulation des graphiques (%(count)s s'afficheraient)"
+
+msgid "This shows exactly what the Analysis tab queries for each target/metric combination:"
+msgstr "Cela montre exactement ce que l'onglet Analyse interroge pour chaque combinaison cible/mesure :"
+
+msgid "Target"
+msgstr "Cible"
+
+msgid "Metric"
+msgstr "Mesure"
+
+msgid "Values Found"
+msgstr "Valeurs trouvees"
+
+msgid "Numeric Values"
+msgstr "Valeurs numeriques"
+
+msgid "Would Show Chart?"
+msgstr "Afficherait un graphique?"
+
+msgid "YES"
+msgstr "OUI"
+
+msgid "NO"
+msgstr "NON"
+
+msgid "No target/metric combinations found for this client."
+msgstr "Aucune combinaison cible/mesure trouvee pour ce client."
+
+msgid "How Charts Work"
+msgstr "Comment fonctionnent les graphiques"
+
+msgid "must be seeded (run"
+msgstr "doivent etre initialisees (executez"
+
+msgid "Targets"
+msgstr "Cibles"
+
+msgid "must have metrics assigned (in the Plan tab)"
+msgstr "doivent avoir des mesures assignees (dans l'onglet Plan)"
+
+msgid "must be created (not quick notes)"
+msgstr "doivent etre creees (pas des notes rapides)"
+
+msgid "Metric values"
+msgstr "Valeurs de mesures"
+
+msgid "must be recorded when creating full notes"
+msgstr "doivent etre enregistrees lors de la creation de notes completes"
+
+msgid "Back to Admin Settings"
+msgstr "Retour aux parametres d'administration"
+
+#: templates/admin_settings/terminology.html
+msgid "English"
+msgstr "Anglais"
+
+msgid "Default:"
+msgstr "Par defaut :"
+
+msgid "English term for"
+msgstr "Terme anglais pour"
+
+msgid "French term for"
+msgstr "Terme francais pour"
+
+msgid "Leave blank to use English"
+msgstr "Laissez vide pour utiliser l'anglais"

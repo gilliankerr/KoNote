@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _lazy
 
 from .forms import FeatureToggleForm, InstanceSettingsForm, TerminologyForm
 from .models import DEFAULT_TERMS, FeatureToggle, InstanceSetting, TerminologyOverride
@@ -13,7 +14,7 @@ def admin_required(view_func):
     """Decorator: 403 if user is not an admin."""
     def wrapper(request, *args, **kwargs):
         if not request.user.is_admin:
-            return HttpResponseForbidden("Access denied. Admin privileges required.")
+            return HttpResponseForbidden(_("Access denied. Admin privileges required."))
         return view_func(request, *args, **kwargs)
     wrapper.__name__ = view_func.__name__
     return wrapper
@@ -57,7 +58,7 @@ def terminology(request):
         )
         if form.is_valid():
             form.save()
-            messages.success(request, "Terminology updated.")
+            messages.success(request, _("Terminology updated."))
             return redirect("admin_settings:terminology")
 
     # Build table data: key, defaults, current values, is_overridden
@@ -85,19 +86,19 @@ def terminology_reset(request, term_key):
     """Delete an override, reverting to default."""
     if request.method == "POST":
         TerminologyOverride.objects.filter(term_key=term_key).delete()
-        messages.success(request, f"Reset '{term_key}' to default.")
+        messages.success(request, _("Reset '%(term_key)s' to default.") % {"term_key": term_key})
     return redirect("admin_settings:terminology")
 
 
 # --- Feature Toggles ---
 
 DEFAULT_FEATURES = {
-    "programs": "Programs module",
-    "custom_fields": "Custom client fields",
-    "alerts": "Metric alerts",
-    "events": "Event tracking",
-    "funder_reports": "Funder report exports",
-    "require_client_consent": "Require client consent before notes (PIPEDA/PHIPA)",
+    "programs": _lazy("Programs module"),
+    "custom_fields": _lazy("Custom client fields"),
+    "alerts": _lazy("Metric alerts"),
+    "events": _lazy("Event tracking"),
+    "funder_reports": _lazy("Funder report exports"),
+    "require_client_consent": _lazy("Require client consent before notes (PIPEDA/PHIPA)"),
 }
 
 # Features that default to enabled (most default to disabled)
@@ -116,8 +117,10 @@ def features(request):
                 feature_key=feature_key,
                 defaults={"is_enabled": action == "enable"},
             )
-            state = "enabled" if action == "enable" else "disabled"
-            messages.success(request, f"Feature '{feature_key}' {state}.")
+            if action == "enable":
+                messages.success(request, _("Feature '%(feature)s' enabled.") % {"feature": feature_key})
+            else:
+                messages.success(request, _("Feature '%(feature)s' disabled.") % {"feature": feature_key})
             return redirect("admin_settings:features")
 
     # Build feature list with current state
@@ -147,7 +150,7 @@ def instance_settings(request):
         form = InstanceSettingsForm(request.POST, current_settings=current_settings)
         if form.is_valid():
             form.save()
-            messages.success(request, "Settings updated.")
+            messages.success(request, _("Settings updated."))
             return redirect("admin_settings:instance_settings")
     else:
         form = InstanceSettingsForm(current_settings=current_settings)
@@ -237,22 +240,22 @@ def diagnose_charts(request):
     diagnosis = None
     diagnosis_type = "info"
     if lib_metrics == 0:
-        diagnosis = "NO LIBRARY METRICS! Run: python manage.py seed"
+        diagnosis = _("NO LIBRARY METRICS! Run: python manage.py seed")
         diagnosis_type = "error"
     elif total_ptm == 0:
-        diagnosis = "NO METRICS LINKED TO TARGETS! Run: python manage.py seed"
+        diagnosis = _("NO METRICS LINKED TO TARGETS! Run: python manage.py seed")
         diagnosis_type = "error"
     elif client_data and client_data["pnt_count"] == 0:
-        diagnosis = "No progress notes linked to targets. Full notes must record data against plan targets."
+        diagnosis = _("No progress notes linked to targets. Full notes must record data against plan targets.")
         diagnosis_type = "warning"
     elif client_data and client_data["mv_count"] == 0:
-        diagnosis = "No metric values recorded. Enter values when creating full notes."
+        diagnosis = _("No metric values recorded. Enter values when creating full notes.")
         diagnosis_type = "warning"
     elif charts_would_show == 0 and client_data and client_data["mv_count"] > 0:
-        diagnosis = f"BUG: {client_data['mv_count']} metric values exist but NO charts would display! Check chart simulation below."
+        diagnosis = _("BUG: %(count)s metric values exist but NO charts would display! Check chart simulation below.") % {"count": client_data['mv_count']}
         diagnosis_type = "error"
     elif charts_would_show > 0:
-        diagnosis = f"Data looks good! {charts_would_show} charts should display."
+        diagnosis = _("Data looks good! %(count)s charts should display.") % {"count": charts_would_show}
         diagnosis_type = "success"
 
     return render(request, "admin_settings/diagnose_charts.html", {
