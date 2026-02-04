@@ -24,6 +24,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Build-time commands use konote.settings.build (no env vars needed)
+# Validate translations first - gives clear error messages if there are problems
+RUN python scripts/validate_translations.py
 RUN python manage.py compilemessages --settings=konote.settings.build
 RUN python manage.py collectstatic --noinput --settings=konote.settings.build
 
