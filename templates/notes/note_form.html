@@ -30,10 +30,12 @@
         <legend>{% blocktrans with targets=term.target_plural|default:"targets" %}Which {{ targets }} did you work on?{% endblocktrans %}</legend>
         <small>{% blocktrans with targets=term.target_plural|default:"targets" %}Tick the {{ targets }} you want to record against. Only selected ones will appear below.{% endblocktrans %}</small>
         {% for tf in target_forms %}
-        <label>
+        <label class="checkbox-item">
             <input type="checkbox" class="target-selector" data-target-id="{{ tf.target.pk }}">
-            {{ tf.target.name }}
-            <small class="secondary">— {{ tf.target.plan_section.name }}</small>
+            <span class="checkbox-label-text">
+                {{ tf.target.name }}
+                <small class="secondary">{{ tf.target.plan_section.name }}</small>
+            </span>
         </label>
         {% endfor %}
     </fieldset>
@@ -81,13 +83,30 @@
     <small>{% trans "(optional — adds to your home page reminders)" %}</small>
     {% if form.follow_up_date.errors %}<small class="error" role="alert">{{ form.follow_up_date.errors.0 }}</small>{% endif %}
 
-    <!-- Sticky footer with consent and save -->
-    <div class="sticky-form-footer{% if form.consent_confirmed.errors %} has-error{% endif %}" role="region" aria-label="{% trans 'Consent and save' %}">
+    <!-- Participant reflection section -->
+    <div class="participant-reflection" role="region" aria-labelledby="reflection-heading">
+        <h3 id="reflection-heading">
+            <span class="reflection-icon" aria-hidden="true">💬</span>
+            {% blocktrans with client=term.client|default:"Participant" %}{{ client }}'s Reflection{% endblocktrans %}
+        </h3>
+        <p class="reflection-prompt">
+            {% trans "Ask:" %} <em>"{% trans "What's one thing you're taking away from today?" %}"</em>
+        </p>
+        <label for="{{ form.participant_reflection.id_for_label }}" class="visually-hidden">
+            {% blocktrans with client=term.client|default:"Participant" %}{{ client }}'s response{% endblocktrans %}
+        </label>
+        {{ form.participant_reflection }}
+        {% if form.participant_reflection.errors %}<small class="error" role="alert">{{ form.participant_reflection.errors.0 }}</small>{% endif %}
+        <small class="reflection-help">{% trans "Record their words, not your interpretation. Even a brief phrase captures their voice." %}</small>
+    </div>
+
+    <!-- Sticky footer with confirmation and save -->
+    <div class="sticky-form-footer{% if form.consent_confirmed.errors %} has-error{% endif %}" role="region" aria-label="{% trans 'Confirm and save' %}">
         <div class="sticky-form-footer-inner">
             <div class="consent-section">
                 <label for="{{ form.consent_confirmed.id_for_label }}">
                     {{ form.consent_confirmed }}
-                    {% trans "I confirm verbal consent was obtained" %}
+                    {% trans "We created this note together" %}
                 </label>
                 {% if form.consent_confirmed.errors %}
                 <small class="error" role="alert">{{ form.consent_confirmed.errors.0 }}</small>

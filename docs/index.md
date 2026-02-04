@@ -1,4 +1,4 @@
-# KoNote Documentation
+# KoNote2 Documentation
 
 Welcome! Find what you need based on what you're trying to do.
 
@@ -8,18 +8,27 @@ Welcome! Find what you need based on what you're trying to do.
 
 | I want to... | Start here |
 |--------------|------------|
-| **Understand what KoNote is** | [README](../README.md) — overview, features, tech stack |
-| **Set up KoNote for the first time** | [Deploying KoNote](deploying-konote.md) — local setup, cloud hosting |
-| **Configure my agency's settings** | [Administering KoNote](administering-konote.md) — terminology, programs, users, backups |
-| **Learn how to use KoNote daily** | [Using KoNote](using-konote.md) — staff training guide |
+| **Get quick help with a task** | [Help](help.md) — in-app help and quick reference |
+| **Understand what KoNote2 is** | [README](../README.md) — overview, features, tech stack |
+| **Understand the design philosophy** | [Design Principles](design-principles.md) — research-based approach to participant engagement |
+| **Set up KoNote2 for the first time** | [Deploying KoNote2](deploying-konote.md) — local setup, cloud hosting |
+| **Configure my agency's settings** | [Administering KoNote2](administering-konote.md) — terminology, programs, users, backups |
+| **Learn how to use KoNote2 daily** | [Using KoNote2](using-konote.md) — staff training guide |
 | **Understand the technical architecture** | [Technical Reference](technical-documentation.md) — data models, security, APIs |
 
 ---
 
 ## Quick Links
 
+### For Everyone
+
+- [Help & Quick Reference](help.md) — find answers fast
+- [Keyboard Shortcuts](help.md#keyboard-shortcuts)
+- [Troubleshooting](help.md#troubleshooting)
+
 ### For Administrators
 
+- [Privacy Policy Template](privacy-policy-template.md) — customise before going live
 - [Agency Setup](administering-konote.md#agency-configuration) — terminology, features, programs
 - [User Management](administering-konote.md#user-management) — creating accounts, assigning roles
 - [Backup & Restore](administering-konote.md#backup-and-restore) — protecting your data
@@ -46,9 +55,12 @@ Welcome! Find what you need based on what you're trying to do.
 
 | Document | Audience | Purpose |
 |----------|----------|---------|
-| [Deploying KoNote](deploying-konote.md) | IT / Technical lead | Get KoNote running (local or cloud) |
-| [Administering KoNote](administering-konote.md) | Program managers / Admins | Configure and maintain your instance |
-| [Using KoNote](using-konote.md) | Front-line staff | Day-to-day usage guide |
+| [Help](help.md) | All users | Quick reference and in-app help |
+| [Design Principles](design-principles.md) | All users | Research-based approach to participant-centred practice |
+| [Deploying KoNote2](deploying-konote.md) | IT / Technical lead | Get KoNote2 running (local or cloud) |
+| [Privacy Policy Template](privacy-policy-template.md) | Admins / Legal | Customise for your organisation before going live |
+| [Administering KoNote2](administering-konote.md) | Program managers / Admins | Configure and maintain your instance |
+| [Using KoNote2](using-konote.md) | Front-line staff | Day-to-day usage guide |
 | [Technical Reference](technical-documentation.md) | Developers | Architecture, data models, customisation |
 
 ---

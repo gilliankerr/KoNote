@@ -266,6 +266,7 @@ def note_create(request, client_id):
                     author_program=_get_author_program(request.user, client),
                     template=form.cleaned_data.get("template"),
                     summary=form.cleaned_data.get("summary", ""),
+                    participant_reflection=form.cleaned_data.get("participant_reflection", ""),
                     follow_up_date=form.cleaned_data.get("follow_up_date"),
                 )
                 session_date = form.cleaned_data.get("session_date")

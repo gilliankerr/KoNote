@@ -80,6 +80,11 @@ class ProgressNote(models.Model):
     )
     notes_text = models.TextField(default="", blank=True, help_text="Content for quick notes.")
     summary = models.TextField(default="", blank=True)
+    participant_reflection = models.TextField(
+        default="",
+        blank=True,
+        help_text="The participant's own words about what they're taking away from the session.",
+    )
     backdate = models.DateTimeField(null=True, blank=True, help_text="Override date if note is for a past session.")
     begin_timestamp = models.DateTimeField(null=True, blank=True)
     follow_up_date = models.DateField(

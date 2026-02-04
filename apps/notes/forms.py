@@ -9,10 +9,10 @@ class QuickNoteForm(forms.ModelForm):
 
     consent_confirmed = forms.BooleanField(
         required=True,
-        label="I confirm verbal consent was obtained",
-        help_text="The client has given verbal consent to record notes about this session.",
+        label="We created this note together",
+        help_text="Confirm you reviewed this note with the participant.",
         error_messages={
-            "required": "You must confirm consent was obtained before saving this note.",
+            "required": "Please confirm you reviewed this note together.",
         },
     )
 
@@ -66,12 +66,21 @@ class FullNoteForm(forms.Form):
         label="Follow up by",
         help_text="(optional — adds to your home page reminders)",
     )
+    participant_reflection = forms.CharField(
+        widget=forms.Textarea(attrs={
+            "rows": 2,
+            "placeholder": "Their words...",
+        }),
+        required=False,
+        label="Participant's reflection",
+        help_text="Record their words, not your interpretation.",
+    )
     consent_confirmed = forms.BooleanField(
         required=True,
-        label="I confirm verbal consent was obtained",
-        help_text="The client has given verbal consent to record notes about this session.",
+        label="We created this note together",
+        help_text="Confirm you reviewed this note with the participant.",
         error_messages={
-            "required": "You must confirm consent was obtained before saving this note.",
+            "required": "Please confirm you reviewed this note together.",
         },
     )
 

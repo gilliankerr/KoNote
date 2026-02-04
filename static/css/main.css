@@ -709,6 +709,38 @@ label {
     font-weight: 500;
     margin-bottom: var(--kn-space-xs);
 }
+
+/* ---- Checkbox list items (target selection) ---- */
+label.checkbox-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--kn-space-sm);
+    padding: var(--kn-space-base) 0;
+    border-bottom: 1px solid var(--kn-border-light);
+    margin-bottom: 0;
+    line-height: 1.5;
+    cursor: pointer;
+}
+label.checkbox-item:last-of-type {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+label.checkbox-item input[type="checkbox"] {
+    margin: 0.25rem 0 0 0;
+    flex-shrink: 0;
+    width: 1.125rem;
+    height: 1.125rem;
+}
+.checkbox-label-text {
+    flex: 1;
+}
+.checkbox-label-text small.secondary {
+    display: block;
+    margin-top: 0.125rem;
+    font-weight: 400;
+    color: var(--kn-text-muted);
+    font-size: 0.8125rem;
+}
 .form-row {
     margin-bottom: var(--kn-space-base);
 }
@@ -1710,4 +1742,87 @@ article[aria-label="notification"].fading-out {
     margin-left: var(--kn-space-xs);
     font-weight: 600;
     vertical-align: middle;
+}
+
+/* ============================================
+   PARTICIPANT REFLECTION SECTION
+   ============================================
+   A visually distinct area that signals this is
+   the participant's space in the record. Designed
+   to prompt collaborative documentation.
+   ============================================ */
+
+.participant-reflection {
+    background: var(--kn-primary-subtle);
+    border: 1px solid var(--kn-border-light);
+    border-left: 4px solid var(--kn-primary);
+    border-radius: var(--kn-radius-card);
+    padding: var(--kn-space-lg);
+    margin: var(--kn-space-xl) 0;
+}
+
+.participant-reflection h3 {
+    margin: 0 0 var(--kn-space-sm) 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--kn-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--kn-space-sm);
+}
+
+.participant-reflection .reflection-icon {
+    font-size: 1.25rem;
+}
+
+.participant-reflection .reflection-prompt {
+    font-size: 0.9375rem;
+    color: var(--kn-text-secondary);
+    margin: 0 0 var(--kn-space-base) 0;
+    line-height: 1.5;
+}
+
+.participant-reflection .reflection-prompt em {
+    color: var(--kn-text);
+    font-style: normal;
+    font-weight: 500;
+}
+
+.participant-reflection textarea {
+    background: var(--kn-card-bg);
+    border-color: var(--kn-border);
+    margin-bottom: var(--kn-space-xs);
+}
+
+.participant-reflection textarea:focus {
+    border-color: var(--kn-primary);
+    box-shadow: 0 0 0 2px var(--kn-primary-subtle);
+}
+
+.participant-reflection textarea::placeholder {
+    font-style: italic;
+    color: var(--kn-text-muted);
+}
+
+.participant-reflection .reflection-help {
+    display: block;
+    font-size: 0.8125rem;
+    color: var(--kn-text-muted);
+    margin-top: var(--kn-space-xs);
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+    .participant-reflection {
+        padding: var(--kn-space-base);
+        margin: var(--kn-space-lg) 0;
+    }
+
+    .participant-reflection h3 {
+        font-size: 0.9375rem;
+    }
+
+    .participant-reflection .reflection-prompt {
+        font-size: 0.875rem;
+    }
 }

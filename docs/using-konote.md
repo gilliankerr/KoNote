@@ -1,6 +1,6 @@
 # Quick Start for Staff
 
-Welcome to KoNote! This guide covers the everyday tasks you'll do as a staff member: finding clients, writing notes, and tracking progress.
+Welcome to KoNote2! This guide covers the everyday tasks you'll do as a staff member: finding clients, writing notes, and tracking progress.
 
 > **Who is this for?** Case managers, counsellors, support workers, and other front-line staff who work directly with clients.
 >
@@ -25,14 +25,14 @@ Welcome to KoNote! This guide covers the everyday tasks you'll do as a staff mem
 
 ### If your agency uses Microsoft (Azure AD)
 
-1. Go to your KoNote web address (provided by your admin).
+1. Go to your KoNote2 web address (provided by your admin).
 2. Click **Login with Azure AD**.
 3. Enter your work email and password.
 4. You're in!
 
 ### If your agency uses local login
 
-1. Go to your KoNote web address.
+1. Go to your KoNote2 web address.
 2. Enter your **username** and **password**.
 3. Click **Login**.
 
@@ -113,7 +113,7 @@ Click any tab name to switch views. The page updates without a full reload.
 
 ## Writing Progress Notes
 
-Progress notes record what happened during your interaction with a client. KoNote offers two types:
+Progress notes record what happened during your interaction with a client. KoNote2 offers two types:
 
 ### Quick Note (for brief updates)
 
@@ -123,7 +123,7 @@ Use this for simple check-ins or short updates.
 2. Go to the **Notes** tab.
 3. Click **+ Quick Note**.
 4. Type your note in the text box.
-5. (Optional) Check **Verbal consent obtained** if the client agreed to the note.
+5. Check **We created this note together** to confirm you reviewed it with them.
 6. Click **Save**.
 
 ### Full Progress Note (for detailed sessions)
@@ -135,12 +135,33 @@ Use this when you need to document a structured session with targets and metrics
 3. Click **+ Progress Note**.
 4. Fill in:
    - **Session date** — Defaults to today; change if you're documenting a past session
-   - **Summary** — A brief overview of the session
-   - **Target sections** — For each plan target, add notes about what you discussed and enter any metric values
-5. (Optional) Check **Verbal consent obtained**.
-6. Click **Save Note**.
+   - **Target sections** — Select which targets you worked on and enter notes and metric values for each
+   - **Summary** — A brief overview of the session (optional)
+5. **Capture their reflection** — Ask them the question shown on screen and record their response in their own words.
+6. Check **We created this note together**.
+7. Click **Save Note**.
 
 **Tip:** You only need to fill in the targets you actually worked on. Leave others blank.
+
+### Why Participant Engagement Matters
+
+You might wonder why KoNote2 prompts you to ask the participant a question and capture their response. There are three good reasons:
+
+1. **It strengthens the relationship.** When you ask "What's one thing you're taking away from today?", you're showing that their perspective matters. This simple act builds trust.
+
+2. **It helps them process.** Articulating what they learned or felt reinforces their own progress. Research shows that people who put their insights into words retain them better.
+
+3. **It makes better records.** Notes that include the participant's own voice are more meaningful than notes written entirely from your perspective. If there's ever a review or audit, their words show genuine engagement.
+
+This isn't extra paperwork — it's turning the last few minutes of your session into something valuable for both of you.
+
+### Tips for Participant Reflection
+
+- **Keep it brief.** Even a single sentence captures their voice: *"I realised I've been too hard on myself."*
+- **Use their exact words.** Don't paraphrase — write what they actually said.
+- **It's okay if they say little.** Sometimes "I feel a bit better" is all there is, and that's fine.
+- **Make it natural.** Work it into the conversation: "Before we wrap up, what's one thing you're taking away from today?"
+- **Show them the screen.** When you're comfortable, document together so they see their words going into the record.
 
 ### Recording metrics
 
@@ -280,5 +301,5 @@ Staff can view plans but typically cannot edit them. Plan changes are made by pr
 
 ---
 
-**Version 1.0** — KoNote Web
-Last updated: 2026-02-03
+**Version 2.0** — KoNote2
+Last updated: 2026-02-04
