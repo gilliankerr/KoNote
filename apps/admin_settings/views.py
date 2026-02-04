@@ -151,3 +151,81 @@ def instance_settings(request):
     else:
         form = InstanceSettingsForm(current_settings=current_settings)
     return render(request, "admin_settings/instance_settings.html", {"form": form})
+
+
+# --- Chart Diagnostics ---
+
+@login_required
+@admin_required
+def diagnose_charts(request):
+    """Diagnostic view to check why charts might be empty."""
+    from apps.clients.models import ClientFile
+    from apps.notes.models import MetricValue, ProgressNote, ProgressNoteTarget
+    from apps.plans.models import MetricDefinition, PlanTarget, PlanTargetMetric
+
+    record_id = request.GET.get("client", "DEMO-001")
+
+    # Gather diagnostic data
+    lib_metrics = MetricDefinition.objects.filter(is_library=True).count()
+    total_ptm = PlanTargetMetric.objects.count()
+
+    client = ClientFile.objects.filter(record_id=record_id).first()
+    client_data = None
+
+    if client:
+        targets = PlanTarget.objects.filter(client_file=client, status="default")
+        target_data = []
+        for t in targets:
+            ptm_count = PlanTargetMetric.objects.filter(plan_target=t).count()
+            target_data.append({"name": t.name, "metric_count": ptm_count})
+
+        full_notes = ProgressNote.objects.filter(
+            client_file=client, note_type="full", status="default"
+        ).count()
+        quick_notes = ProgressNote.objects.filter(
+            client_file=client, note_type="quick", status="default"
+        ).count()
+        pnt_count = ProgressNoteTarget.objects.filter(
+            progress_note__client_file=client
+        ).count()
+        mv_count = MetricValue.objects.filter(
+            progress_note_target__progress_note__client_file=client
+        ).count()
+
+        client_data = {
+            "record_id": record_id,
+            "targets": target_data,
+            "target_count": targets.count(),
+            "full_notes": full_notes,
+            "quick_notes": quick_notes,
+            "pnt_count": pnt_count,
+            "mv_count": mv_count,
+        }
+
+    # Determine diagnosis
+    diagnosis = None
+    diagnosis_type = "info"
+    if lib_metrics == 0:
+        diagnosis = "NO LIBRARY METRICS! Run: python manage.py seed"
+        diagnosis_type = "error"
+    elif total_ptm == 0:
+        diagnosis = "NO METRICS LINKED TO TARGETS! Run: python manage.py seed"
+        diagnosis_type = "error"
+    elif client_data and client_data["pnt_count"] == 0:
+        diagnosis = "No progress notes linked to targets. Full notes must record data against plan targets."
+        diagnosis_type = "warning"
+    elif client_data and client_data["mv_count"] == 0:
+        diagnosis = "No metric values recorded. Enter values when creating full notes."
+        diagnosis_type = "warning"
+    elif client_data and client_data["mv_count"] > 0:
+        diagnosis = f"Data looks good! {client_data['mv_count']} metric values exist. Charts should display."
+        diagnosis_type = "success"
+
+    return render(request, "admin_settings/diagnose_charts.html", {
+        "lib_metrics": lib_metrics,
+        "total_ptm": total_ptm,
+        "client_data": client_data,
+        "record_id": record_id,
+        "diagnosis": diagnosis,
+        "diagnosis_type": diagnosis_type,
+    })

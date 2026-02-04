@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Chart Diagnostics — {{ site.product_name|default:"KoNote" }}{% endblock %}
+
+{% block content %}
+<h2>Chart Diagnostics</h2>
+<p>This page helps diagnose why the Analysis tab might show no charts.</p>
+
+<h3>System-wide</h3>
+<table>
+    <tbody>
+        <tr>
+            <th>Library metrics</th>
+            <td>{{ lib_metrics }}</td>
+            <td>{% if lib_metrics == 0 %}<mark>Missing! Run seed command.</mark>{% else %}OK{% endif %}</td>
+        </tr>
+        <tr>
+            <th>PlanTargetMetric links</th>
+            <td>{{ total_ptm }}</td>
+            <td>{% if total_ptm == 0 %}<mark>None! Metrics not linked to targets.</mark>{% else %}OK{% endif %}</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>Client: {{ record_id }}</h3>
+<form method="get" style="margin-bottom: 1rem;">
+    <label for="client">Check different client:</label>
+    <input type="text" name="client" id="client" value="{{ record_id }}" placeholder="e.g., DEMO-001">
+    <button type="submit">Check</button>
+</form>
+
+{% if client_data %}
+<table>
+    <tbody>
+        <tr>
+            <th>Active targets</th>
+            <td>{{ client_data.target_count }}</td>
+        </tr>
+        {% for target in client_data.targets %}
+        <tr>
+            <td style="padding-left: 2rem;">{{ target.name }}</td>
+            <td>{{ target.metric_count }} metrics linked</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <th>Full notes</th>
+            <td>{{ client_data.full_notes }}</td>
+        </tr>
+        <tr>
+            <th>Quick notes</th>
+            <td>{{ client_data.quick_notes }}</td>
+        </tr>
+        <tr>
+            <th>ProgressNoteTarget entries</th>
+            <td>{{ client_data.pnt_count }}</td>
+        </tr>
+        <tr>
+            <th>MetricValue entries</th>
+            <td>{{ client_data.mv_count }}</td>
+        </tr>
+    </tbody>
+</table>
+{% else %}
+<p><mark>Client "{{ record_id }}" not found.</mark></p>
+{% endif %}
+
+<h3>Diagnosis</h3>
+{% if diagnosis %}
+<article class="{% if diagnosis_type == 'error' %}pico-background-red-500{% elif diagnosis_type == 'warning' %}pico-background-yellow-500{% else %}pico-background-green-500{% endif %}">
+    <p><strong>{{ diagnosis }}</strong></p>
+</article>
+{% endif %}
+
+<h3>How Charts Work</h3>
+<ol>
+    <li><strong>Library metrics</strong> must be seeded (run <code>python manage.py seed</code>)</li>
+    <li><strong>Targets</strong> must have metrics assigned (in the Plan tab)</li>
+    <li><strong>Full notes</strong> must be created (not quick notes)</li>
+    <li><strong>Metric values</strong> must be recorded when creating full notes</li>
+</ol>
+
+<p><a href="{% url 'admin_settings:dashboard' %}">&larr; Back to Admin Settings</a></p>
+{% endblock %}

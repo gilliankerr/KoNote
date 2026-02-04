@@ -9,4 +9,5 @@ urlpatterns = [
     path("terminology/reset/<str:term_key>/", views.terminology_reset, name="terminology_reset"),
     path("features/", views.features, name="features"),
     path("instance/", views.instance_settings, name="instance_settings"),
+    path("diagnose-charts/", views.diagnose_charts, name="diagnose_charts"),
 ]
