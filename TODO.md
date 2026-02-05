@@ -84,7 +84,6 @@ These features are intentionally excluded. See technical documentation for ratio
 - [ ] First-run setup wizard — Claude skill + import command — See `tasks/setup-wizard-design.md` (SETUP1)
 - [ ] Encrypted search optimisation (search hash field) for large client lists — (PERF1)
 - [ ] Bulk operations for discharge, assign, export — (UX17)
-- [ ] Keyboard shortcuts and command palette — (UX18)
 
 ## Recently Done
 
