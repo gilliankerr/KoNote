@@ -2,7 +2,7 @@
 Application-level PII encryption using Fernet (AES-128-CBC + HMAC-SHA256).
 
 Usage in models:
-    from konote.encryption import encrypt_field, decrypt_field
+    from KoNote2.encryption import encrypt_field, decrypt_field
 
     class MyModel(models.Model):
         _name_encrypted = models.BinaryField()

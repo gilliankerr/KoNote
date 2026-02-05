@@ -1,6 +1,6 @@
-# KoNote Web — Agency Setup Guide
+# KoNote2 Web — Agency Setup Guide
 
-Welcome to KoNote Web! This guide walks you through initial configuration after your deployment goes live. No technical knowledge required — all setup is done through the web interface.
+Welcome to KoNote2 Web! This guide walks you through initial configuration after your deployment goes live. No technical knowledge required — all setup is done through the web interface.
 
 > **Estimated time:** 30–45 minutes for a basic setup; longer if you plan to customise terminology, create many programs, or build detailed templates.
 
@@ -28,10 +28,10 @@ Welcome to KoNote Web! This guide walks you through initial configuration after 
 
 If your agency uses Microsoft Azure AD (Office 365):
 
-1. Navigate to the KoNote Web login page.
+1. Navigate to the KoNote2 Web login page.
 2. Click **Login with Azure AD**.
 3. Enter your work email and password.
-4. KoNote Web automatically creates your account on first login.
+4. KoNote2 Web automatically creates your account on first login.
 
 Your account is created as a **Staff user** by default. An admin must promote you to **Admin** if you need to configure the system.
 
@@ -59,7 +59,7 @@ Instance settings control your organisation's branding and behaviour.
 
 | Field | What it does | Example |
 |-------|---|---|
-| **Product Name** | Name shown in the header and page titles. | "Youth Housing Program — KoNote" |
+| **Product Name** | Name shown in the header and page titles. | "Youth Housing Program — KoNote2" |
 | **Support Email** | Displayed in the footer or help pages so users know who to contact. | support@agency.ca |
 | **Logo URL** | Web address of your organisation's logo image. | https://example.com/logo.png |
 | **Date Format** | How dates appear throughout the system. Choose one: ISO (2026-02-02), US (02/02/2026), or other formats. | 2026-02-02 |
@@ -74,7 +74,7 @@ Changes apply immediately to all logged-in users on their next page reload.
 
 ## Customise Terminology
 
-KoNote uses standard terms out of the box — "Client", "Program", "Plan", "Progress Note", etc. You can change these to match your organisation's vocabulary.
+KoNote2 uses standard terms out of the box — "Client", "Program", "Plan", "Progress Note", etc. You can change these to match your organisation's vocabulary.
 
 ### Why customise?
 
@@ -164,7 +164,7 @@ After creating a program, you can assign staff members to it.
 
 ## Create User Accounts
 
-Users log in to KoNote with either Azure AD or local credentials. As an admin, you create staff accounts and assign them roles and programs.
+Users log in to KoNote2 with either Azure AD or local credentials. As an admin, you create staff accounts and assign them roles and programs.
 
 ### Steps
 
@@ -427,9 +427,9 @@ When you're ready to add your first client:
 
 ### A Note on Client Search and Encryption
 
-KoNote encrypts all personally identifiable information (PII) — names, contact details, etc. — using Fernet (AES) encryption. This keeps client data secure, but it means the database cannot search encrypted fields directly using SQL.
+KoNote2 encrypts all personally identifiable information (PII) — names, contact details, etc. — using Fernet (AES) encryption. This keeps client data secure, but it means the database cannot search encrypted fields directly using SQL.
 
-Instead, when you search for a client, KoNote loads accessible client records into memory and filters them there. **This works well for agencies with up to approximately 2,000 clients.** Most small and mid-sized nonprofits will never notice a difference.
+Instead, when you search for a client, KoNote2 loads accessible client records into memory and filters them there. **This works well for agencies with up to approximately 2,000 clients.** Most small and mid-sized nonprofits will never notice a difference.
 
 If your agency expects to serve significantly more than 2,000 clients, a search hash optimisation can be added to improve performance. This is tracked as **PERF1** in the project roadmap.
 
@@ -462,5 +462,5 @@ If your agency expects to serve significantly more than 2,000 clients, a search 
 
 ---
 
-**Version 1.0** — KoNote Web
+**Version 1.0** — KoNote2 Web
 Last updated: 2026-02-02

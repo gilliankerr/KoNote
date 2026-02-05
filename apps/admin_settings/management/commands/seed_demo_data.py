@@ -1,8 +1,14 @@
 """
-Seed rich demo data for the 5 demo clients (DEMO-001 through DEMO-005).
+Seed rich demo data for demo clients (DEMO-001 through DEMO-010).
 
-Creates plans, progress notes with metric recordings, events, and alerts
-so that charts and reports have meaningful data to display.
+Creates:
+- Plans with sections and targets linked to metrics
+- Progress notes with metric recordings following realistic trends
+- Events (intake, follow-ups, referrals, crises)
+- Alerts for clients with notable situations
+- Custom field values (contact info, emergency contacts, referral sources)
+
+This gives charts and reports meaningful data to display.
 
 Run with: python manage.py seed_demo_data
 Only runs when DEMO_MODE is enabled.
@@ -14,7 +20,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from apps.clients.models import ClientFile
+from apps.clients.models import ClientDetailValue, ClientFile, CustomFieldDefinition
 from apps.events.models import Alert, Event, EventType
 from apps.notes.models import MetricValue, ProgressNote, ProgressNoteTarget
 from apps.plans.models import (
@@ -565,6 +571,134 @@ CLIENT_EVENTS = {
     ],
 }
 
+# Custom field values for demo clients (Contact, Emergency, Referral)
+# Field names must match those in seed_intake_fields.py
+CLIENT_CUSTOM_FIELDS = {
+    "DEMO-001": {
+        # Contact Information
+        "Preferred Name": "Jordan",
+        "Primary Phone": "(416) 555-0123",
+        "Email": "jordan.rivera@example.com",
+        "Preferred Contact Method": "Text message",
+        "Best Time to Contact": "Afternoon (12pm-5pm)",
+        "Preferred Language of Service": "English",
+        # Emergency Contact
+        "Emergency Contact Name": "Maria Rivera",
+        "Emergency Contact Relationship": "Parent/Guardian",
+        "Emergency Contact Phone": "(416) 555-0124",
+        # Referral
+        "Referral Source": "Community agency",
+        "Referring Agency Name": "Downtown Community Health Centre",
+    },
+    "DEMO-002": {
+        "Preferred Name": "Taylor",
+        "Primary Phone": "(647) 555-0234",
+        "Preferred Contact Method": "Phone call",
+        "Best Time to Contact": "Morning (9am-12pm)",
+        "Preferred Language of Service": "English",
+        "Emergency Contact Name": "Alex Chen",
+        "Emergency Contact Relationship": "Friend",
+        "Emergency Contact Phone": "(647) 555-0235",
+        "Referral Source": "Shelter/Housing provider",
+        "Referring Agency Name": "Covenant House",
+        # Accessibility
+        "Accommodation Needs": "Prefers written appointment reminders",
+    },
+    "DEMO-003": {
+        "Preferred Name": "Avery",
+        "Primary Phone": "(905) 555-0345",
+        "Email": "avery.j@example.com",
+        "Preferred Contact Method": "Email",
+        "Best Time to Contact": "Any time",
+        "Preferred Language of Service": "English",
+        "Emergency Contact Name": "Jamie Johnson",
+        "Emergency Contact Relationship": "Sibling",
+        "Emergency Contact Phone": "(905) 555-0346",
+        "Referral Source": "Hospital/Health provider",
+        "Referring Agency Name": "CAMH",
+    },
+    "DEMO-004": {
+        "Primary Phone": "(416) 555-0456",
+        "Preferred Contact Method": "Text message",
+        "Best Time to Contact": "Evening (5pm-8pm)",
+        "Preferred Language of Service": "English",
+        "Emergency Contact Name": "Priya Patel",
+        "Emergency Contact Relationship": "Parent/Guardian",
+        "Emergency Contact Phone": "(416) 555-0457",
+        "Referral Source": "School/Education",
+        "Referring Agency Name": "Toronto District School Board",
+    },
+    "DEMO-005": {
+        "Preferred Name": "Sam",
+        "Primary Phone": "(647) 555-0567",
+        "Email": "sam.williams@example.com",
+        "Preferred Contact Method": "Email",
+        "Best Time to Contact": "Any time",
+        "Preferred Language of Service": "English",
+        "Emergency Contact Name": "Drew Williams",
+        "Emergency Contact Relationship": "Spouse/Partner",
+        "Emergency Contact Phone": "(647) 555-0568",
+        "Referral Source": "Self-referral",
+    },
+    "DEMO-006": {
+        "Primary Phone": "(416) 555-0678",
+        "Preferred Contact Method": "Text message",
+        "Best Time to Contact": "Afternoon (12pm-5pm)",
+        "Preferred Language of Service": "English",
+        "Emergency Contact Name": "Rosa Martinez",
+        "Emergency Contact Relationship": "Parent/Guardian",
+        "Emergency Contact Phone": "(416) 555-0679",
+        "Referral Source": "School/Education",
+    },
+    "DEMO-007": {
+        "Preferred Name": "Maya",
+        "Primary Phone": "(905) 555-0789",
+        "Preferred Contact Method": "Phone call",
+        "Best Time to Contact": "Morning (9am-12pm)",
+        "Preferred Language of Service": "English",
+        "Emergency Contact Name": "David Thompson",
+        "Emergency Contact Relationship": "Parent/Guardian",
+        "Emergency Contact Phone": "(905) 555-0790",
+        "Referral Source": "Hospital/Health provider",
+        "Accommodation Needs": "Needs quiet space for meetings; social anxiety",
+    },
+    "DEMO-008": {
+        "Primary Phone": "(647) 555-0890",
+        "Preferred Contact Method": "Text message",
+        "Best Time to Contact": "Evening (5pm-8pm)",
+        "Preferred Language of Service": "English",
+        "Emergency Contact Name": "Lisa Nguyen",
+        "Emergency Contact Relationship": "Parent/Guardian",
+        "Emergency Contact Phone": "(647) 555-0891",
+        "Referral Source": "Social services (OW/ODSP)",
+    },
+    "DEMO-009": {
+        "Preferred Name": "Zara",
+        "Primary Phone": "(416) 555-0901",
+        "Email": "zara.a@example.com",
+        "Preferred Contact Method": "Email",
+        "Best Time to Contact": "Afternoon (12pm-5pm)",
+        "Preferred Language of Service": "English",
+        "Emergency Contact Name": "Fatima Ahmed",
+        "Emergency Contact Relationship": "Parent/Guardian",
+        "Emergency Contact Phone": "(416) 555-0902",
+        "Referral Source": "Self-referral",
+    },
+    "DEMO-010": {
+        "Preferred Name": "Liam",
+        "Primary Phone": "(905) 555-1012",
+        "Email": "liam.oconnor@example.com",
+        "Preferred Contact Method": "Phone call",
+        "Best Time to Contact": "Any time",
+        "Preferred Language of Service": "English",
+        "Emergency Contact Name": "Patrick O'Connor",
+        "Emergency Contact Relationship": "Parent/Guardian",
+        "Emergency Contact Phone": "(905) 555-1013",
+        "Referral Source": "Community agency",
+        "Referring Agency Name": "Youth Employment Services",
+    },
+}
+
 
 class Command(BaseCommand):
     help = "Populate demo clients with plans, notes, events, and alerts for charts/reports."
@@ -788,5 +922,22 @@ class Command(BaseCommand):
                     author=author,
                     author_program=program,
                 )
+
+            # ----------------------------------------------------------
+            # 5. Populate custom field values (contact, emergency, referral)
+            # ----------------------------------------------------------
+            custom_values = CLIENT_CUSTOM_FIELDS.get(record_id, {})
+            for field_name, value in custom_values.items():
+                try:
+                    field_def = CustomFieldDefinition.objects.get(name=field_name)
+                    cdv, _ = ClientDetailValue.objects.get_or_create(
+                        client_file=client,
+                        field_def=field_def,
+                    )
+                    cdv.set_value(value)
+                    cdv.save()
+                except CustomFieldDefinition.DoesNotExist:
+                    # Field may not exist if seed_intake_fields wasn't run
+                    pass
 
         self.stdout.write(self.style.SUCCESS("  Demo rich data seeded successfully (10 clients across 2 programs)."))

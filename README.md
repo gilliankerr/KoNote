@@ -1,18 +1,18 @@
 # KoNote2
 
-A secure, web-based client outcome management system for nonprofits. Agencies define desired outcomes with clients, record progress notes with metrics, and visualise progress over time. Each organisation runs their own instance with full control over configuration, terminology, and user access.
+A secure, web-based Participant Outcome Management system for nonprofits. Agencies define desired outcomes with clients, record progress notes with metrics, and visualise progress over time. Each organisation runs their own instance with full control over configuration, terminology, and user access.
 
 ---
 
 ## Origins & Acknowledgements
 
-**KoNote2** is the second generation of [KoNote](https://github.com/LogicalOutcomes/KoNote), an open-source outcome tracking system originally created by **Dr. David Gotlib**. David, a former board member of [LogicalOutcomes](https://github.com/LogicalOutcomes), donated the original KoNote to the organisation and made it open source. LogicalOutcomes is a Canadian nonprofit focused on evaluation consulting and building organisational learning capacity.
+**KoNote2** is the second generation of [KoNote2](https://github.com/LogicalOutcomes/KoNote2), an open-source outcome tracking system originally created by **Dr. David Gotlib**. David, a former board member of [LogicalOutcomes](https://github.com/LogicalOutcomes), donated the original KoNote2 to the organisation and made it open source. LogicalOutcomes is a Canadian nonprofit focused on evaluation consulting and building organisational learning capacity.
 
-The original KoNote was designed to help mental health professionals and social service agencies track client outcomes — "notes that count." As Dr. Gotlib put it, traditional EMRs are often "over-engineered and cluttered." KoNote took the opposite approach: a simple interface designed for frontline workers, not IT departments.
+The original KoNote2 was designed to help mental health professionals and social service agencies track client outcomes — "notes that count." As Dr. Gotlib put it, traditional EMRs are often "over-engineered and cluttered." KoNote2 took the opposite approach: a simple interface designed for frontline workers, not IT departments.
 
 ### Why KoNote2?
 
-When we implemented KoNote in nonprofit organisations, we discovered something important: **every nonprofit is different**. Each agency had:
+When we implemented KoNote2 in nonprofit organisations, we discovered something important: **every nonprofit is different**. Each agency had:
 
 - **Different vocabulary** — "clients" vs. "participants" vs. "members" vs. "service users"
 - **Different workflows** — some wanted detailed structured notes, others needed quick check-ins
@@ -134,9 +134,9 @@ For the research basis behind these design choices, see [Design Principles](docs
 
 ## Quick Start
 
-> **Not a developer?** That's fine. If you've installed WordPress or used Excel competently, you can set up KoNote2. Our [Deploying KoNote2](docs/deploying-konote.md) guide explains every step in plain language.
+> **Not a developer?** That's fine. If you've installed WordPress or used Excel competently, you can set up KoNote2. Our [Deploying KoNote2](docs/deploying-KoNote2.md) guide explains every step in plain language.
 >
-> **Important:** Running your own instance means taking responsibility for client data security. KoNote2 has strong protections built in, but you need to configure them correctly. See the [security responsibility section](docs/deploying-konote.md#understanding-your-responsibility) to understand what that involves.
+> **Important:** Running your own instance means taking responsibility for client data security. KoNote2 has strong protections built in, but you need to configure them correctly. See the [security responsibility section](docs/deploying-KoNote2.md#understanding-your-responsibility) to understand what that involves.
 
 ### Try It Instantly (Docker)
 
@@ -160,8 +160,8 @@ Then open http://localhost:8000 in your browser.
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-org/konote-web.git
-   cd konote-web
+   git clone https://github.com/your-org/KoNote2-web.git
+   cd KoNote2-web
    ```
 
 2. **Create a virtual environment**
@@ -197,13 +197,13 @@ Then open http://localhost:8000 in your browser.
    ```
    SECRET_KEY=paste-your-generated-key-here
    FIELD_ENCRYPTION_KEY=paste-your-generated-key-here
-   DATABASE_URL=postgresql://konote:password@localhost:5432/konote
-   AUDIT_DATABASE_URL=postgresql://audit_writer:password@localhost:5432/konote_audit
+   DATABASE_URL=postgresql://KoNote2:password@localhost:5432/KoNote2
+   AUDIT_DATABASE_URL=postgresql://audit_writer:password@localhost:5432/KoNote2_audit
    AUTH_MODE=local
    ```
 
-   > **Getting `konote.E001` error?** Your encryption key is missing or invalid.
-   > See [Deploying KoNote](docs/deploying-konote.md#troubleshooting) for help.
+   > **Getting `KoNote2.E001` error?** Your encryption key is missing or invalid.
+   > See [Deploying KoNote2](docs/deploying-KoNote2.md#troubleshooting) for help.
 
 5. **Run migrations**
    ```bash
@@ -227,12 +227,12 @@ Visit `http://localhost:8000` to access the application.
 
 ## Deployment
 
-KoNote2 is designed to run on your own infrastructure. See [Deploying KoNote2](docs/deploying-konote.md) for complete instructions, including:
+KoNote2 is designed to run on your own infrastructure. See [Deploying KoNote2](docs/deploying-KoNote2.md) for complete instructions, including:
 
-- **[Local Development (Docker)](docs/deploying-konote.md#local-development-docker)** — Try KoNote2 locally
-- **[Railway](docs/deploying-konote.md#deploy-to-railway)** — Platform-as-a-Service, easy setup
-- **[Azure](docs/deploying-konote.md#deploy-to-azure)** — Azure Container Apps + managed PostgreSQL
-- **[Elestio](docs/deploying-konote.md#deploy-to-elestio)** — Docker Compose on managed hosting
+- **[Local Development (Docker)](docs/deploying-KoNote2.md#local-development-docker)** — Try KoNote2 locally
+- **[Railway](docs/deploying-KoNote2.md#deploy-to-railway)** — Platform-as-a-Service, easy setup
+- **[Azure](docs/deploying-KoNote2.md#deploy-to-azure)** — Azure Container Apps + managed PostgreSQL
+- **[Elestio](docs/deploying-KoNote2.md#deploy-to-elestio)** — Docker Compose on managed hosting
 
 ### Docker
 
@@ -259,7 +259,7 @@ After deployment, configure your instance through the web interface:
 5. **Templates** — build reusable plan and note structures
 6. **Custom Fields** — add agency-specific intake fields
 
-See [Administering KoNote](docs/administering-konote.md) for detailed instructions.
+See [Administering KoNote2](docs/administering-KoNote2.md) for detailed instructions.
 
 ---
 
@@ -269,9 +269,9 @@ Start with the [Documentation Index](docs/index.md) to find what you need.
 
 | Document | Audience | Description |
 |----------|----------|-------------|
-| [Deploying KoNote2](docs/deploying-konote.md) | IT / Technical lead | Local setup, cloud deployments, PDF setup |
-| [Administering KoNote2](docs/administering-konote.md) | Program managers / Admins | Configuration, users, backups, security |
-| [Using KoNote2](docs/using-konote.md) | Front-line staff | Day-to-day usage guide |
+| [Deploying KoNote2](docs/deploying-KoNote2.md) | IT / Technical lead | Local setup, cloud deployments, PDF setup |
+| [Administering KoNote2](docs/administering-KoNote2.md) | Program managers / Admins | Configuration, users, backups, security |
+| [Using KoNote2](docs/using-KoNote2.md) | Front-line staff | Day-to-day usage guide |
 | [Technical Reference](docs/technical-documentation.md) | Developers | Architecture, security, data models |
 
 ---
@@ -286,7 +286,7 @@ KoNote2 is designed for sensitive client data:
 - **Session security** — Database-backed sessions, configurable timeout
 - **HTTP security** — HSTS, CSP, X-Frame-Options, secure cookies
 
-See [Administering KoNote2](docs/administering-konote.md#security-operations) for security operations and [Technical Reference](docs/technical-documentation.md) for architecture details.
+See [Administering KoNote2](docs/administering-KoNote2.md#security-operations) for security operations and [Technical Reference](docs/technical-documentation.md) for architecture details.
 
 ---
 
@@ -323,8 +323,8 @@ This project is open source. See [LICENSE](LICENSE) for details.
 
 ## Acknowledgements
 
-- **[Dr. David Gotlib](https://www.canhealth.com/2016/11/02/physician-created-konote-makes-it-easy-to-chart-notes-and-numbers/)** — Creator of the original KoNote, former LogicalOutcomes board member, who donated the software and made it open source
-- **[LogicalOutcomes](https://github.com/LogicalOutcomes)** — Stewards of the original KoNote project
+- **[Dr. David Gotlib](https://www.canhealth.com/2016/11/02/physician-created-KoNote2-makes-it-easy-to-chart-notes-and-numbers/)** — Creator of the original KoNote2, former LogicalOutcomes board member, who donated the software and made it open source
+- **[LogicalOutcomes](https://github.com/LogicalOutcomes)** — Stewards of the original KoNote2 project
 - **[Pico CSS](https://picocss.com/)** — Minimal CSS framework
 - **[HTMX](https://htmx.org/)** — HTML extensions for dynamic interactions
 - **[Chart.js](https://www.chartjs.org/)** — Progress visualisation
@@ -335,4 +335,4 @@ This project is open source. See [LICENSE](LICENSE) for details.
 
 - **Documentation issues**: Open an issue in this repository
 - **Security vulnerabilities**: Please report privately (see SECURITY.md)
-- **General questions**: See [Administering KoNote2](docs/administering-konote.md)
+- **General questions**: See [Administering KoNote2](docs/administering-KoNote2.md)

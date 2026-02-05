@@ -1,10 +1,10 @@
-# French translations for KoNote Web
+# French translations for KoNote2 Web
 # Copyright (C) 2024
-# This file is distributed under the same license as the KoNote Web package.
+# This file is distributed under the same license as the KoNote2 Web package.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: KoNote Web 1.0\n"
+"Project-Id-Version: KoNote2 Web 1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-01 00:00+0000\n"
 "PO-Revision-Date: 2024-01-01 00:00+0000\n"
@@ -88,7 +88,7 @@ msgstr "Administrateur"
 msgid "Home"
 msgstr "Accueil"
 
-msgid "Client Outcome Management"
+msgid "Participant Outcome Management"
 msgstr "Gestion des resultats clients"
 
 msgid "Name or ID..."

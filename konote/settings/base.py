@@ -1,5 +1,5 @@
 """
-Base Django settings for KoNote Web.
+Base Django settings for KoNote2 Web.
 Shared across all environments.
 """
 import os
@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # KoNote apps
+    # KoNote2 apps
     "apps.auth_app",
     "apps.programs",
     "apps.clients",
@@ -62,19 +62,19 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "konote.middleware.safe_locale.SafeLocaleMiddleware",
+    "KoNote2.middleware.safe_locale.SafeLocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "konote.middleware.program_access.ProgramAccessMiddleware",
-    "konote.middleware.terminology.TerminologyMiddleware",
-    "konote.middleware.audit.AuditMiddleware",
+    "KoNote2.middleware.program_access.ProgramAccessMiddleware",
+    "KoNote2.middleware.terminology.TerminologyMiddleware",
+    "KoNote2.middleware.audit.AuditMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "csp.middleware.CSPMiddleware",
 ]
 
-ROOT_URLCONF = "konote.urls"
+ROOT_URLCONF = "KoNote2.urls"
 
 TEMPLATES = [
     {
@@ -88,18 +88,18 @@ TEMPLATES = [
                 "django.template.context_processors.i18n",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "konote.context_processors.terminology",
-                "konote.context_processors.features",
-                "konote.context_processors.instance_settings",
-                "konote.context_processors.user_roles",
-                "konote.context_processors.document_storage",
-                "konote.context_processors.pending_submissions",
+                "KoNote2.context_processors.terminology",
+                "KoNote2.context_processors.features",
+                "KoNote2.context_processors.instance_settings",
+                "KoNote2.context_processors.user_roles",
+                "KoNote2.context_processors.document_storage",
+                "KoNote2.context_processors.pending_submissions",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = "konote.wsgi.application"
+WSGI_APPLICATION = "KoNote2.wsgi.application"
 
 # Custom user model
 AUTH_USER_MODEL = "auth_app.User"
@@ -117,7 +117,7 @@ DATABASES = {
     ) | {"OPTIONS": {"connect_timeout": 10}},
 }
 
-DATABASE_ROUTERS = ["konote.db_router.AuditRouter"]
+DATABASE_ROUTERS = ["KoNote2.db_router.AuditRouter"]
 
 # Password hashing — Argon2 first
 PASSWORD_HASHERS = [
@@ -222,7 +222,7 @@ AZURE_REDIRECT_URI = os.environ.get("AZURE_REDIRECT_URI", "")
 # OpenRouter AI (optional — features hidden when key is empty)
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "anthropic/claude-sonnet-4-20250514")
-OPENROUTER_SITE_URL = os.environ.get("OPENROUTER_SITE_URL", "https://konote.app")
+OPENROUTER_SITE_URL = os.environ.get("OPENROUTER_SITE_URL", "https://KoNote2.app")
 
 # Logging — errors to stderr so they appear in Railway logs
 LOGGING = {

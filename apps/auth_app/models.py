@@ -6,7 +6,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 from django.utils import timezone
 
-from konote.encryption import decrypt_field, encrypt_field
+from KoNote2.encryption import decrypt_field, encrypt_field
 
 
 class UserManager(BaseUserManager):

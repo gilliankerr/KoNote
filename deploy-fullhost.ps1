@@ -2,7 +2,7 @@
 # Deploy KoNote2 to FullHost using the Jelastic REST API
 #
 # Usage:
-#   .\deploy-fullhost.ps1 -ApiToken "your-token" -EnvName "konote-prod" -OrgName "My Nonprofit"
+#   .\deploy-fullhost.ps1 -ApiToken "your-token" -EnvName "KoNote2-prod" -OrgName "My Nonprofit"
 #
 # Prerequisites:
 #   1. FullHost account: https://app.vap.fullhost.cloud/
@@ -74,12 +74,12 @@ $nodesJson = @"
         "flexibleCloudlets": 8,
         "displayName": "KoNote2 App",
         "docker": {
-            "image": "ghcr.io/gilliankerr/konote-redux:fullhost-latest"
+            "image": "ghcr.io/gilliankerr/KoNote2-redux:fullhost-latest"
         },
         "env": {
             "JELASTIC_ENVIRONMENT": "true",
-            "DJANGO_SETTINGS_MODULE": "konote.settings.production",
-            "KONOTE_MODE": "production",
+            "DJANGO_SETTINGS_MODULE": "KoNote2.settings.production",
+            "KoNote2_MODE": "production",
             "AUTH_MODE": "local",
             "PORT": "8000"
         }
@@ -94,8 +94,8 @@ $nodesJson = @"
             "image": "postgres:15-alpine"
         },
         "env": {
-            "POSTGRES_DB": "konote",
-            "POSTGRES_USER": "konote",
+            "POSTGRES_DB": "KoNote2",
+            "POSTGRES_USER": "KoNote2",
             "POSTGRES_PASSWORD": "$DbPassword"
         }
     },
@@ -109,7 +109,7 @@ $nodesJson = @"
             "image": "postgres:15-alpine"
         },
         "env": {
-            "POSTGRES_DB": "konote_audit",
+            "POSTGRES_DB": "KoNote2_audit",
             "POSTGRES_USER": "audit_writer",
             "POSTGRES_PASSWORD": "$AuditDbPassword"
         }
@@ -182,8 +182,8 @@ Write-Host "Step 3: Configuring application environment variables..." -Foregroun
 $appVars = @{
     SECRET_KEY = $SecretKey
     FIELD_ENCRYPTION_KEY = $EncryptionKey
-    DATABASE_URL = "postgresql://konote:$DbPassword@$($dbNode.intIP):5432/konote"
-    AUDIT_DATABASE_URL = "postgresql://audit_writer:$AuditDbPassword@$($auditDbNode.intIP):5432/konote_audit"
+    DATABASE_URL = "postgresql://KoNote2:$DbPassword@$($dbNode.intIP):5432/KoNote2"
+    AUDIT_DATABASE_URL = "postgresql://audit_writer:$AuditDbPassword@$($auditDbNode.intIP):5432/KoNote2_audit"
     ALLOWED_HOSTS = $envDomain
     ORG_NAME = $OrgName
     DEFAULT_CLIENT_TERM = $ClientTerm

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% if editing %}{% blocktrans with client=term.client|default:"Client" %}Edit {{ client }}{% endblocktrans %}{% else %}{% blocktrans with client=term.client|default:"Client" %}New {{ client }}{% endblocktrans %}{% endif %} — {{ site.product_name|default:"KoNote" }}{% endblock %}
+{% block title %}{% if editing %}{% blocktrans with client=term.client|default:"Client" %}Edit {{ client }}{% endblocktrans %}{% else %}{% blocktrans with client=term.client|default:"Client" %}New {{ client }}{% endblocktrans %}{% endif %} — {{ site.product_name|default:"KoNote2" }}{% endblock %}
 
 {% block content %}
 {% include "_breadcrumbs.html" %}

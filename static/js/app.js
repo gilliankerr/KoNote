@@ -1,4 +1,4 @@
-/* KoNote Web — minimal vanilla JS for interactions */
+/* KoNote2 Web — minimal vanilla JS for interactions */
 
 // Enable script execution in HTMX 2.0 swapped content (needed for Chart.js in Analysis tab)
 // This must be set before any HTMX swaps occur
@@ -202,7 +202,7 @@ document.addEventListener("click", function (event) {
 // Saves form data to localStorage as user types, restores on page load
 (function () {
     var AUTOSAVE_DELAY = 1000; // Save 1 second after user stops typing
-    var STORAGE_PREFIX = "konote_draft_";
+    var STORAGE_PREFIX = "KoNote2_draft_";
 
     // Debounce helper
     function debounce(fn, delay) {

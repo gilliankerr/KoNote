@@ -8,7 +8,7 @@ from apps.clients.models import (
     ClientFile, ClientProgramEnrolment, CustomFieldGroup,
     CustomFieldDefinition, ClientDetailValue,
 )
-import konote.encryption as enc_module
+import KoNote2.encryption as enc_module
 
 TEST_KEY = Fernet.generate_key().decode()
 

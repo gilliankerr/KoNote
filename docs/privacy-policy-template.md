@@ -1,0 +1,356 @@
+# Privacy Policy Template for KoNote2
+
+> **Setup Instructions:** This privacy policy template must be customised by each organisation before deploying KoNote2. Replace all `[PLACEHOLDER]` values with your organisation's specific information. Review the entire document with your privacy officer or legal counsel before publishing.
+
+---
+
+# Privacy Policy — [ORGANISATION NAME]
+
+**Last Updated:** [DATE]
+**Effective Date:** [DATE]
+**Data Controller:** [ORGANISATION NAME]
+
+---
+
+## 1. Introduction
+
+This Privacy Policy describes how [ORGANISATION NAME] ("we," "us," or "our") collects, uses, stores, and protects personal information through our client management system. This policy applies to all users of the system, including staff members, administrators, and the clients whose information is recorded.
+
+We comply with the *Personal Information Protection and Electronic Documents Act* (PIPEDA) and applicable provincial privacy legislation.
+
+---
+
+## 2. Information We Collect
+
+### 2.1 Client Information
+
+We collect personal information about clients to deliver and track services:
+
+| Data Category | Examples | Classification |
+|---------------|----------|----------------|
+| **Identifiers** | Name, date of birth, client ID | Directly identifying PII |
+| **Contact Information** | Address, phone number, email address | Directly identifying PII |
+| **Demographic Data** | Age, gender, language preference | Indirectly identifying |
+| **Service Records** | Programme enrolment, case notes, progress metrics | Sensitive service data |
+| **Consent Records** | Consent forms, consent dates, scope of consent | Legal records |
+| **Custom Fields** | Organisation-defined fields (varies by programme) | Variable sensitivity |
+
+### 2.2 Staff and User Information
+
+| Data Category | Examples | Purpose |
+|---------------|----------|---------|
+| **Account Credentials** | Email address, hashed password (local auth only) | Authentication |
+| **Identity Provider Data** | Azure AD profile (name, email, object ID) | SSO authentication |
+| **Access Logs** | Login timestamps, IP addresses, user agent | Security auditing |
+| **Activity Records** | Actions performed, records accessed | Audit trail |
+
+### 2.3 Technical Data
+
+- Browser type and version
+- Operating system
+- Session identifiers (cookies)
+- Request timestamps
+- Error logs (anonymised where possible)
+
+---
+
+## 3. How We Protect Your Information
+
+### 3.1 Encryption at Rest
+
+All personally identifiable information (PII) is encrypted before storage using **Fernet symmetric encryption**, which implements:
+
+- **Algorithm:** AES-128 in CBC mode
+- **Authentication:** HMAC using SHA-256
+- **Key Derivation:** Keys derived from a master secret using HKDF
+- **Key Storage:** Encryption keys stored in environment variables, isolated from the database and source code
+
+**Encrypted fields include:**
+- Client first name, last name
+- Contact information (address, phone, email)
+- Any custom fields marked as PII by administrators
+
+**Technical note:** Because PII is encrypted at the application layer, database-level searches on these fields are not possible. Client search operations decrypt permitted records in application memory and filter there. This architecture is designed for deployments with up to approximately 2,000 active clients.
+
+### 3.2 Encryption in Transit
+
+All data transmitted between your browser and our servers is encrypted using:
+
+- **Protocol:** TLS 1.2 or TLS 1.3 (depending on hosting platform configuration)
+- **Certificate:** Minimum 2048-bit RSA or ECDSA certificates
+- **HSTS:** HTTP Strict Transport Security enabled
+
+> **Hosting Note:** TLS configuration depends on your hosting platform (Azure, Railway, Elest.io, or self-hosted). Ensure your platform is configured to enforce HTTPS and disable older TLS versions.
+
+### 3.3 Password Security
+
+For users authenticating with local accounts (not SSO):
+
+- **Hashing Algorithm:** Argon2id (winner of the Password Hashing Competition)
+- **Parameters:** Memory cost 64 MB, time cost 3 iterations, parallelism 4
+- **Salting:** Unique 16-byte random salt per password
+- **Rehashing:** Passwords automatically rehashed if security parameters are upgraded
+
+### 3.4 Database Security
+
+- **Database Engine:** PostgreSQL 16
+- **Connection Security:** SSL/TLS required for all database connections
+- **Access Control:** Role-based database permissions; application uses a restricted service account
+- **Separation:** Audit logs stored in a separate database from application data
+- **Backups:** [DESCRIBE YOUR BACKUP PROCEDURES AND ENCRYPTION]
+
+> **Hosting Note:** Database security configuration varies by hosting platform. Document your specific backup procedures, encryption methods, and data centre locations.
+
+### 3.5 Application Security
+
+- **Session Management:** Secure, HTTP-only, SameSite cookies; sessions expire after configurable inactivity period
+- **CSRF Protection:** All state-changing requests require valid CSRF tokens
+- **Content Security Policy:** Strict CSP headers to prevent XSS attacks
+- **Input Validation:** All user input validated server-side using Django forms
+- **SQL Injection Prevention:** Parameterised queries via Django ORM
+- **Rate Limiting:** Authentication endpoints rate-limited to prevent brute force attacks
+
+---
+
+## 4. Access Control
+
+### 4.1 Role-Based Access Control (RBAC)
+
+Access to client information is controlled through a role-based permission system:
+
+| Role | Access Level |
+|------|--------------|
+| **System Administrator** | Full system configuration; no client data access by default |
+| **Agency Administrator** | Manage users, programmes, settings; configurable client access |
+| **Programme Manager** | Full access to assigned programme(s) and their clients |
+| **Staff** | Access limited to assigned clients and programmes |
+| **Read-Only** | View-only access to assigned records |
+
+### 4.2 Client Assignment
+
+Staff can only access client records when explicitly assigned. Assignment can be:
+- **Direct:** Individual staff-to-client assignment
+- **Programme-based:** Access to all clients in assigned programmes
+- **Team-based:** Access through team membership
+
+### 4.3 Administrative Access
+
+Administrative functions (user management, system configuration, terminology settings) are restricted to administrative routes and protected by middleware that verifies administrator role membership.
+
+---
+
+## 5. Audit Logging
+
+### 5.1 What We Log
+
+All access to and modifications of client data are recorded:
+
+| Event Type | Data Recorded |
+|------------|---------------|
+| **Authentication** | User ID, timestamp, IP address, success/failure, method (SSO/local) |
+| **Record Access** | User ID, client ID, timestamp, access type (view/edit) |
+| **Data Changes** | User ID, record ID, field changed, previous and new values (encrypted), timestamp |
+| **Permission Changes** | User ID, target user, permissions granted/revoked, timestamp |
+| **Export Events** | User ID, export type, record count, timestamp |
+
+### 5.2 Log Protection
+
+- Audit logs are stored in a **separate PostgreSQL database** with independent access controls
+- Log entries are append-only; application accounts cannot modify or delete logs
+- Logs are retained for **[RETENTION PERIOD - e.g., 7 years]** in accordance with regulatory requirements
+- Log access is restricted to designated compliance personnel
+
+### 5.3 Log Review
+
+Audit logs are reviewed **[FREQUENCY - e.g., monthly]** for:
+- Unusual access patterns
+- Failed authentication attempts
+- Bulk data exports
+- Access outside normal business hours
+
+---
+
+## 6. Hosting and Data Location
+
+> **Important:** Each organisation hosts their own instance of KoNote2 on infrastructure they select and control. Complete this section based on your hosting choices.
+
+### 6.1 Hosting Platform
+
+**Platform:** [YOUR HOSTING PLATFORM - e.g., Azure, Railway, Elest.io, self-hosted]
+**Data Centre Location:** [COUNTRY/REGION]
+**Provider Certifications:** [e.g., SOC 2 Type II, ISO 27001, if applicable]
+
+### 6.2 Data Residency
+
+All data, including:
+- Client records
+- User accounts
+- Audit logs
+- Encrypted backups
+
+is stored in **[COUNTRY/REGION]**.
+
+> **Canadian Organisations:** If PIPEDA compliance requires Canadian data residency, ensure your hosting platform stores data in Canadian data centres.
+
+### 6.3 Subprocessors
+
+[LIST ANY THIRD-PARTY SERVICES THAT PROCESS DATA ON YOUR BEHALF]
+
+| Service | Purpose | Data Shared | Location |
+|---------|---------|-------------|----------|
+| [Hosting provider] | Infrastructure | All application data | [Location] |
+| [Backup provider, if separate] | Backup storage | Encrypted backups | [Location] |
+
+---
+
+## 7. Third-Party Authentication (If Applicable)
+
+> **Complete this section if using Azure AD SSO. Delete if using local authentication only.**
+
+### 7.1 Azure Active Directory (SSO)
+
+If your organisation uses Azure AD single sign-on:
+
+- **Data Shared with Microsoft:** Authentication requests
+- **Data Received:** Authentication token, user profile (email, display name), group memberships (if configured)
+- **Data Stored Locally:** Azure AD object ID (for account linking), email, display name
+- **Microsoft's Privacy Policy:** https://privacy.microsoft.com
+
+---
+
+## 8. Cookies and Session Management
+
+### 8.1 Essential Cookies
+
+We use only essential cookies required for the application to function:
+
+| Cookie Name | Purpose | Duration |
+|-------------|---------|----------|
+| `sessionid` | Maintains your login session | [SESSION DURATION - e.g., 8 hours of inactivity] |
+| `csrftoken` | Prevents cross-site request forgery attacks | 1 year |
+
+### 8.2 No Tracking Cookies
+
+We do not use:
+- Advertising cookies
+- Third-party tracking cookies
+- Analytics cookies that share data with external parties
+
+---
+
+## 9. Data Retention
+
+| Data Type | Retention Period | Rationale |
+|-----------|------------------|-----------|
+| **Active Client Records** | Duration of service + [X years] | Service delivery and regulatory compliance |
+| **Closed Client Records** | [X years] after closure | Statutory retention requirements |
+| **Audit Logs** | [X years] | Compliance and incident investigation |
+| **User Accounts** | Duration of employment + [X months] | Access management |
+| **Session Data** | [X hours] after last activity | Security |
+| **Error Logs** | [X days] | Troubleshooting |
+
+> **Note:** Retention periods should align with your organisation's record retention policy and applicable regulations (e.g., funder requirements, professional standards).
+
+### 9.1 Data Deletion
+
+After retention periods expire, data is securely deleted:
+- Database records permanently deleted with verification
+- Encrypted backups rotated according to backup retention schedule
+- Deletion logged in audit system
+
+---
+
+## 10. Your Rights Under PIPEDA
+
+You have the right to:
+
+1. **Access** — Request a copy of your personal information we hold
+2. **Correction** — Request correction of inaccurate information
+3. **Withdrawal of Consent** — Withdraw consent for specific uses (where consent is the legal basis)
+4. **Complaint** — File a complaint with the Office of the Privacy Commissioner of Canada
+
+### 10.1 For Clients
+
+If you are a client whose information is recorded in this system, contact us at **[CONTACT EMAIL]** to:
+- Request access to your records
+- Request corrections to inaccurate information
+- Ask questions about how your information is used
+- Withdraw consent (subject to legal and service requirements)
+
+### 10.2 For Staff
+
+Contact your system administrator or **[PRIVACY OFFICER EMAIL]** for:
+- Access to your employment-related data
+- Questions about workplace privacy
+
+### 10.3 Response Time
+
+We respond to access requests within **30 days** as required by PIPEDA. If we need additional time, we will notify you of the extension and the reasons.
+
+---
+
+## 11. Data Breach Response
+
+In the event of a data breach involving personal information:
+
+1. **Containment** — Immediate action to stop ongoing breach and secure systems
+2. **Assessment** — Determine scope, affected individuals, and risk of significant harm
+3. **Notification** — If there is a real risk of significant harm:
+   - Notify affected individuals as soon as feasible
+   - Report to the Office of the Privacy Commissioner of Canada
+   - Notify other regulators as required by law
+4. **Documentation** — Maintain records of all breaches regardless of notification requirement
+5. **Remediation** — Implement measures to prevent recurrence
+
+### 11.1 Breach Contact
+
+Report suspected breaches to: **[SECURITY CONTACT EMAIL]**
+
+---
+
+## 12. Changes to This Policy
+
+We may update this Privacy Policy to reflect changes in our practices or legal requirements. When we make changes:
+
+- This page will be updated with a new "Last Updated" date
+- Users will be notified of material changes via **[EMAIL / IN-APP NOTIFICATION]**
+- Changes take effect **[X days]** after posting (or immediately for changes required by law)
+
+---
+
+## 13. Contact Us
+
+**Privacy Officer:** [NAME]
+**Email:** [EMAIL]
+**Phone:** [PHONE]
+
+**Mailing Address:**
+[ORGANISATION NAME]
+[STREET ADDRESS]
+[CITY, PROVINCE, POSTAL CODE]
+Canada
+
+For complaints not resolved to your satisfaction, you may contact:
+
+**Office of the Privacy Commissioner of Canada**
+Website: https://www.priv.gc.ca
+Phone: 1-800-282-1376
+
+---
+
+## Setup Checklist
+
+Before publishing this privacy policy, ensure you have:
+
+- [ ] Replaced all `[PLACEHOLDER]` values with your organisation's information
+- [ ] Specified your hosting platform and data centre location
+- [ ] Documented your backup procedures
+- [ ] Set appropriate retention periods based on your policies and regulations
+- [ ] Designated a privacy officer and contact information
+- [ ] Reviewed with legal counsel or privacy advisor
+- [ ] Configured your instance's session timeout to match the policy
+- [ ] Published the policy on your instance (link from login page or footer)
+
+---
+
+*This privacy policy template is provided as part of KoNote2. Each organisation is responsible for customising this policy to reflect their specific practices, hosting configuration, and regulatory requirements.*

@@ -1,20 +1,20 @@
 # Phase 2 Prompt: Core Data — Programs & Clients
 
-Copy this prompt into a new Claude Code conversation. Open the `konote-web` project folder first.
+Copy this prompt into a new Claude Code conversation. Open the `KoNote2-web` project folder first.
 
 ---
 
 ## Prompt
 
-I'm building a nonprofit client management system called KoNote Web. Phase 1 (foundation) is done — Django 5 project with PostgreSQL, Docker, security middleware, and all data models. I need you to build **Phase 2: Programs & Client Management**.
+I'm building a nonprofit client management system called KoNote2 Web. Phase 1 (foundation) is done — Django 5 project with PostgreSQL, Docker, security middleware, and all data models. I need you to build **Phase 2: Programs & Client Management**.
 
 ### Context
 
 - Read `TODO.md` for the full task list
 - Read the plan at `C:\Users\gilli\.claude\plans\idempotent-cooking-walrus.md` for architecture details
 - The project uses **Django 5, server-rendered templates, HTMX, Pico CSS** — no React, no npm
-- All PII fields on `ClientFile` are encrypted via `konote/encryption.py` (Fernet). Use the property accessors (e.g., `client.first_name = "Jane"`) — never write to `_first_name_encrypted` directly
-- RBAC middleware at `konote/middleware/program_access.py` already enforces program-scoped access. Views just need `@login_required`
+- All PII fields on `ClientFile` are encrypted via `KoNote2/encryption.py` (Fernet). Use the property accessors (e.g., `client.first_name = "Jane"`) — never write to `_first_name_encrypted` directly
+- RBAC middleware at `KoNote2/middleware/program_access.py` already enforces program-scoped access. Views just need `@login_required`
 - Terminology is dynamic — use `{{ term.client }}` in templates, never hardcode "Client"
 - Feature toggles are available as `{{ features.programs }}` in templates
 

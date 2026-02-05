@@ -1,4 +1,4 @@
-# Security Review Report: KoNote Web
+# Security Review Report: KoNote2 Web
 
 **Review Date:** 2026-02-03
 **Reviewer:** Claude (automated security review)
@@ -116,7 +116,7 @@ Minor Issues:      4
 - **Improvement:** Create a simple `templates/500.html` that shows a friendly error message without technical details.
 
 **[M3] Audit Middleware Only Logs Successful Requests**
-- **Location:** [konote/middleware/audit.py:30](konote/middleware/audit.py#L30)
+- **Location:** [KoNote2/middleware/audit.py:30](KoNote2/middleware/audit.py#L30)
 - **Issue:** The condition `response.status_code < 400` means 403/404/500 responses are not logged. While this reduces noise, it also means access denials aren't captured.
 - **Improvement:** Consider logging 403 responses specifically to track unauthorized access attempts:
   ```python
@@ -144,7 +144,7 @@ Minor Issues:      4
 - ○ Could not verify cache doesn't store PII (no caching implementation found)
 
 **Encryption in Transit (5/5)**
-- ✓ HSTS enabled: `SECURE_HSTS_SECONDS = 31536000` ([production.py:12](konote/settings/production.py#L12))
+- ✓ HSTS enabled: `SECURE_HSTS_SECONDS = 31536000` ([production.py:12](KoNote2/settings/production.py#L12))
 - ✓ `SECURE_PROXY_SSL_HEADER` configured for reverse proxy
 - ✓ No outbound API calls found that would need certificate validation
 

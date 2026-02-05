@@ -10,7 +10,7 @@ from apps.events.models import EventType, Event, Alert
 from apps.audit.models import AuditLog
 from apps.plans.models import MetricDefinition, PlanSection, PlanTarget, PlanTargetMetric
 from apps.notes.models import ProgressNote, ProgressNoteTarget, MetricValue
-import konote.encryption as enc_module
+import KoNote2.encryption as enc_module
 
 TEST_KEY = Fernet.generate_key().decode()
 

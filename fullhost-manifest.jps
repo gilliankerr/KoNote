@@ -1,12 +1,12 @@
 type: install
 name: KoNote2
 version: 1.0.0
-baseUrl: https://raw.githubusercontent.com/gilliankerr/KoNote-Redux/main
-logo: https://raw.githubusercontent.com/gilliankerr/KoNote-Redux/main/static/img/logo.png
+baseUrl: https://raw.githubusercontent.com/gilliankerr/KoNote2-Redux/main
+logo: https://raw.githubusercontent.com/gilliankerr/KoNote2-Redux/main/static/img/logo.png
 
 description:
   text: |
-    KoNote2 is a secure, web-based client outcome management system for nonprofits.
+    KoNote2 is a secure, web-based Participant Outcome Management system for nonprofits.
     Agencies define desired outcomes with clients, record progress notes with metrics,
     and visualise progress over time. Each agency runs their own private instance.
 
@@ -22,7 +22,7 @@ description:
     - An organisation name for your instance
     - An email address for the admin account
     - About 10-15 minutes for setup
-  short: Secure client outcome management for nonprofits
+  short: Secure Participant Outcome Management for nonprofits
 
 categories:
   - apps/cms
@@ -78,11 +78,11 @@ nodes:
     fixedCloudlets: 2
     flexibleCloudlets: 8
     displayName: KoNote2 App
-    image: ghcr.io/gilliankerr/konote-redux:fullhost-latest
+    image: ghcr.io/gilliankerr/KoNote2-redux:fullhost-latest
     env:
       JELASTIC_ENVIRONMENT: "true"
-      DJANGO_SETTINGS_MODULE: konote.settings.production
-      KONOTE_MODE: production
+      DJANGO_SETTINGS_MODULE: KoNote2.settings.production
+      KoNote2_MODE: production
       AUTH_MODE: local
       PORT: 8000
     volumes:
@@ -101,8 +101,8 @@ nodes:
     displayName: Main Database
     image: postgres:15-alpine
     env:
-      POSTGRES_DB: konote
-      POSTGRES_USER: konote
+      POSTGRES_DB: KoNote2
+      POSTGRES_USER: KoNote2
     volumes:
       - /var/lib/postgresql/data
 
@@ -114,7 +114,7 @@ nodes:
     displayName: Audit Database
     image: postgres:15-alpine
     env:
-      POSTGRES_DB: konote_audit
+      POSTGRES_DB: KoNote2_audit
       POSTGRES_USER: audit_writer
     volumes:
       - /var/lib/postgresql/data
@@ -168,7 +168,7 @@ onInstall:
         2. Invite your team members
         3. Configure your programs and outcomes
 
-        **Need help?** Visit [KoNote2 Documentation](https://github.com/gilliankerr/KoNote-Redux/docs)
+        **Need help?** Visit [KoNote2 Documentation](https://github.com/gilliankerr/KoNote2-Redux/docs)
 
 actions:
   setDatabasePasswords:
@@ -179,7 +179,7 @@ actions:
         - command: |
             export PGPASSWORD="${nodes.sqldb.password:-postgres}"
             until pg_isready -U postgres; do sleep 2; done
-            psql -U postgres -c "ALTER USER konote WITH PASSWORD '${globals.DB_PASSWORD}';"
+            psql -U postgres -c "ALTER USER KoNote2 WITH PASSWORD '${globals.DB_PASSWORD}';"
 
     # Set password for audit database
     - api: environment.control.ExecCmdById
@@ -203,8 +203,8 @@ actions:
       vars:
         SECRET_KEY: ${globals.SECRET_KEY}
         FIELD_ENCRYPTION_KEY: ${globals.FIELD_ENCRYPTION_KEY}
-        DATABASE_URL: postgresql://konote:${globals.DB_PASSWORD}@${nodes.sqldb.first.intIP}:5432/konote
-        AUDIT_DATABASE_URL: postgresql://audit_writer:${globals.AUDIT_DB_PASSWORD}@${nodes.sqldb2.first.intIP}:5432/konote_audit
+        DATABASE_URL: postgresql://KoNote2:${globals.DB_PASSWORD}@${nodes.sqldb.first.intIP}:5432/KoNote2
+        AUDIT_DATABASE_URL: postgresql://audit_writer:${globals.AUDIT_DB_PASSWORD}@${nodes.sqldb2.first.intIP}:5432/KoNote2_audit
         ALLOWED_HOSTS: ${env.domain}
         ORG_NAME: ${settings.orgName}
         DEFAULT_CLIENT_TERM: ${settings.clientTerm}
@@ -240,7 +240,7 @@ success:
   text: |
     ## KoNote2 Deployment Complete!
 
-    Your secure client outcome management system is now running.
+    Your secure Participant Outcome Management system is now running.
 
     **URL:** https://${env.domain}
     **Admin Email:** ${settings.adminEmail}

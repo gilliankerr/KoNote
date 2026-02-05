@@ -1,6 +1,6 @@
 # Security Review Agent Prompt
 
-You are conducting a **security review** for KoNote Web, a Django-based nonprofit case management system that handles sensitive client data (PII).
+You are conducting a **security review** for KoNote2 Web, a Django-based nonprofit case management system that handles sensitive client data (PII).
 
 ## Context
 
@@ -22,13 +22,13 @@ You are conducting a **security review** for KoNote Web, a Django-based nonprofi
 
 **Critical — Read These First:**
 ```
-konote/encryption.py
+KoNote2/encryption.py
 apps/clients/models.py
-konote/middleware/program_access.py
+KoNote2/middleware/program_access.py
 apps/auth_app/views.py
 apps/audit/models.py
-konote/middleware/audit.py
-konote/settings/base.py
+KoNote2/middleware/audit.py
+KoNote2/settings/base.py
 ```
 
 **High Priority:**
@@ -38,7 +38,7 @@ apps/clients/views.py
 apps/notes/views.py
 apps/clients/forms.py
 apps/programs/models.py
-konote/db_router.py
+KoNote2/db_router.py
 ```
 
 **Medium Priority:**

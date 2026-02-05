@@ -2,7 +2,7 @@
 
 **Review Date:** 2026-02-03
 **Reviewer:** Claude (automated security review)
-**Version:** KoNote Web (main branch, commit 05920b4)
+**Version:** KoNote2 Web (main branch, commit 05920b4)
 
 ---
 
@@ -98,12 +98,12 @@ _None found._
 - **Resolution:** Now uses Django's `json_script` filter, which safely escapes content and creates a `<script type="application/json">` tag. This is the recommended secure pattern for passing data to JavaScript.
 
 **[M2] CSP allows 'unsafe-inline' for styles**
-- **Location:** [settings/base.py:162](konote/settings/base.py#L162)
+- **Location:** [settings/base.py:162](KoNote2/settings/base.py#L162)
 - **Issue:** `CSP_STYLE_SRC` includes `'unsafe-inline'`, which weakens CSP protection against CSS injection attacks.
 - **Improvement:** This is documented as required by Pico CSS. In future, consider vendoring Pico locally and removing `'unsafe-inline'`, or using CSP nonces for inline styles.
 
 **[M3] Client view events not logged** ✅ FIXED
-- **Location:** [middleware/audit.py:11-17](konote/middleware/audit.py#L11-L17), [middleware/audit.py:45-48](konote/middleware/audit.py#L45-L48)
+- **Location:** [middleware/audit.py:11-17](KoNote2/middleware/audit.py#L11-L17), [middleware/audit.py:45-48](KoNote2/middleware/audit.py#L45-L48)
 - **Issue:** The audit middleware only logged state-changing requests (`POST/PUT/PATCH/DELETE`).
 - **Resolution:** Added client view logging for compliance:
   - GET requests to `/clients/<id>/` and `/clients/<id>/*` now logged with `action='view'`
@@ -111,7 +111,7 @@ _None found._
 - **Test:** View a client record; verify entry in audit_log table with `action='view'`.
 
 **[M4] Audit exceptions silently ignored** ✅ FIXED
-- **Location:** [middleware/audit.py:67-68](konote/middleware/audit.py#L67-L68), [auth_app/views.py:237](apps/auth_app/views.py#L237)
+- **Location:** [middleware/audit.py:67-68](KoNote2/middleware/audit.py#L67-L68), [auth_app/views.py:237](apps/auth_app/views.py#L237)
 - **Issue:** Audit logging failures were caught with bare `except` clauses and silently ignored.
 - **Resolution:** All audit functions now log failures:
   - Middleware: `logger.error("Audit logging failed for %s %s: %s", ...)`
@@ -125,7 +125,7 @@ _None found._
 
 | Scenario | Result | Evidence |
 |----------|--------|----------|
-| **IDOR:** User A accessing Client in Program B | ✓ Blocked | `ProgramAccessMiddleware` checks program overlap at [middleware/program_access.py:93-109](konote/middleware/program_access.py#L93-L109) |
+| **IDOR:** User A accessing Client in Program B | ✓ Blocked | `ProgramAccessMiddleware` checks program overlap at [middleware/program_access.py:93-109](KoNote2/middleware/program_access.py#L93-L109) |
 | **Vertical escalation:** Receptionist accessing staff features | ✓ Blocked | `@minimum_role("staff")` decorator on note views |
 | **Session fixation** | ✓ Mitigated | Django regenerates session ID on login by default |
 | **Encryption oracle:** Decryption error leaking info | ✓ Safe | Returns `"[decryption error]"` string, not exception details |
@@ -159,14 +159,14 @@ _None found._
 ## Files Reviewed
 
 ### Critical Priority (All Reviewed)
-- [konote/encryption.py](konote/encryption.py) ✓
+- [KoNote2/encryption.py](KoNote2/encryption.py) ✓
 - [apps/clients/models.py](apps/clients/models.py) ✓
-- [konote/middleware/program_access.py](konote/middleware/program_access.py) ✓
+- [KoNote2/middleware/program_access.py](KoNote2/middleware/program_access.py) ✓
 - [apps/auth_app/views.py](apps/auth_app/views.py) ✓
 - [apps/audit/models.py](apps/audit/models.py) ✓
-- [konote/middleware/audit.py](konote/middleware/audit.py) ✓
-- [konote/settings/base.py](konote/settings/base.py) ✓
-- [konote/settings/production.py](konote/settings/production.py) ✓
+- [KoNote2/middleware/audit.py](KoNote2/middleware/audit.py) ✓
+- [KoNote2/settings/base.py](KoNote2/settings/base.py) ✓
+- [KoNote2/settings/production.py](KoNote2/settings/production.py) ✓
 
 ### High Priority (All Reviewed)
 - [apps/auth_app/models.py](apps/auth_app/models.py) ✓
@@ -174,7 +174,7 @@ _None found._
 - [apps/notes/views.py](apps/notes/views.py) ✓
 - [apps/clients/forms.py](apps/clients/forms.py) ✓
 - [apps/programs/models.py](apps/programs/models.py) ✓
-- [konote/db_router.py](konote/db_router.py) ✓
+- [KoNote2/db_router.py](KoNote2/db_router.py) ✓
 
 ### Medium Priority (All Reviewed)
 - [apps/audit/management/commands/lockdown_audit_db.py](apps/audit/management/commands/lockdown_audit_db.py) ✓

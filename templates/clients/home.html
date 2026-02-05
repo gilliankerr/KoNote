@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Home" %} — {{ site.product_name|default:"KoNote" }}{% endblock %}
+{% block title %}{% trans "Home" %} — {{ site.product_name|default:"KoNote2" }}{% endblock %}
 
 {% block content %}
 <!-- Organization header -->
 <header class="org-header">
     <div class="org-brand">
         <h1 class="org-name">{{ org_name }}</h1>
-        <p class="org-tagline">{% trans "Client Outcome Management" %}</p>
+        <p class="org-tagline">{% trans "Participant Outcome Management" %}</p>
     </div>
     <div class="org-welcome">
         {% blocktrans with name=user.first_name|default:user.display_name %}Welcome back, <strong>{{ name }}</strong>{% endblocktrans %}

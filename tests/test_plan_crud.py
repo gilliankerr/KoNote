@@ -13,7 +13,7 @@ from apps.plans.models import (
     PlanTargetRevision,
 )
 from apps.programs.models import Program, UserProgramRole
-import konote.encryption as enc_module
+import KoNote2.encryption as enc_module
 
 
 TEST_KEY = Fernet.generate_key().decode()

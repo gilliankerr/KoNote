@@ -115,7 +115,7 @@ class InstanceSettingsForm(forms.Form):
     document_storage_url_template = forms.CharField(
         max_length=500, required=False, label="URL Template",
         help_text='URL with {record_id} placeholder. Example for SharePoint: '
-                  'https://contoso.sharepoint.com/sites/KoNote/Clients/{record_id}/',
+                  'https://contoso.sharepoint.com/sites/KoNote2/Clients/{record_id}/',
         widget=forms.TextInput(attrs={"placeholder": "https://example.com/clients/{record_id}/"}),
     )
 

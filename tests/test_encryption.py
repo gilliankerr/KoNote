@@ -2,8 +2,8 @@
 from django.test import TestCase, override_settings
 from cryptography.fernet import Fernet
 
-from konote.encryption import encrypt_field, decrypt_field, _get_fernet
-import konote.encryption as enc_module
+from KoNote2.encryption import encrypt_field, decrypt_field, _get_fernet
+import KoNote2.encryption as enc_module
 
 
 TEST_KEY = Fernet.generate_key().decode()

@@ -34,7 +34,7 @@ $session = $response.session
 
 ## Deployment Options
 
-There are two ways to deploy KoNote to FullHost:
+There are two ways to deploy KoNote2 to FullHost:
 
 ### Option A: JPS Manifest (One-Click Deploy)
 
@@ -49,11 +49,11 @@ Claude Code can deploy using the Jelastic REST API. This is useful for:
 
 **Create a Docker environment with API:**
 ```powershell
-# Example: Create KoNote environment
+# Example: Create KoNote2 environment
 $body = @{
     session = "YOUR_SESSION_TOKEN"
-    env = '{"shortdomain":"konote-prod","region":"default"}'
-    nodes = '[{"nodeType":"docker","fixedCloudlets":4,"flexibleCloudlets":8,"docker":{"image":"ghcr.io/your-org/konote-web:latest"}}]'
+    env = '{"shortdomain":"KoNote2-prod","region":"default"}'
+    nodes = '[{"nodeType":"docker","fixedCloudlets":4,"flexibleCloudlets":8,"docker":{"image":"ghcr.io/your-org/KoNote2-web:latest"}}]'
 }
 Invoke-RestMethod -Uri "https://app.vap.fullhost.cloud/1.0/environment/control/rest/createenvironment" -Method POST -Body $body
 ```
@@ -62,7 +62,7 @@ Invoke-RestMethod -Uri "https://app.vap.fullhost.cloud/1.0/environment/control/r
 ```powershell
 $body = @{
     session = "YOUR_SESSION_TOKEN"
-    envName = "konote-prod"
+    envName = "KoNote2-prod"
     nodeId = "12345"  # Get from environment info
     vars = '{"DATABASE_URL":"postgres://...","SECRET_KEY":"..."}'
 }
@@ -78,9 +78,9 @@ Invoke-RestMethod -Uri "https://app.vap.fullhost.cloud/1.0/environment/control/r
 **Files created:**
 - `fullhost-manifest.jps` — JPS manifest for one-click deployment
 - `docs/deploy-fullhost.md` — Step-by-step guide for non-technical users
-- `docs/deploying-konote.md` — Updated with FullHost option
-- `konote/wsgi.py` — Auto-detects FullHost environment
-- `konote/settings/production.py` — Auto-allows FullHost domains
+- `docs/deploying-KoNote2.md` — Updated with FullHost option
+- `KoNote2/wsgi.py` — Auto-detects FullHost environment
+- `KoNote2/settings/production.py` — Auto-allows FullHost domains
 
 ## Pre-Publication Checklist
 
@@ -92,14 +92,14 @@ The manifest currently references a placeholder repository. Update to the actual
 
 ```yaml
 # Change this line:
-baseUrl: https://raw.githubusercontent.com/konote/konote-web/main
+baseUrl: https://raw.githubusercontent.com/KoNote2/KoNote2-web/main
 
 # To your actual repository:
-baseUrl: https://raw.githubusercontent.com/YOUR_ORG/konote-web/main
+baseUrl: https://raw.githubusercontent.com/YOUR_ORG/KoNote2-web/main
 ```
 
 Also update the deploy button URLs in:
-- `docs/deploying-konote.md` (line ~297)
+- `docs/deploying-KoNote2.md` (line ~297)
 - `docs/deploy-fullhost.md` (Step 2, Option A)
 
 ### 2. Create a FullHost Account
@@ -115,7 +115,7 @@ Also update the deploy button URLs in:
 1. Log in to [app.fullhost.cloud](https://app.fullhost.cloud)
 2. Click **Import** in the top menu
 3. Select the **URL** tab
-4. Paste: `https://raw.githubusercontent.com/YOUR_ORG/konote-web/main/fullhost-manifest.jps`
+4. Paste: `https://raw.githubusercontent.com/YOUR_ORG/KoNote2-web/main/fullhost-manifest.jps`
 5. Click **Import**
 
 **Option B: File Upload**
@@ -156,7 +156,7 @@ Once the manifest works via direct import, test the deploy button:
 
 1. Create a test markdown file with the button:
    ```markdown
-   [![Deploy to FullHost](https://www.fullhost.com/deploy-button.svg)](https://app.fullhost.cloud/install?manifest=https://raw.githubusercontent.com/YOUR_ORG/konote-web/main/fullhost-manifest.jps)
+   [![Deploy to FullHost](https://www.fullhost.com/deploy-button.svg)](https://app.fullhost.cloud/install?manifest=https://raw.githubusercontent.com/YOUR_ORG/KoNote2-web/main/fullhost-manifest.jps)
    ```
 2. Click the button
 3. Verify it opens the FullHost installer with the KoNote2 manifest pre-loaded
@@ -201,7 +201,7 @@ The JPS manifest has been rewritten to use Docker containers:
 1. **Alpine-based Dockerfile created** — `Dockerfile.alpine` packages Python 3.12 + Django on Alpine Linux
 2. **GitHub Actions workflow created** — `.github/workflows/docker-fullhost.yml` builds and pushes to ghcr.io
 3. **JPS manifest updated** to use:
-   - `nodeType: docker` with `docker.image: ghcr.io/gilliankerr/konote-redux:fullhost-latest`
+   - `nodeType: docker` with `docker.image: ghcr.io/gilliankerr/KoNote2-redux:fullhost-latest`
    - `postgres:15-alpine` instead of native PostgreSQL
 4. **PowerShell deployment script created** — `deploy-fullhost.ps1` for API-based deployment
 
@@ -221,15 +221,15 @@ The following files have been created/updated:
 
 1. **Push to GitHub** — Commit and push these new files
 2. **Enable GitHub Actions** — The workflow should run automatically on push to main
-3. **Make package public** — After the first build, go to GitHub → Packages → konote-redux → Package settings → Change visibility to Public
+3. **Make package public** — After the first build, go to GitHub → Packages → KoNote2-redux → Package settings → Change visibility to Public
 4. **Test JPS manifest** — Import `fullhost-manifest.jps` in FullHost dashboard
 5. **Verify deployment** — Check that the app starts and migrations run
 
 ### Test Environment Created
 
 A test PostgreSQL environment was created during testing:
-- **Name:** konote-test
-- **URL:** konote-test.ca-east.onfullhost.cloud
+- **Name:** KoNote2-test
+- **URL:** KoNote2-test.ca-east.onfullhost.cloud
 - **Status:** Running (delete from dashboard when done)
 
 ### API Token Permissions Needed
@@ -246,8 +246,8 @@ When creating an API token, check these under **API Access**:
 ### Environment Variable: JELASTIC_ENVIRONMENT
 
 The code assumes FullHost sets `JELASTIC_ENVIRONMENT`. If they use a different variable name, update:
-- `konote/wsgi.py` (line ~35)
-- `konote/settings/production.py` (line ~52)
+- `KoNote2/wsgi.py` (line ~35)
+- `KoNote2/settings/production.py` (line ~52)
 
 ### Database Initialisation
 
@@ -285,6 +285,6 @@ Once testing is complete:
 
 - [fullhost-manifest.jps](../fullhost-manifest.jps)
 - [docs/deploy-fullhost.md](../docs/deploy-fullhost.md)
-- [docs/deploying-konote.md](../docs/deploying-konote.md)
-- [konote/wsgi.py](../konote/wsgi.py)
-- [konote/settings/production.py](../konote/settings/production.py)
+- [docs/deploying-KoNote2.md](../docs/deploying-KoNote2.md)
+- [KoNote2/wsgi.py](../KoNote2/wsgi.py)
+- [KoNote2/settings/production.py](../KoNote2/settings/production.py)

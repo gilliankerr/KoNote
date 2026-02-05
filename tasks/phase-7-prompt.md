@@ -1,12 +1,12 @@
 # Phase 7 Prompt: Hardening & Deployment
 
-Copy this prompt into a new Claude Code conversation. Open the `konote-web` project folder first.
+Copy this prompt into a new Claude Code conversation. Open the `KoNote2-web` project folder first.
 
 ---
 
 ## Prompt
 
-I'm building KoNote Web, a nonprofit client management system. Phases 1-6 are done (all features built). I need you to do **Phase 7: Security Hardening & Deployment Guides**.
+I'm building KoNote2 Web, a nonprofit client management system. Phases 1-6 are done (all features built). I need you to do **Phase 7: Security Hardening & Deployment Guides**.
 
 ### Context
 
@@ -46,7 +46,7 @@ I'm building KoNote Web, a nonprofit client management system. Phases 1-6 are do
   - Login: 5/min/IP (already set)
   - API endpoints: 60/min/user
   - Export endpoints: 5/min/user
-- Document the rate limits in a comment block in `konote/settings/base.py`
+- Document the rate limits in a comment block in `KoNote2/settings/base.py`
 
 **4. Deployment Guide: Azure**
 - Create `docs/deploy-azure.md`

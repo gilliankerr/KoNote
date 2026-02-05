@@ -1,15 +1,196 @@
-# Deploying KoNote
+# Deploying KoNote2
 
-This guide covers everything you need to get KoNote running — from local development to cloud production. Choose your path:
+This guide covers everything you need to get KoNote2 running — from local development to cloud production. Choose your path:
 
 | I want to... | Go to... |
 |--------------|----------|
-| Try KoNote locally | [Local Development (Docker)](#local-development-docker) |
+| Choose a hosting platform | [Choosing a Hosting Platform](#choosing-a-hosting-platform) |
+| Check if my nonprofit qualifies for free Azure | [Checking Nonprofit Eligibility](#checking-nonprofit-eligibility-for-azure-credits) |
+| Try KoNote2 locally | [Local Development (Docker)](#local-development-docker) |
 | Deploy to Railway | [Deploy to Railway](#deploy-to-railway) |
 | Deploy to Azure | [Deploy to Azure](#deploy-to-azure) |
 | Deploy to Elestio | [Deploy to Elestio](#deploy-to-elestio) |
+| Deploy to FullHost | [Deploy to FullHost](#deploy-to-fullhost) |
 | Set up PDF reports | [PDF Report Setup](#pdf-report-setup) |
 | Go live with real data | [Before You Enter Real Data](#before-you-enter-real-data) |
+
+---
+
+## Choosing a Hosting Platform
+
+Not sure which platform is right for your organisation? This section compares your options based on cost, ease of setup, data residency, and scaling.
+
+### Quick Comparison
+
+| Platform | Monthly Cost (CAD) | Setup Difficulty | Canadian Data | Security Certifications |
+|----------|-------------------|------------------|---------------|------------------------|
+| **Railway** | $35–55 | Easy | No (US servers) | SOC 2 Type II, HIPAA |
+| **Azure** | $75–115 | Hard | Yes (Canada Central) | SOC 2, ISO 27001, HIPAA, 90+ |
+| **Elestio** | $50–80 | Medium | No (EU/US servers) | SOC 2 Type 1, ISO 27001 |
+| **FullHost** | $23–45 | Easy | Yes (Montreal) | None documented |
+
+### Cost Breakdown (200 Clients, 5–10 Staff)
+
+These estimates assume light usage — a small nonprofit with staff working mostly 9–5 weekdays.
+
+#### Railway (~$35–55/month)
+| Resource | Cost |
+|----------|------|
+| Web app (Starter plan) | $5–15 |
+| PostgreSQL (main) | $15–20 |
+| PostgreSQL (audit) | $15–20 |
+
+**Pros:** Simplest setup, auto-deploys from GitHub, scales down overnight
+**Cons:** US servers only, less enterprise support
+
+#### Azure (~$75–115/month)
+| Resource | Cost |
+|----------|------|
+| Container App (0.5 vCPU, 1 GB) | $15–40 |
+| PostgreSQL Flexible (main) | $20–25 |
+| PostgreSQL Flexible (audit) | $20–25 |
+| Database storage (32 GB × 2) | $10 |
+| Container Registry (Basic) | $7 |
+
+**Pros:** Canadian data centres, enterprise-grade, Azure AD integration, nonprofit credits available
+**Cons:** Most complex setup, higher base cost
+
+**Nonprofit discount:** Microsoft offers $2,000 USD/year (~$2,700 CAD) in Azure credits through [Microsoft for Nonprofits](https://nonprofit.microsoft.com). If you qualify, Azure could be nearly free for 2+ years of KoNote2 hosting. See [Checking Nonprofit Eligibility](#checking-nonprofit-eligibility-for-azure-credits) below.
+
+#### Elestio (~$50–80/month)
+| Resource | Cost |
+|----------|------|
+| Docker Compose service | $25–40 |
+| Managed PostgreSQL (main) | $15–20 |
+| Managed PostgreSQL (audit) | $15–20 |
+
+**Pros:** Docker Compose native, auto-deploys from GitHub, good documentation
+**Cons:** No Canadian servers, fixed pricing (no scale-to-zero), smaller ecosystem
+
+#### FullHost (~$23–45/month)
+| Resource | Cost |
+|----------|------|
+| App server (2 reserved + ~2 dynamic cloudlets) | $8 |
+| Main database (2 reserved + ~1 dynamic cloudlet) | $5.50 |
+| Audit database (2 reserved + ~1 dynamic cloudlet) | $5.50 |
+| Storage (2 GB) | $0.40 |
+| External IP | $3.50 |
+
+**Pros:** Canadian data centre (Montreal), lowest cost, pay-per-use cloudlets, one-click deploy, free trial ($25 credits)
+**Cons:** No security certifications (SOC 2, ISO 27001), smaller provider, Jelastic platform may be unfamiliar
+
+### How to Choose
+
+**Choose Railway if:**
+- You want the simplest possible setup
+- You're comfortable with US-based servers
+- You want costs to scale down when not in use
+
+**Choose Azure if:**
+- You need Canadian data residency AND security certifications (health data, government contracts)
+- You already use Microsoft 365 / Azure AD
+- You want enterprise support and SLAs
+- You qualify for Microsoft nonprofit credits (potentially free)
+
+**Choose Elestio if:**
+- You want a balance of simplicity and features
+- You prefer Docker Compose workflows
+- Predictable monthly billing is important
+
+**Choose FullHost if:**
+- You need Canadian data residency at the lowest cost
+- You don't have funder/regulatory requirements for certified providers
+- You want pay-per-use pricing
+- You prefer a smaller, Canadian provider
+
+### Data Residency Considerations
+
+If your organisation serves clients in Canada, you may have obligations under:
+
+- **PIPEDA** (federal privacy law) — Generally allows data to be stored outside Canada, but you must protect it adequately
+- **Provincial health privacy laws** (PHIPA in Ontario, HIA in Alberta, etc.) — May require health information to stay in Canada
+- **Funder requirements** — Some government contracts specify Canadian hosting
+
+**If in doubt:** Choose Azure (Canada Central region) or FullHost for Canadian data residency.
+
+### Security Certifications
+
+Security certifications matter if your organisation:
+- Handles health information (PHIPA in Ontario, HIA in Alberta, etc.)
+- Has government contracts that specify certified vendors
+- Needs to demonstrate compliance to funders, boards, or auditors
+
+| Certification | What It Means |
+|---------------|---------------|
+| **SOC 2 Type II** | Independent auditors verified security controls work over time (6–12 months) |
+| **SOC 2 Type 1** | Security controls exist, but not yet tested over time |
+| **ISO 27001** | International standard for information security management |
+| **HIPAA** | US health data standard (relevant if serving US clients) |
+
+**Platform certifications:**
+
+- **Azure** — Most comprehensive: SOC 2, ISO 27001, HIPAA, FedRAMP, and [90+ certifications](https://learn.microsoft.com/en-us/azure/compliance/)
+- **Railway** — [SOC 2 Type II, SOC 3, HIPAA attestation](https://trust.railway.com/)
+- **Elestio** — [SOC 2 Type 1, ISO 27001](https://elest.io/security-and-compliance) (working toward Type II)
+- **FullHost** — No documented certifications (smaller Canadian provider)
+
+**What this means in practice:**
+
+If your funder or regulator requires a certified hosting provider, FullHost may not qualify — even though it offers Canadian data residency. In that case, Azure is the best choice (Canadian data + enterprise certifications).
+
+For most small nonprofits without specific certification requirements, FullHost's lower cost and Canadian location may outweigh the lack of formal certifications.
+
+### Scaling Models Explained
+
+| Model | How It Works | Best For |
+|-------|--------------|----------|
+| **Auto-scaling (Railway, Azure)** | Adds/removes capacity based on traffic; you pay for actual usage | Variable traffic, cost-conscious |
+| **Pay-per-use cloudlets (FullHost)** | Resources flex within limits; charged hourly for what you use | Predictable but variable workloads |
+| **Fixed VMs (Elestio)** | You pick a size, pay hourly whether used or not | Stable, predictable workloads |
+
+For a 200-client nonprofit with predictable 9–5 usage, any model works fine. Auto-scaling mainly saves money overnight and weekends.
+
+### Checking Nonprofit Eligibility for Azure Credits
+
+Microsoft offers **$2,000 USD/year (~$2,700 CAD)** in Azure credits to eligible nonprofits — enough to cover 2+ years of KoNote2 hosting.
+
+#### Who Qualifies
+
+To be eligible, your organisation must be:
+
+- **A registered nonprofit** with legal charitable status (in Canada: CRA-registered charity or qualified donee)
+- **Mission-based** — operating for community/public benefit, not commercial purposes
+- **Non-discriminatory** in services and hiring
+
+#### Who Does NOT Qualify
+
+- Government organisations
+- Schools and universities (separate program exists)
+- Healthcare organisations (hospitals, clinics)
+- Professional associations or unions
+- Political organisations
+
+#### How to Check and Apply
+
+1. Go to [nonprofit.microsoft.com](https://nonprofit.microsoft.com/)
+2. Click **Get Started** or **Join**
+3. Enter your organisation's legal name and registration number
+4. Microsoft verifies against nonprofit databases (takes 2–10 business days)
+5. Once approved, activate your Azure grant at the [Azure grant activation page](https://learn.microsoft.com/en-us/industry/nonprofit/microsoft-for-nonprofits/claim-activate-nonprofit-azure-grant)
+
+#### Important Notes
+
+- **Annual renewal required** — Credits expire after 12 months and must be renewed
+- **Usage requirements** — Microsoft may check that you're actively using their services
+- **Employee must apply** — IT consultants cannot apply on behalf of a nonprofit
+
+#### If You Don't Qualify
+
+| Situation | Best Option |
+|-----------|-------------|
+| Need Canadian data + certifications | Azure at full price (~$75–115/month) |
+| Need Canadian data, no certification requirement | FullHost (~$23–45/month) |
+| No Canadian data requirement | Railway (~$35–55/month) |
 
 ---
 
@@ -22,17 +203,17 @@ If you've ever:
 - Used Excel competently (formulas, sorting, multiple sheets)
 - Followed step-by-step software instructions
 
-...you have the skills to set up KoNote. Every step shows you exactly what to type and what to expect.
+...you have the skills to set up KoNote2. Every step shows you exactly what to type and what to expect.
 
 ---
 
 ## Understanding Your Responsibility
 
-KoNote stores sensitive client information. By running your own instance, you're taking on responsibility for protecting that data.
+KoNote2 stores sensitive client information. By running your own instance, you're taking on responsibility for protecting that data.
 
-### What KoNote Does Automatically
+### What KoNote2 Does Automatically
 
-When configured correctly, KoNote:
+When configured correctly, KoNote2:
 
 - **Encrypts client names, emails, birth dates, and phone numbers** — Even if someone accessed your database directly, they'd see scrambled text
 - **Blocks common security mistakes** — The server won't start if critical security settings are missing
@@ -59,7 +240,7 @@ Consider engaging IT support if:
 
 ## Automatic Platform Detection
 
-KoNote automatically detects which platform it's running on and configures itself appropriately:
+KoNote2 automatically detects which platform it's running on and configures itself appropriately:
 
 | Platform | How It's Detected | What's Auto-Configured |
 |----------|-------------------|------------------------|
@@ -68,7 +249,7 @@ KoNote automatically detects which platform it's running on and configures itsel
 | **Elestio** | `ELESTIO_VM_NAME` variable | Production settings, `.elest.io` domains allowed |
 | **Docker/Self-hosted** | `DATABASE_URL` is set | Production settings, localhost allowed by default |
 
-This means you only need to set the **essential** variables for each platform — KoNote handles the rest.
+This means you only need to set the **essential** variables for each platform — KoNote2 handles the rest.
 
 ### Essential Variables (All Platforms)
 
@@ -89,7 +270,7 @@ If something is missing, the startup check will tell you exactly what's wrong an
 
 | Software | What It Does | Where to Get It |
 |----------|--------------|-----------------|
-| **Git** | Downloads the KoNote code | [git-scm.com](https://git-scm.com/download/win) |
+| **Git** | Downloads the KoNote2 code | [git-scm.com](https://git-scm.com/download/win) |
 | **Python 3.12+** | Runs the application | [python.org](https://www.python.org/downloads/) |
 
 ### For Local Development
@@ -118,15 +299,15 @@ python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().d
 
 ## Local Development (Docker)
 
-Docker handles PostgreSQL, the web server, and all dependencies automatically. This is the recommended path for trying KoNote.
+Docker handles PostgreSQL, the web server, and all dependencies automatically. This is the recommended path for trying KoNote2.
 
 **Time estimate:** 30–45 minutes
 
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/your-org/konote-web.git
-cd konote-web
+git clone https://github.com/your-org/KoNote2-web.git
+cd KoNote2-web
 ```
 
 ### Step 2: Create Environment File
@@ -143,13 +324,13 @@ Edit `.env` and add your generated keys:
 SECRET_KEY=your-generated-secret-key-here
 FIELD_ENCRYPTION_KEY=your-generated-encryption-key-here
 
-POSTGRES_USER=konote
+POSTGRES_USER=KoNote2
 POSTGRES_PASSWORD=MySecurePassword123
-POSTGRES_DB=konote
+POSTGRES_DB=KoNote2
 
 AUDIT_POSTGRES_USER=audit_writer
 AUDIT_POSTGRES_PASSWORD=AnotherPassword456
-AUDIT_POSTGRES_DB=konote_audit
+AUDIT_POSTGRES_DB=KoNote2_audit
 ```
 
 ### Step 4: Start the Containers
@@ -173,7 +354,7 @@ docker-compose exec web python manage.py migrate --database=audit
 docker-compose exec web python manage.py createsuperuser
 ```
 
-### Step 7: Access KoNote
+### Step 7: Access KoNote2
 
 Open **http://localhost:8000** and log in.
 
@@ -198,12 +379,12 @@ Railway automatically builds and deploys from GitHub. Best for small organisatio
 
 1. Go to [railway.app](https://railway.app) and sign in with GitHub
 2. Click **New Project** → **Deploy from GitHub repo**
-3. Select **konote-web**
+3. Select **KoNote2-web**
 4. Click **Deploy**
 
 ### Step 2: Add PostgreSQL Databases
 
-KoNote needs **two** PostgreSQL databases (main + audit).
+KoNote2 needs **two** PostgreSQL databases (main + audit).
 
 1. Click **+ Add** → **Add from Marketplace** → **PostgreSQL**
 2. Wait for it to initialise
@@ -232,7 +413,7 @@ Click **Redeploy** and wait for the build to complete.
 
 ### Step 5: Verify
 
-Click the generated domain (e.g., `konote-web-production-xxxx.up.railway.app`). You should see the login page.
+Click the generated domain (e.g., `KoNote2-web-production-xxxx.up.railway.app`). You should see the login page.
 
 ### Adding a Custom Domain
 
@@ -267,7 +448,7 @@ Azure Container Apps provides enterprise-grade hosting with Azure AD integration
 ### Step 1: Create Resource Group
 
 ```bash
-az group create --name konote-prod --location canadacentral
+az group create --name KoNote2-prod --location canadacentral
 ```
 
 ### Step 2: Create PostgreSQL Databases
@@ -275,17 +456,17 @@ az group create --name konote-prod --location canadacentral
 ```bash
 # Main database
 az postgres flexible-server create \
-  --resource-group konote-prod \
-  --name konote-db \
+  --resource-group KoNote2-prod \
+  --name KoNote2-db \
   --location canadacentral \
-  --admin-user konote \
+  --admin-user KoNote2 \
   --admin-password <YOUR_PASSWORD> \
   --version 16
 
 # Audit database
 az postgres flexible-server create \
-  --resource-group konote-prod \
-  --name konote-audit-db \
+  --resource-group KoNote2-prod \
+  --name KoNote2-audit-db \
   --location canadacentral \
   --admin-user audit_writer \
   --admin-password <YOUR_AUDIT_PASSWORD> \
@@ -296,45 +477,45 @@ Create the databases:
 
 ```bash
 az postgres flexible-server db create \
-  --resource-group konote-prod \
-  --server-name konote-db \
-  --database-name konote
+  --resource-group KoNote2-prod \
+  --server-name KoNote2-db \
+  --database-name KoNote2
 
 az postgres flexible-server db create \
-  --resource-group konote-prod \
-  --server-name konote-audit-db \
-  --database-name konote_audit
+  --resource-group KoNote2-prod \
+  --server-name KoNote2-audit-db \
+  --database-name KoNote2_audit
 ```
 
 ### Step 3: Create Container Registry
 
 ```bash
 az acr create \
-  --resource-group konote-prod \
-  --name konoteregistry \
+  --resource-group KoNote2-prod \
+  --name KoNote2registry \
   --sku Basic
 ```
 
 ### Step 4: Build and Push Docker Image
 
 ```bash
-docker build -t konote:latest .
-az acr login --name konoteregistry
-docker tag konote:latest konoteregistry.azurecr.io/konote:latest
-docker push konoteregistry.azurecr.io/konote:latest
+docker build -t KoNote2:latest .
+az acr login --name KoNote2registry
+docker tag KoNote2:latest KoNote2registry.azurecr.io/KoNote2:latest
+docker push KoNote2registry.azurecr.io/KoNote2:latest
 ```
 
 ### Step 5: Create Container App
 
 ```bash
 az containerapp create \
-  --name konote-web \
-  --resource-group konote-prod \
-  --environment konote-env \
-  --image konoteregistry.azurecr.io/konote:latest \
+  --name KoNote2-web \
+  --resource-group KoNote2-prod \
+  --environment KoNote2-env \
+  --image KoNote2registry.azurecr.io/KoNote2:latest \
   --target-port 8000 \
   --ingress external \
-  --registry-server konoteregistry.azurecr.io \
+  --registry-server KoNote2registry.azurecr.io \
   --cpu 0.5 \
   --memory 1Gi
 ```
@@ -347,8 +528,8 @@ In Azure Portal, go to your Container App → Containers → Environment variabl
 |----------|-------|
 | `SECRET_KEY` | Your generated key |
 | `FIELD_ENCRYPTION_KEY` | Your generated key |
-| `DATABASE_URL` | `postgresql://konote:PASSWORD@konote-db.postgres.database.azure.com:5432/konote` |
-| `AUDIT_DATABASE_URL` | `postgresql://audit_writer:PASSWORD@konote-audit-db.postgres.database.azure.com:5432/konote_audit` |
+| `DATABASE_URL` | `postgresql://KoNote2:PASSWORD@KoNote2-db.postgres.database.azure.com:5432/KoNote2` |
+| `AUDIT_DATABASE_URL` | `postgresql://audit_writer:PASSWORD@KoNote2-audit-db.postgres.database.azure.com:5432/KoNote2_audit` |
 
 Optional (auto-detected):
 - `ALLOWED_HOSTS` — Auto-includes `.azurewebsites.net` domains; add custom domains if needed
@@ -360,9 +541,9 @@ Create a temporary Azure Container Instance to run migrations:
 
 ```bash
 az container create \
-  --resource-group konote-prod \
-  --name konote-migrate \
-  --image konoteregistry.azurecr.io/konote:latest \
+  --resource-group KoNote2-prod \
+  --name KoNote2-migrate \
+  --image KoNote2registry.azurecr.io/KoNote2:latest \
   --environment-variables DATABASE_URL="..." AUDIT_DATABASE_URL="..." SECRET_KEY="..." FIELD_ENCRYPTION_KEY="..." \
   --command-line "/bin/bash -c 'python manage.py migrate && python manage.py migrate --database=audit'"
 ```
@@ -396,8 +577,8 @@ Add these in the Elestio dashboard:
 |----------|-------|
 | `SECRET_KEY` | Your generated key |
 | `FIELD_ENCRYPTION_KEY` | Your generated key |
-| `DATABASE_URL` | `postgresql://konote:konote@db:5432/konote` |
-| `AUDIT_DATABASE_URL` | `postgresql://audit_writer:audit_pass@audit_db:5432/konote_audit` |
+| `DATABASE_URL` | `postgresql://KoNote2:KoNote2@db:5432/KoNote2` |
+| `AUDIT_DATABASE_URL` | `postgresql://audit_writer:audit_pass@audit_db:5432/KoNote2_audit` |
 
 Optional (auto-detected):
 - `ALLOWED_HOSTS` — Auto-includes `.elest.io` domains; add custom domains if needed
@@ -407,7 +588,7 @@ Optional (auto-detected):
 
 1. Go to Repository settings in Elestio
 2. Connect to your GitHub account
-3. Select the `konote-web` repository
+3. Select the `KoNote2-web` repository
 4. Choose the `main` branch
 
 ### Step 4: Run Initial Setup
@@ -420,7 +601,7 @@ python manage.py migrate --database=audit
 python manage.py lockdown_audit_db
 ```
 
-KoNote auto-detects Elestio and uses production settings automatically.
+KoNote2 auto-detects Elestio and uses production settings automatically.
 
 ### Step 5: Configure Domain and TLS
 
@@ -430,9 +611,44 @@ KoNote auto-detects Elestio and uses production settings automatically.
 
 ---
 
+## Deploy to FullHost
+
+FullHost is a Canadian hosting provider using the Jelastic platform. It offers pay-per-use "cloudlet" pricing and Canadian data residency (Montreal data centre).
+
+**Estimated cost:** ~$23–45 CAD/month (see [detailed pricing](deploy-fullhost.md#understanding-costs))
+**Free trial:** $25 in credits (no credit card required)
+
+For complete step-by-step instructions, see the **[FullHost Deployment Guide](deploy-fullhost.md)**.
+
+### Quick Start: One-Click Deploy
+
+1. Go to [fullhost.com/cloud-paas](https://www.fullhost.com/cloud-paas/) and create a free account
+2. Click the deploy button (in the [FullHost guide](deploy-fullhost.md#step-2-deploy-konote2))
+3. Fill in: organisation name, admin email, admin password, client term
+4. Click **Install** and wait 5–10 minutes
+5. **Save the encryption key** shown on the success screen
+
+That's it — you'll have a working KoNote2 instance at a URL like `https://konote2-abc123.jls-can1.cloudjiffy.net`.
+
+### Why FullHost?
+
+- **Canadian data residency** — Montreal data centre satisfies PIPEDA and provincial requirements
+- **Lowest cost option** — ~$23/month for a small nonprofit
+- **One-click deploy** — No command line required
+- **Pay-per-use** — Cloudlets scale with actual usage
+
+### FullHost-Specific Notes
+
+- **Cloudlets:** FullHost charges by "cloudlets" (128 MB RAM + 200 MHz CPU). Your environment scales automatically within the limits you set.
+- **Reserved cloudlets:** Minimum guaranteed resources (~$1.50/month each)
+- **Dynamic cloudlets:** Additional capacity used only during activity (~$2.50/month each)
+- **External IP:** Required for public access (~$3.50/month)
+
+---
+
 ## PDF Report Setup
 
-KoNote can generate PDF reports using WeasyPrint. This is optional — the app works fully without it.
+KoNote2 can generate PDF reports using WeasyPrint. This is optional — the app works fully without it.
 
 ### Quick Check
 
@@ -482,7 +698,7 @@ Complete this checklist before entering any real client information.
 
 - [ ] I have copied my `FIELD_ENCRYPTION_KEY` to a secure location (password manager, encrypted file)
 - [ ] The backup is stored **separately** from my database backups
-- [ ] I can retrieve the key without logging into KoNote
+- [ ] I can retrieve the key without logging into KoNote2
 
 **Test yourself:** Close this document. Can you retrieve your encryption key from your backup? If not, fix that now.
 
@@ -571,5 +787,5 @@ Usually caused by missing environment variables.
 
 Once your deployment is running:
 
-1. **[Administering KoNote](administering-konote.md)** — Configure your agency's settings
-2. **[Using KoNote](using-konote.md)** — Train your staff
+1. **[Administering KoNote2](administering-KoNote2.md)** — Configure your agency's settings
+2. **[Using KoNote2](using-KoNote2.md)** — Train your staff

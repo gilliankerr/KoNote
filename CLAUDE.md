@@ -1,8 +1,8 @@
-# KoNote Web — Project Instructions
+# KoNote2 Web — Project Instructions
 
 ## What This Is
 
-A secure, web-based client outcome management system for nonprofits. Agencies define desired outcomes with clients, record progress notes with metrics, and visualise progress over time. Each agency runs their own instance.
+A secure, web-based Participant Outcome Management system for nonprofits. Agencies define desired outcomes with clients, record progress notes with metrics, and visualise progress over time. Each agency runs their own instance.
 
 ## Tech Stack
 

@@ -1,4 +1,5 @@
 {# Partial: Read-only display of custom fields with edit toggle #}
+{# Empty fields are filtered out in the view — only fields with values shown #}
 <div class="custom-fields-header">
     <h2 id="custom-fields-heading">Additional Details</h2>
     {% if has_editable_fields %}
@@ -24,9 +25,13 @@
                 {{ item.field_def.name }}
                 {% if item.field_def.is_sensitive %}<small class="secondary">(encrypted)</small>{% endif %}
             </dt>
-            <dd>{{ item.value|default:"—" }}</dd>
+            <dd>{{ item.value }}</dd>
         </div>
         {% endfor %}
     </dl>
 </section>
 {% endfor %}
+
+{% if not custom_data %}
+<p class="secondary" style="margin-top: var(--kn-space-base);">No additional details recorded. Click Edit to add information.</p>
+{% endif %}

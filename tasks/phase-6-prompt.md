@@ -1,12 +1,12 @@
 # Phase 6 Prompt: Customisation Admin
 
-Copy this prompt into a new Claude Code conversation. Open the `konote-web` project folder first.
+Copy this prompt into a new Claude Code conversation. Open the `KoNote2-web` project folder first.
 
 ---
 
 ## Prompt
 
-I'm building KoNote Web, a nonprofit client management system. Phases 1-5 are done. I need you to build **Phase 6: Customisation Admin** — this is how agencies make the system their own without editing code.
+I'm building KoNote2 Web, a nonprofit client management system. Phases 1-5 are done. I need you to build **Phase 6: Customisation Admin** — this is how agencies make the system their own without editing code.
 
 ### Context
 
@@ -14,7 +14,7 @@ I'm building KoNote Web, a nonprofit client management system. Phases 1-5 are do
 - Read `C:\Users\gilli\.claude\plans\idempotent-cooking-walrus.md` for architecture
 - Models in `apps/admin_settings/models.py`: `TerminologyOverride`, `FeatureToggle`, `InstanceSetting`
 - Default terms are in `DEFAULT_TERMS` dict in that same file
-- Context processors in `konote/context_processors.py` inject `term`, `features`, `site` into all templates
+- Context processors in `KoNote2/context_processors.py` inject `term`, `features`, `site` into all templates
 - These use a 5-minute cache — after saving changes, the cache must be cleared
 - Stack: Django 5, HTMX, Pico CSS. No React.
 

@@ -10,8 +10,8 @@ from apps.auth_app.decorators import minimum_role
 from apps.auth_app.models import Invite, User
 from apps.clients.models import ClientFile, ClientProgramEnrolment
 from apps.programs.models import Program, UserProgramRole
-from konote.middleware.program_access import ProgramAccessMiddleware
-import konote.encryption as enc_module
+from KoNote2.middleware.program_access import ProgramAccessMiddleware
+import KoNote2.encryption as enc_module
 
 
 TEST_KEY = Fernet.generate_key().decode()

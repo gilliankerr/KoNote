@@ -1,5 +1,5 @@
 """
-Security audit command for KoNote Web.
+Security audit command for KoNote2 Web.
 
 Runs comprehensive security checks across encryption, RBAC, audit logging,
 configuration, and document storage. Designed to work for any developer
@@ -143,7 +143,7 @@ class Command(BaseCommand):
         # ENC002: Encryption round-trip works
         if key:
             try:
-                from konote.encryption import decrypt_field, encrypt_field
+                from KoNote2.encryption import decrypt_field, encrypt_field
                 test_value = "security_audit_test_string"
                 encrypted = encrypt_field(test_value)
                 decrypted = decrypt_field(encrypted)
@@ -504,8 +504,8 @@ class Command(BaseCommand):
         # CFG006: Security middleware in chain
         middleware = getattr(settings, "MIDDLEWARE", [])
         required = [
-            "konote.middleware.program_access.ProgramAccessMiddleware",
-            "konote.middleware.audit.AuditMiddleware",
+            "KoNote2.middleware.program_access.ProgramAccessMiddleware",
+            "KoNote2.middleware.audit.AuditMiddleware",
         ]
         missing = [m for m in required if m not in middleware]
         if missing:
@@ -623,7 +623,7 @@ class Command(BaseCommand):
 
     def _output_text(self, results):
         """Output results as formatted text."""
-        self.stdout.write("\nKoNote Security Audit")
+        self.stdout.write("\nKoNote2 Security Audit")
         self.stdout.write("=" * 50)
 
         # Group by category

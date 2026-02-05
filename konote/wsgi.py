@@ -1,4 +1,4 @@
-"""WSGI config for KoNote Web."""
+"""WSGI config for KoNote2 Web."""
 import os
 from django.core.wsgi import get_wsgi_application
 
@@ -21,18 +21,18 @@ def get_default_settings():
 
     # Auto-detect Railway
     if os.environ.get("RAILWAY_ENVIRONMENT"):
-        return "konote.settings.production"
+        return "KoNote2.settings.production"
 
     # Auto-detect Azure App Service
     if os.environ.get("WEBSITE_SITE_NAME"):
-        return "konote.settings.production"
+        return "KoNote2.settings.production"
 
     # Auto-detect Elestio
     if os.environ.get("ELESTIO_VM_NAME"):
-        return "konote.settings.production"
+        return "KoNote2.settings.production"
 
     # Default to production for WSGI (gunicorn is typically production)
-    return "konote.settings.production"
+    return "KoNote2.settings.production"
 
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", get_default_settings())

@@ -372,7 +372,7 @@ Every significant action is logged for compliance.
 2. Filter by date, user, or action type
 3. Export if needed for reporting
 
-For detailed administrator documentation, see [Administering KoNote2](administering-konote.md).
+For detailed administrator documentation, see [Administering KoNote2](administering-KoNote2.md).
 
 ---
 
@@ -439,13 +439,13 @@ For security, KoNote2 logs you out after inactivity. Log in again to continue. Y
 
 ### In-App Resources
 
-- **Quick Reference Card** — See [Using KoNote2](using-konote.md#quick-reference-card)
+- **Quick Reference Card** — See [Using KoNote2](using-KoNote2.md#quick-reference-card)
 - **Keyboard shortcuts** — Press `?` anywhere in the app
 
 ### Documentation
 
-- [Staff Training Guide](using-konote.md) — Daily tasks in detail
-- [Administrator Guide](administering-konote.md) — Configuration and maintenance
+- [Staff Training Guide](using-KoNote2.md) — Daily tasks in detail
+- [Administrator Guide](administering-KoNote2.md) — Configuration and maintenance
 - [Technical Documentation](technical-documentation.md) — For developers
 
 ### Contact Support

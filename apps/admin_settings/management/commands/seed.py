@@ -94,7 +94,7 @@ class Command(BaseCommand):
         from apps.admin_settings.models import InstanceSetting
 
         defaults = {
-            "product_name": "KoNote",
+            "product_name": "KoNote2",
             "logo_url": "",
             "date_format": "YYYY-MM-DD",
             "time_format": "h:mma",
@@ -122,7 +122,7 @@ class Command(BaseCommand):
         # Create demo programs
         program1, _ = Program.objects.get_or_create(
             name="Demo Program",
-            defaults={"description": "A sample program for exploring KoNote.", "colour_hex": "#6366F1"},
+            defaults={"description": "A sample program for exploring KoNote2.", "colour_hex": "#6366F1"},
         )
         program2, _ = Program.objects.get_or_create(
             name="Youth Services",

@@ -71,11 +71,11 @@ Run this security review when any of the following change:
 
 | File | What to Check |
 |------|---------------|
-| `konote/encryption.py` | Algorithm strength, error handling, key loading |
+| `KoNote2/encryption.py` | Algorithm strength, error handling, key loading |
 | `apps/clients/models.py` | All PII uses `_*_encrypted` pattern |
 | `apps/auth_app/models.py` | User email encryption |
 | `apps/clients/forms.py` | No raw PII leakage in validation errors |
-| `konote/settings/*.py` | TLS/HSTS configuration |
+| `KoNote2/settings/*.py` | TLS/HSTS configuration |
 
 ### Checklist
 
@@ -113,7 +113,7 @@ Run this security review when any of the following change:
 
 | File | What to Check |
 |------|---------------|
-| `konote/middleware/program_access.py` | All client routes protected |
+| `KoNote2/middleware/program_access.py` | All client routes protected |
 | `apps/clients/views.py` | Program scoping enforced |
 | `apps/notes/views.py` | Client access validation |
 | `apps/programs/models.py` | Role definitions |
@@ -154,7 +154,7 @@ Run this security review when any of the following change:
 | File | What to Check |
 |------|---------------|
 | `apps/auth_app/views.py` | Login logic, rate limiting, error messages |
-| `konote/settings/base.py` | Session and password configuration |
+| `KoNote2/settings/base.py` | Session and password configuration |
 | Azure AD configuration | Token validation (if using SSO) |
 
 ### Checklist
@@ -193,9 +193,9 @@ Run this security review when any of the following change:
 | File | What to Check |
 |------|---------------|
 | `apps/audit/models.py` | Fields captured, immutability |
-| `konote/middleware/audit.py` | Coverage of operations |
+| `KoNote2/middleware/audit.py` | Coverage of operations |
 | `apps/audit/management/commands/lockdown_audit_db.py` | DB permissions |
-| `konote/db_router.py` | Database routing |
+| `KoNote2/db_router.py` | Database routing |
 
 ### Checklist
 

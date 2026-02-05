@@ -46,7 +46,7 @@ from apps.reports.utils import (
     get_fiscal_year_choices,
 )
 from apps.reports.forms import MetricExportForm
-import konote.encryption as enc_module
+import KoNote2.encryption as enc_module
 
 TEST_KEY = Fernet.generate_key().decode()
 

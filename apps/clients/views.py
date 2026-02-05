@@ -188,7 +188,7 @@ def client_detail(request, client_id):
     is_receptionist = user_role == "receptionist"
 
     enrolments = ClientProgramEnrolment.objects.filter(client_file=client, status="enrolled").select_related("program")
-    # Custom fields for Info tab — filter by role visibility
+    # Custom fields for Info tab — filter by role visibility and hide empty fields
     groups = CustomFieldGroup.objects.filter(status="active").prefetch_related("fields")
     custom_data = []
     has_editable_fields = False
@@ -209,8 +209,11 @@ def client_detail(request, client_id):
             is_editable = not is_receptionist or field_def.receptionist_access == "edit"
             if is_editable:
                 has_editable_fields = True
+            # For display mode, skip empty fields — Edit button shows all fields
+            if not value:
+                continue
             field_values.append({"field_def": field_def, "value": value, "is_editable": is_editable})
-        # Only include groups that have visible fields
+        # Only include groups that have fields with values
         if field_values:
             custom_data.append({"group": group, "fields": field_values})
     # Breadcrumbs: Clients > [Client Name]
@@ -239,8 +242,14 @@ def client_detail(request, client_id):
     return render(request, "clients/detail.html", context)
 
 
-def _get_custom_fields_context(client, user_role):
+def _get_custom_fields_context(client, user_role, hide_empty=False):
     """Build custom fields context for display/edit templates.
+
+    Args:
+        client: ClientFile instance
+        user_role: User's role (receptionist, counsellor, etc.)
+        hide_empty: If True, exclude fields without values (for display mode).
+                   If False, include all fields (for edit mode).
 
     Returns a dict with custom_data, has_editable_fields, client, and is_receptionist.
     """
@@ -264,7 +273,11 @@ def _get_custom_fields_context(client, user_role):
             is_editable = not is_receptionist or field_def.receptionist_access == "edit"
             if is_editable:
                 has_editable_fields = True
+            # In display mode (hide_empty=True), skip fields without values
+            if hide_empty and not value:
+                continue
             field_values.append({"field_def": field_def, "value": value, "is_editable": is_editable})
+        # Only include groups that have visible fields
         if field_values:
             custom_data.append({"group": group, "fields": field_values})
 
@@ -281,7 +294,7 @@ def client_custom_fields_display(request, client_id):
     """HTMX: Return read-only custom fields partial."""
     client = get_object_or_404(ClientFile, pk=client_id)
     user_role = getattr(request, "user_program_role", None)
-    context = _get_custom_fields_context(client, user_role)
+    context = _get_custom_fields_context(client, user_role, hide_empty=True)
     return render(request, "clients/_custom_fields_display.html", context)
 
 
@@ -345,7 +358,7 @@ def client_save_custom_fields(request, client_id):
 
     # For HTMX requests, return the read-only display partial
     if request.headers.get("HX-Request"):
-        context = _get_custom_fields_context(client, user_role)
+        context = _get_custom_fields_context(client, user_role, hide_empty=True)
         return render(request, "clients/_custom_fields_display.html", context)
 
     return redirect("clients:client_detail", client_id=client.pk)

@@ -8,7 +8,7 @@ from apps.admin_settings.models import (
     get_default_terms_for_language,
 )
 from apps.auth_app.models import User
-import konote.encryption as enc_module
+import KoNote2.encryption as enc_module
 
 TEST_KEY = Fernet.generate_key().decode()
 
@@ -329,7 +329,7 @@ class DocumentStorageSettingsTest(TestCase):
             "date_format": "Y-m-d",
             "session_timeout_minutes": "30",
             "document_storage_provider": "sharepoint",
-            "document_storage_url_template": "https://contoso.sharepoint.com/sites/KoNote/Clients/{record_id}/",
+            "document_storage_url_template": "https://contoso.sharepoint.com/sites/KoNote2/Clients/{record_id}/",
         })
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(
@@ -338,7 +338,7 @@ class DocumentStorageSettingsTest(TestCase):
         )
         self.assertEqual(
             InstanceSetting.get("document_storage_url_template"),
-            "https://contoso.sharepoint.com/sites/KoNote/Clients/{record_id}/",
+            "https://contoso.sharepoint.com/sites/KoNote2/Clients/{record_id}/",
         )
 
     def test_admin_can_configure_google_drive(self):
@@ -433,7 +433,7 @@ class DocumentFolderUrlHelperTest(TestCase):
         )
         InstanceSetting.objects.create(
             setting_key="document_storage_url_template",
-            setting_value="https://contoso.sharepoint.com/sites/KoNote/Clients/{record_id}/",
+            setting_value="https://contoso.sharepoint.com/sites/KoNote2/Clients/{record_id}/",
         )
         cache.clear()
 
@@ -446,7 +446,7 @@ class DocumentFolderUrlHelperTest(TestCase):
         url = get_document_folder_url(client)
         self.assertEqual(
             url,
-            "https://contoso.sharepoint.com/sites/KoNote/Clients/REC-2024-042/",
+            "https://contoso.sharepoint.com/sites/KoNote2/Clients/REC-2024-042/",
         )
 
     def test_returns_none_when_client_has_no_record_id(self):
@@ -460,7 +460,7 @@ class DocumentFolderUrlHelperTest(TestCase):
         )
         InstanceSetting.objects.create(
             setting_key="document_storage_url_template",
-            setting_value="https://contoso.sharepoint.com/sites/KoNote/Clients/{record_id}/",
+            setting_value="https://contoso.sharepoint.com/sites/KoNote2/Clients/{record_id}/",
         )
         cache.clear()
 

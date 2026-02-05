@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Privacy Policy" %} - {{ site.product_name|default:"KoNote2" }}{% endblock %}
+
+{% block content %}
+<div class="privacy-page">
+    <h1>{% trans "Privacy Policy" %}</h1>
+
+    <div class="notice">
+        <p>{% trans "This page should display your organisation's privacy policy." %}</p>
+        <p>{% trans "Administrators: Please customise the privacy policy template and configure it for your instance." %}</p>
+    </div>
+
+    <section>
+        <h2>{% trans "Data Protection Overview" %}</h2>
+
+        <p>{% trans "KoNote2 is designed with privacy and security as core features:" %}</p>
+
+        <h3>{% trans "Encryption" %}</h3>
+        <ul>
+            <li>{% trans "All personally identifiable information is encrypted at rest" %}</li>
+            <li>{% trans "Data in transit is protected by TLS/HTTPS" %}</li>
+            <li>{% trans "Passwords are hashed using Argon2id" %}</li>
+        </ul>
+
+        <h3>{% trans "Access Control" %}</h3>
+        <ul>
+            <li>{% trans "Role-based access controls limit who can see what" %}</li>
+            <li>{% trans "Staff can only access" %} {{ term.client_plural }} {% trans "in their assigned" %} {{ term.program_plural }}</li>
+            <li>{% trans "Administrative functions are restricted to administrators" %}</li>
+        </ul>
+
+        <h3>{% trans "Audit Logging" %}</h3>
+        <ul>
+            <li>{% trans "All access to" %} {{ term.client }} {% trans "data is logged" %}</li>
+            <li>{% trans "Login attempts are recorded with timestamps and IP addresses" %}</li>
+            <li>{% trans "Data changes are tracked with before/after values" %}</li>
+            <li>{% trans "Audit logs are stored separately and cannot be modified" %}</li>
+        </ul>
+
+        <h3>{% trans "Your Rights" %}</h3>
+        <p>{% trans "Under PIPEDA and applicable privacy legislation, you have the right to:" %}</p>
+        <ul>
+            <li>{% trans "Request access to your personal information" %}</li>
+            <li>{% trans "Request correction of inaccurate information" %}</li>
+            <li>{% trans "Withdraw consent for specific uses" %}</li>
+            <li>{% trans "File a complaint with the Privacy Commissioner" %}</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>{% trans "Contact" %}</h2>
+
+        {% if site.support_email %}
+        <p>{% trans "For privacy questions, contact:" %} <a href="mailto:{{ site.support_email }}">{{ site.support_email }}</a></p>
+        {% else %}
+        <p>{% trans "Please contact your system administrator for privacy questions." %}</p>
+        {% endif %}
+    </section>
+
+</div>
+
+<style>
+.privacy-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.privacy-page .notice {
+    background: var(--pico-form-element-background-color, #fff3cd);
+    border: 1px solid var(--pico-form-element-border-color, #ffc107);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.privacy-page section {
+    margin-bottom: 2rem;
+}
+
+.privacy-page h2 {
+    color: var(--pico-primary, #1976d2);
+    border-bottom: 2px solid var(--pico-primary, #1976d2);
+    padding-bottom: 0.5rem;
+    margin-top: 2rem;
+}
+
+.privacy-page h3 {
+    margin-top: 1.5rem;
+    color: var(--pico-secondary, #607d8b);
+}
+
+.privacy-page ul {
+    margin-left: 1.5rem;
+}
+
+.privacy-page li {
+    margin-bottom: 0.5rem;
+}
+</style>
+{% endblock %}

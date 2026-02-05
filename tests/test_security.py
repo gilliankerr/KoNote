@@ -1,5 +1,5 @@
 """
-Security tests for KoNote Web.
+Security tests for KoNote2 Web.
 
 These tests verify that security properties hold across the application:
 - PII fields are properly encrypted and not exposed
@@ -18,7 +18,7 @@ from cryptography.fernet import Fernet
 from apps.auth_app.models import User
 from apps.programs.models import Program, UserProgramRole
 from apps.clients.models import ClientFile, ClientProgramEnrolment
-import konote.encryption as enc_module
+import KoNote2.encryption as enc_module
 
 
 TEST_KEY = Fernet.generate_key().decode()
@@ -317,7 +317,7 @@ class ConfigurationDriftTest(TestCase):
         from django.conf import settings
 
         self.assertIn(
-            "konote.middleware.audit.AuditMiddleware",
+            "KoNote2.middleware.audit.AuditMiddleware",
             settings.MIDDLEWARE,
             "AuditMiddleware must be in MIDDLEWARE for audit logging",
         )
@@ -327,7 +327,7 @@ class ConfigurationDriftTest(TestCase):
         from django.conf import settings
 
         self.assertIn(
-            "konote.middleware.program_access.ProgramAccessMiddleware",
+            "KoNote2.middleware.program_access.ProgramAccessMiddleware",
             settings.MIDDLEWARE,
             "ProgramAccessMiddleware must be in MIDDLEWARE for RBAC",
         )

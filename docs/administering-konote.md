@@ -254,27 +254,27 @@ Store it separately from database backups:
 **Docker Compose:**
 ```bash
 # Main database
-docker compose exec db pg_dump -U konote konote > backup_main_$(date +%Y-%m-%d).sql
+docker compose exec db pg_dump -U KoNote2 KoNote2 > backup_main_$(date +%Y-%m-%d).sql
 
 # Audit database
-docker compose exec audit_db pg_dump -U audit_writer konote_audit > backup_audit_$(date +%Y-%m-%d).sql
+docker compose exec audit_db pg_dump -U audit_writer KoNote2_audit > backup_audit_$(date +%Y-%m-%d).sql
 ```
 
 **Plain PostgreSQL:**
 ```bash
-pg_dump -h hostname -U konote -d konote > backup_main_$(date +%Y-%m-%d).sql
-pg_dump -h hostname -U audit_writer -d konote_audit > backup_audit_$(date +%Y-%m-%d).sql
+pg_dump -h hostname -U KoNote2 -d KoNote2 > backup_main_$(date +%Y-%m-%d).sql
+pg_dump -h hostname -U audit_writer -d KoNote2_audit > backup_audit_$(date +%Y-%m-%d).sql
 ```
 
 ### Automated Backups
 
 **Windows Task Scheduler:**
 
-Save as `C:\KoNote2\backup_konote.ps1`:
+Save as `C:\KoNote2\backup_KoNote2.ps1`:
 
 ```powershell
 $BackupDir = "C:\Backups\KoNote2"
-$KoNote2Dir = "C:\KoNote2\konote-web"
+$KoNote2Dir = "C:\KoNote2\KoNote2-web"
 $Date = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
 
 if (-not (Test-Path $BackupDir)) { New-Item -ItemType Directory -Path $BackupDir -Force }
@@ -282,10 +282,10 @@ if (-not (Test-Path $BackupDir)) { New-Item -ItemType Directory -Path $BackupDir
 Set-Location $KoNote2Dir
 
 # Main database
-docker compose exec -T db pg_dump -U konote konote | Out-File -FilePath "$BackupDir\backup_main_$Date.sql" -Encoding utf8
+docker compose exec -T db pg_dump -U KoNote2 KoNote2 | Out-File -FilePath "$BackupDir\backup_main_$Date.sql" -Encoding utf8
 
 # Audit database
-docker compose exec -T audit_db pg_dump -U audit_writer konote_audit | Out-File -FilePath "$BackupDir\backup_audit_$Date.sql" -Encoding utf8
+docker compose exec -T audit_db pg_dump -U audit_writer KoNote2_audit | Out-File -FilePath "$BackupDir\backup_audit_$Date.sql" -Encoding utf8
 
 # Clean up backups older than 30 days
 Get-ChildItem -Path $BackupDir -Filter "backup_*.sql" | Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-30) } | Remove-Item -Force
@@ -295,23 +295,23 @@ Schedule via Task Scheduler to run daily at 2:00 AM.
 
 **Linux/Mac Cron:**
 
-Save as `/home/user/backup_konote.sh`:
+Save as `/home/user/backup_KoNote2.sh`:
 
 ```bash
 #!/bin/bash
-BACKUP_DIR="/backups/konote"
+BACKUP_DIR="/backups/KoNote2"
 DATE=$(date +%Y-%m-%d_%H-%M-%S)
 
 mkdir -p "$BACKUP_DIR"
 
-docker compose -f /path/to/konote-web/docker-compose.yml exec -T db pg_dump -U konote konote > "$BACKUP_DIR/backup_main_$DATE.sql"
-docker compose -f /path/to/konote-web/docker-compose.yml exec -T audit_db pg_dump -U audit_writer konote_audit > "$BACKUP_DIR/backup_audit_$DATE.sql"
+docker compose -f /path/to/KoNote2-web/docker-compose.yml exec -T db pg_dump -U KoNote2 KoNote2 > "$BACKUP_DIR/backup_main_$DATE.sql"
+docker compose -f /path/to/KoNote2-web/docker-compose.yml exec -T audit_db pg_dump -U audit_writer KoNote2_audit > "$BACKUP_DIR/backup_audit_$DATE.sql"
 
 # Clean up old backups
 find "$BACKUP_DIR" -name "backup_*.sql" -mtime +30 -delete
 ```
 
-Add to crontab: `0 2 * * * /home/user/backup_konote.sh`
+Add to crontab: `0 2 * * * /home/user/backup_KoNote2.sh`
 
 ### Cloud Provider Backups
 
@@ -327,14 +327,14 @@ Add to crontab: `0 2 * * * /home/user/backup_konote.sh`
 docker compose down
 
 # Remove old volumes (WARNING: deletes current data)
-docker volume rm konote-web_pgdata konote-web_audit_pgdata
+docker volume rm KoNote2-web_pgdata KoNote2-web_audit_pgdata
 
 # Start fresh containers
 docker compose up -d
 
 # Wait 10 seconds, then restore
-docker compose exec -T db psql -U konote konote < backup_main_2026-02-03.sql
-docker compose exec -T audit_db psql -U audit_writer konote_audit < backup_audit_2026-02-03.sql
+docker compose exec -T db psql -U KoNote2 KoNote2 < backup_main_2026-02-03.sql
+docker compose exec -T audit_db psql -U audit_writer KoNote2_audit < backup_audit_2026-02-03.sql
 ```
 
 ### Backup Retention Policy
@@ -372,11 +372,11 @@ python manage.py check --deploy
 
 | ID | Severity | What It Checks |
 |----|----------|----------------|
-| `konote.E001` | Error | Encryption key exists and valid |
-| `konote.E002` | Error | Security middleware loaded |
-| `konote.W001` | Warning | DEBUG=True in production |
-| `konote.W002` | Warning | Session cookies not secure |
-| `konote.W003` | Warning | CSRF cookies not secure |
+| `KoNote2.E001` | Error | Encryption key exists and valid |
+| `KoNote2.E002` | Error | Security middleware loaded |
+| `KoNote2.W001` | Warning | DEBUG=True in production |
+| `KoNote2.W002` | Warning | Session cookies not secure |
+| `KoNote2.W003` | Warning | CSRF cookies not secure |
 
 Errors prevent server start. Warnings indicate security gaps.
 

@@ -1,0 +1,609 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Help" %} - {{ site.product_name|default:"KoNote2" }}{% endblock %}
+
+{% block content %}
+<div class="help-page">
+    <h1>{% trans "KoNote2 Help" %}</h1>
+
+    <p>{% trans "Welcome to KoNote2! This guide helps you find what you need quickly." %}</p>
+
+    <!-- Quick Navigation -->
+    <nav class="help-nav" aria-label="{% trans 'Help navigation' %}">
+        <h2>{% trans "Quick Navigation" %}</h2>
+        <ul>
+            <li><a href="#searching">{% trans "Searching for" %} {{ term.client_plural }}</a></li>
+            <li><a href="#notes">{{ term.progress_note_plural }}</a></li>
+            <li><a href="#events">{% trans "Events and Alerts" %}</a></li>
+            <li><a href="#plans">{{ term.plan }}s</a></li>
+            <li><a href="#reports">{% trans "Analysis and Reports" %}</a></li>
+            <li><a href="#shortcuts">{% trans "Keyboard Shortcuts" %}</a></li>
+            <li><a href="#troubleshooting">{% trans "Troubleshooting" %}</a></li>
+            {% if user.is_admin %}
+            <li><a href="#admin">{% trans "Administrator Tasks" %}</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- Getting Started -->
+    <section id="getting-started">
+        <h2>{% trans "Getting Started" %}</h2>
+
+        <h3>{% trans "The Home Page" %}</h3>
+        <p>{% trans "After logging in, your home page shows:" %}</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "Section" %}</th>
+                    <th>{% trans "What It Shows" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>{% trans "Search bar" %}</strong></td>
+                    <td>{% trans "Type a name or ID to find" %} {{ term.client_plural }}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Stats row" %}</strong></td>
+                    <td>{% trans "Active" %} {{ term.client_plural }}{% trans ", alerts," %} {{ term.client_plural }} {% trans "needing attention" %}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Priority Items" %}</strong></td>
+                    <td>{{ term.client_plural|capfirst }} {% trans "with active alerts or no recent notes" %}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Recently Viewed" %}</strong></td>
+                    <td>{% trans "Quick links to" %} {{ term.client_plural }} {% trans "you've looked at recently" %}</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Searching for Clients -->
+    <section id="searching">
+        <h2>{% trans "Searching for" %} {{ term.client_plural|capfirst }}</h2>
+
+        <h3>{% trans "Quick Search" %}</h3>
+        <ol>
+            <li>{% trans "Type a" %} {{ term.client }}'s {% trans "name or record ID in the search bar" %}</li>
+            <li>{% trans "Results appear as you type" %}</li>
+            <li>{% trans "Click a name to open their" %} {{ term.file }}</li>
+        </ol>
+
+        <h3>{% trans "Using Filters" %}</h3>
+        <ol>
+            <li>{% trans "Click" %} <strong>{% trans "Search filters" %}</strong> {% trans "below the search bar" %}</li>
+            <li>{% trans "Choose from:" %}
+                <ul>
+                    <li><strong>{% trans "Status" %}</strong> — {% trans "Active, Inactive, or Discharged" %}</li>
+                    {% if features.programs %}
+                    <li><strong>{{ term.program|capfirst }}</strong> — {% trans "Filter by specific" %} {{ term.program }}</li>
+                    {% endif %}
+                    <li><strong>{% trans "Date range" %}</strong> — {% trans "Created after/before certain dates" %}</li>
+                </ul>
+            </li>
+            <li>{% trans "Results update automatically" %}</li>
+        </ol>
+    </section>
+
+    <!-- Client Files -->
+    <section id="files">
+        <h2>{{ term.client|capfirst }} {{ term.file }}s</h2>
+
+        <p>{% trans "When you open a" %} {{ term.client }}'s {{ term.file }}{% trans ", you'll see several tabs:" %}</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "Tab" %}</th>
+                    <th>{% trans "What You'll Find" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>{% trans "Info" %}</strong></td>
+                    <td>{% trans "Basic information," %} {% if features.programs %}{{ term.program }} {% trans "enrolments," %}{% endif %} {% trans "custom fields" %}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Notes" %}</strong></td>
+                    <td>{{ term.progress_note_plural|capfirst }} {% trans "timeline" %}</td>
+                </tr>
+                <tr>
+                    <td><strong>{{ term.plan|capfirst }}</strong></td>
+                    <td>{{ term.plan|capfirst }} {% trans "with" %} {{ term.section }}s{% trans "," %} {{ term.target_plural }}{% trans ", and" %} {{ term.metric_plural }}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Events" %}</strong></td>
+                    <td>{% trans "Events and alerts" %}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Analysis" %}</strong></td>
+                    <td>{% trans "Progress charts over time" %}</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Progress Notes -->
+    <section id="notes">
+        <h2>{{ term.progress_note_plural|capfirst }}</h2>
+
+        <p>{{ term.progress_note_plural|capfirst }} {% trans "document your interactions with" %} {{ term.client_plural }}{% trans ". KoNote2 offers two types:" %}</p>
+
+        <h3>{{ term.quick_note|capfirst }}s</h3>
+        <p>{% trans "Use" %} {{ term.quick_note }}s {% trans "for brief check-ins or short updates." %}</p>
+        <ol>
+            <li>{% trans "Open the" %} {{ term.client }}'s {{ term.file }}</li>
+            <li>{% trans "Go to the" %} <strong>{% trans "Notes" %}</strong> {% trans "tab" %}</li>
+            <li>{% trans "Click" %} <strong>+ {{ term.quick_note|capfirst }}</strong></li>
+            <li>{% trans "Type your note" %}</li>
+            <li>{% trans "Click" %} <strong>{% trans "Save" %}</strong></li>
+        </ol>
+
+        <h3>{% trans "Full" %} {{ term.progress_note_plural|capfirst }}</h3>
+        <p>{% trans "Use full" %} {{ term.progress_note_plural }} {% trans "for structured sessions where you're working on" %} {{ term.plan }} {{ term.target_plural }}.</p>
+        <ol>
+            <li>{% trans "Open the" %} {{ term.client }}'s {{ term.file }}</li>
+            <li>{% trans "Go to the" %} <strong>{% trans "Notes" %}</strong> {% trans "tab" %}</li>
+            <li>{% trans "Click" %} <strong>+ {{ term.progress_note|capfirst }}</strong></li>
+            <li>{% trans "Fill in:" %}
+                <ul>
+                    <li><strong>{% trans "Session date" %}</strong> — {% trans "defaults to today" %}</li>
+                    <li><strong>{% trans "Summary" %}</strong> — {% trans "brief overview of the session" %}</li>
+                    <li><strong>{{ term.target|capfirst }} {{ term.section }}s</strong> — {% trans "notes and" %} {{ term.metric }} {% trans "values for each" %} {{ term.target }} {% trans "you worked on" %}</li>
+                </ul>
+            </li>
+            <li>{% trans "Click" %} <strong>{% trans "Save Note" %}</strong></li>
+        </ol>
+
+        <p><strong>{% trans "Tip:" %}</strong> {% trans "You only need to fill in the" %} {{ term.target_plural }} {% trans "you actually worked on. Leave others blank." %}</p>
+
+        <h3>{% trans "Recording" %} {{ term.metric_plural|capfirst }}</h3>
+        <p>{% trans "When writing a full" %} {{ term.progress_note }}{% trans ", you'll see" %} {{ term.metric }} {% trans "fields under each" %} {{ term.target }}{% trans ". Common types:" %}</p>
+        <ul>
+            <li><strong>{% trans "Scale ratings" %}</strong> (1–10) {% trans "for things like housing stability or mood" %}</li>
+            <li><strong>{% trans "Yes/No" %}</strong> {% trans "checkboxes for milestone achievements" %}</li>
+            <li><strong>{% trans "Text" %}</strong> {% trans "for qualitative observations" %}</li>
+        </ul>
+
+        <h3>{% trans "Backdating Notes" %}</h3>
+        <p>{% trans "Documenting a session that happened earlier? In the note form, change the" %} <strong>{% trans "Session date" %}</strong> {% trans "to the actual date. The note will appear in the timeline based on that date." %}</p>
+
+        <h3>{% trans "Cancelling a Note" %}</h3>
+        <p>{% trans "Made a mistake? You can cancel a note within 24 hours:" %}</p>
+        <ol>
+            <li>{% trans "Find the note in the Notes tab" %}</li>
+            <li>{% trans "Click" %} <strong>{% trans "Cancel" %}</strong></li>
+            <li>{% trans "Enter a reason (required)" %}</li>
+            <li>{% trans "Confirm" %}</li>
+        </ol>
+        <p>{% trans "The note remains visible but is marked as cancelled. After 24 hours, notes cannot be cancelled." %}</p>
+    </section>
+
+    <!-- Events and Alerts -->
+    <section id="events">
+        <h2>{% trans "Events and Alerts" %}</h2>
+
+        <h3>{% trans "Events" %}</h3>
+        <p>{% trans "Events record discrete occurrences that don't need a full note — intake, discharge, hospital visits, crises, etc." %}</p>
+        <ol>
+            <li>{% trans "Open the" %} {{ term.client }}'s {{ term.file }}</li>
+            <li>{% trans "Go to the" %} <strong>{% trans "Events" %}</strong> {% trans "tab" %}</li>
+            <li>{% trans "Click" %} <strong>+ {% trans "New Event" %}</strong></li>
+            <li>{% trans "Choose the event type" %}</li>
+            <li>{% trans "Enter the date" %}</li>
+            <li>{% trans "Add any notes" %}</li>
+            <li>{% trans "Click" %} <strong>{% trans "Save" %}</strong></li>
+        </ol>
+
+        <h3>{{ term.alert|capfirst }}s</h3>
+        <p>{{ term.alert|capfirst }}s {% trans "flag a" %} {{ term.client }} {% trans "as needing attention. Use them for safety concerns or urgent follow-ups." %}</p>
+        <ol>
+            <li>{% trans "Open the" %} {{ term.client }}'s {{ term.file }}</li>
+            <li>{% trans "Go to the" %} <strong>{% trans "Events" %}</strong> {% trans "tab" %}</li>
+            <li>{% trans "Click" %} <strong>+ {% trans "New" %} {{ term.alert|capfirst }}</strong></li>
+            <li>{% trans "Describe the concern" %}</li>
+            <li>{% trans "Click" %} <strong>{% trans "Save" %}</strong></li>
+        </ol>
+        <p>{% trans "The" %} {{ term.client }} {% trans "will appear in" %} <strong>{% trans "Priority Items" %}</strong> {% trans "on the home page until the alert is resolved." %}</p>
+
+        <h3>{% trans "Resolving" %} {{ term.alert|capfirst }}s</h3>
+        <ol>
+            <li>{% trans "Find the" %} {{ term.alert }} {% trans "in the Events tab" %}</li>
+            <li>{% trans "Click" %} <strong>{% trans "Resolve" %}</strong> {% trans "or" %} <strong>{% trans "Cancel" %} {{ term.alert|capfirst }}</strong></li>
+            <li>{% trans "Add a resolution note" %}</li>
+            <li>{% trans "Save" %}</li>
+        </ol>
+    </section>
+
+    <!-- Outcome Plans -->
+    <section id="plans">
+        <h2>{{ term.plan|capfirst }}s</h2>
+
+        <p>{% trans "The" %} <strong>{{ term.plan|capfirst }}</strong> {% trans "tab shows the" %} {{ term.client }}'s {{ term.plan }} {% trans "— their goals and how they're progressing." %}</p>
+
+        <h3>{% trans "Understanding the" %} {{ term.plan|capfirst }} {% trans "Structure" %}</h3>
+        <ul>
+            <li><strong>{{ term.section|capfirst }}s</strong> — {% trans "Broad categories like" %} "{% trans "Housing" %}", "{% trans "Employment" %}", "{% trans "Health" %}"</li>
+            <li><strong>{{ term.target_plural|capfirst }}</strong> — {% trans "Specific goals within each" %} {{ term.section }}</li>
+            <li><strong>{{ term.metric_plural|capfirst }}</strong> — {% trans "Measurable indicators attached to" %} {{ term.target_plural }}</li>
+        </ul>
+
+        <h3>{% trans "Viewing" %} {{ term.target|capfirst }} {% trans "Details" %}</h3>
+        <ol>
+            <li>{% trans "Click a" %} {{ term.target }} {% trans "name to expand it" %}</li>
+            <li>{% trans "View all notes and" %} {{ term.metric }} {% trans "recordings for that" %} {{ term.target }}</li>
+            <li>{% trans "See progress charts (if" %} {{ term.metric_plural }} {% trans "have been recorded)" %}</li>
+        </ol>
+
+        <h3>{% trans "Editing" %} {{ term.plan|capfirst }}s</h3>
+        <p><strong>{% trans "Staff" %}</strong> {% trans "can view" %} {{ term.plan }}s {% trans "but typically cannot edit them." %}</p>
+        <p><strong>{% trans "Program managers" %}</strong> {% trans "and" %} <strong>{% trans "coordinators" %}</strong> {% trans "can add" %} {{ term.section }}s{% trans "," %} {{ term.target_plural }}{% trans ", and assign" %} {{ term.metric_plural }}.</p>
+    </section>
+
+    <!-- Analysis and Reports -->
+    <section id="reports">
+        <h2>{% trans "Analysis and Reports" %}</h2>
+
+        <h3>{% trans "Viewing Progress Charts" %}</h3>
+        <ol>
+            <li>{% trans "Open the" %} {{ term.client }}'s {{ term.file }}</li>
+            <li>{% trans "Go to the" %} <strong>{% trans "Analysis" %}</strong> {% trans "tab" %}</li>
+            <li>{% trans "View charts showing" %} {{ term.metric }} {% trans "values over time" %}</li>
+        </ol>
+        <p>{% trans "Charts automatically update when new" %} {{ term.metric }} {% trans "values are recorded in" %} {{ term.progress_note_plural }}.</p>
+
+        <h3>{% trans "Exporting Data" %}</h3>
+        <p><strong>{% trans "Program managers and administrators" %}</strong> {% trans "can export data:" %}</p>
+        <ul>
+            <li><strong>{% trans "Metric Export (CSV)" %}</strong> — {% trans "Export" %} {{ term.metric }} {% trans "data filtered by" %} {{ term.program }}{% trans "," %} {{ term.metric_plural }}{% trans ", and date range" %}</li>
+            <li><strong>{{ term.client|capfirst }} {% trans "Data Export" %}</strong> — {% trans "Download a" %} {{ term.client }}'s {% trans "complete data (for GDPR/privacy requests)" %}</li>
+            <li><strong>{% trans "PDF Reports" %}</strong> — {% trans "Generate printable progress reports" %}</li>
+        </ul>
+        <p>{% trans "Find export options under" %} <strong>{% trans "Reports" %}</strong> {% trans "in the main navigation." %}</p>
+    </section>
+
+    <!-- Keyboard Shortcuts -->
+    <section id="shortcuts">
+        <h2>{% trans "Keyboard Shortcuts" %}</h2>
+
+        <p>{% trans "Speed up your work with these shortcuts:" %}</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "Shortcut" %}</th>
+                    <th>{% trans "Action" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><kbd>/</kbd></td>
+                    <td>{% trans "Focus the search bar" %}</td>
+                </tr>
+                <tr>
+                    <td><kbd>g</kbd> {% trans "then" %} <kbd>h</kbd></td>
+                    <td>{% trans "Go to Home" %}</td>
+                </tr>
+                <tr>
+                    <td><kbd>n</kbd></td>
+                    <td>{% trans "New" %} {{ term.quick_note }} ({% trans "on" %} {{ term.client }} {% trans "page" %})</td>
+                </tr>
+                <tr>
+                    <td><kbd>Ctrl</kbd>+<kbd>S</kbd></td>
+                    <td>{% trans "Save current form" %}</td>
+                </tr>
+                <tr>
+                    <td><kbd>Esc</kbd></td>
+                    <td>{% trans "Close modal or cancel action" %}</td>
+                </tr>
+                <tr>
+                    <td><kbd>?</kbd></td>
+                    <td>{% trans "Show keyboard shortcuts" %}</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Understanding Roles -->
+    <section id="roles">
+        <h2>{% trans "Understanding Roles" %}</h2>
+
+        <p>{% trans "Your access depends on your assigned role:" %}</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "Role" %}</th>
+                    <th>{% trans "What You Can Do" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>{% trans "Receptionist" %}</strong></td>
+                    <td>{% trans "View limited" %} {{ term.client }} {% trans "info, update contact details" %}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Staff" %}</strong></td>
+                    <td>{% trans "Full" %} {{ term.client }} {% trans "access, write notes, record events" %}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Program Manager" %}</strong></td>
+                    <td>{% trans "All staff abilities plus edit" %} {{ term.plan }}s{% trans ", manage team" %}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Administrator" %}</strong></td>
+                    <td>{% trans "System settings, user management, all configuration" %}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p><strong>{% trans "Note:" %}</strong> {% trans "Administrators without a" %} {{ term.program }} {% trans "assignment cannot see" %} {{ term.client }} {% trans "data. This is a security feature." %}</p>
+    </section>
+
+    {% if user.is_admin %}
+    <!-- Administrator Tasks -->
+    <section id="admin">
+        <h2>{% trans "Administrator Tasks" %}</h2>
+
+        <p>{% trans "As an administrator, you can configure KoNote2 through the" %} <strong>{% trans "Admin" %}</strong> {% trans "menu:" %}</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "Task" %}</th>
+                    <th>{% trans "Where to Find It" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{% trans "Create users" %}</td>
+                    <td>{% trans "Admin" %} → {% trans "Invites" %}</td>
+                </tr>
+                {% if features.programs %}
+                <tr>
+                    <td>{% trans "Manage" %} {{ term.program_plural }}</td>
+                    <td>{% trans "Admin" %} → {{ term.program_plural|capfirst }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td>{% trans "Set up" %} {{ term.metric_plural }}</td>
+                    <td>{% trans "Admin" %} → {{ term.metric_plural|capfirst }}</td>
+                </tr>
+                <tr>
+                    <td>{% trans "Create" %} {{ term.plan }} {% trans "templates" %}</td>
+                    <td>{% trans "Admin" %} → {% trans "Templates" %}</td>
+                </tr>
+                <tr>
+                    <td>{% trans "Customise terminology" %}</td>
+                    <td>{% trans "Admin" %} → {% trans "Settings" %} → {% trans "Terminology" %}</td>
+                </tr>
+                <tr>
+                    <td>{% trans "Enable/disable features" %}</td>
+                    <td>{% trans "Admin" %} → {% trans "Settings" %} → {% trans "Features" %}</td>
+                </tr>
+                <tr>
+                    <td>{% trans "View audit logs" %}</td>
+                    <td>{% trans "Admin" %} → {% trans "Audit Log" %}</td>
+                </tr>
+                <tr>
+                    <td>{% trans "Registration links" %}</td>
+                    <td>{% trans "Admin" %} → {% trans "Registration" %}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>{% trans "For detailed administrator documentation, see the" %} <a href="/docs/administering-KoNote2/">{% trans "Administrator Guide" %}</a>.</p>
+    </section>
+    {% endif %}
+
+    <!-- Troubleshooting -->
+    <section id="troubleshooting">
+        <h2>{% trans "Troubleshooting" %}</h2>
+
+        <h3>{% trans "I can't log in" %}</h3>
+        <p><strong>{% trans "Azure AD:" %}</strong> {% trans "Check that your work email is registered with KoNote2. Contact your administrator." %}</p>
+        <p><strong>{% trans "Local login:" %}</strong> {% trans "Confirm your credentials. If forgotten, ask your administrator to reset your password." %}</p>
+
+        <h3>{% trans "I can't find a" %} {{ term.client }}</h3>
+        <ul>
+            <li>{% trans "Check your spelling" %}</li>
+            <li>{% trans "Try searching by record ID instead of name" %}</li>
+            <li>{% trans "Check filters — you may have a status filter active" %}</li>
+            <li>{% trans "You can only see" %} {{ term.client_plural }} {% trans "in" %} {{ term.program_plural }} {% trans "you're assigned to" %}</li>
+        </ul>
+
+        <h3>{% trans "I can't edit a" %} {{ term.client }}'s {{ term.plan }}</h3>
+        <p>{% trans "Only program managers and administrators can edit" %} {{ term.plan }}s{% trans ". If you need changes, let your supervisor know." %}</p>
+
+        <h3>{% trans "I can't see the Admin menu" %}</h3>
+        <p>{% trans "The Admin menu only appears for administrators. If you need admin access, contact your system administrator." %}</p>
+
+        <h3>{% trans "My changes aren't saving" %}</h3>
+        <ul>
+            <li>{% trans "Check for validation errors (red text near fields)" %}</li>
+            <li>{% trans "Ensure you're clicking" %} <strong>{% trans "Save" %}</strong>{% trans ", not just closing the form" %}</li>
+            <li>{% trans "Try refreshing the page and attempting again" %}</li>
+        </ul>
+
+        <h3>{% trans "Charts aren't showing data" %}</h3>
+        <p>{% trans "Charts require" %} {{ term.metric }} {% trans "values recorded in" %} {{ term.progress_note_plural }}{% trans ". If no" %} {{ term.metric_plural }} {% trans "have been recorded for a" %} {{ term.target }}{% trans ", charts will be empty." %}</p>
+
+        <h3>{% trans "The page timed out" %}</h3>
+        <p>{% trans "For security, KoNote2 logs you out after inactivity. Log in again to continue. Your unsaved work may be lost." %}</p>
+    </section>
+
+    <!-- Getting More Help -->
+    <section id="more-help">
+        <h2>{% trans "Getting More Help" %}</h2>
+
+        <h3>{% trans "In-App Resources" %}</h3>
+        <ul>
+            <li>{% trans "Press" %} <kbd>?</kbd> {% trans "anywhere in the app to see keyboard shortcuts" %}</li>
+        </ul>
+
+        <h3>{% trans "Contact Support" %}</h3>
+        <ul>
+            <li><strong>{% trans "Password issues" %}</strong> — {% trans "Contact your supervisor or administrator" %}</li>
+            <li><strong>{% trans "Bug reports" %}</strong> — {% trans "Report to your administrator" %}</li>
+            <li><strong>{% trans "Feature requests" %}</strong> — {% trans "Talk to your program coordinator" %}</li>
+        </ul>
+        {% if site.support_email %}
+        <p>{% trans "Support email:" %} <a href="mailto:{{ site.support_email }}">{{ site.support_email }}</a></p>
+        {% endif %}
+    </section>
+
+    <!-- Quick Reference -->
+    <section id="quick-ref">
+        <h2>{% trans "Quick Reference" %}</h2>
+
+        <h3>{% trans "Common Tasks" %}</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "I want to..." %}</th>
+                    <th>{% trans "Do this..." %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{% trans "Find a" %} {{ term.client }}</td>
+                    <td>{% trans "Type name in search bar" %}</td>
+                </tr>
+                <tr>
+                    <td>{% trans "Write a quick update" %}</td>
+                    <td>{% trans "Notes tab" %} → + {{ term.quick_note|capfirst }}</td>
+                </tr>
+                <tr>
+                    <td>{% trans "Document a session" %}</td>
+                    <td>{% trans "Notes tab" %} → + {{ term.progress_note|capfirst }}</td>
+                </tr>
+                <tr>
+                    <td>{% trans "Record intake/discharge" %}</td>
+                    <td>{% trans "Events tab" %} → + {% trans "New Event" %}</td>
+                </tr>
+                <tr>
+                    <td>{% trans "Flag a safety concern" %}</td>
+                    <td>{% trans "Events tab" %} → + {% trans "New" %} {{ term.alert|capfirst }}</td>
+                </tr>
+                <tr>
+                    <td>{% trans "See who needs attention" %}</td>
+                    <td>{% trans "Check Priority Items on home page" %}</td>
+                </tr>
+                <tr>
+                    <td>{% trans "View progress charts" %}</td>
+                    <td>{{ term.client|capfirst }} {{ term.file }} → {% trans "Analysis tab" %}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>{% trans "Understanding Status" %}</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>{{ term.client|capfirst }} {% trans "Status" %}</th>
+                    <th>{% trans "Meaning" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>{% trans "Active" %}</strong></td>
+                    <td>{% trans "Currently receiving services" %}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Inactive" %}</strong></td>
+                    <td>{% trans "Temporarily not receiving services" %}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Discharged" %}</strong></td>
+                    <td>{% trans "Services completed or ended" %}</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+</div>
+
+<style>
+.help-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.help-nav {
+    background: var(--pico-card-background-color, #f5f5f5);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.help-nav h2 {
+    margin-top: 0;
+    font-size: 1.1rem;
+}
+
+.help-nav ul {
+    columns: 2;
+    margin-bottom: 0;
+}
+
+@media (max-width: 600px) {
+    .help-nav ul {
+        columns: 1;
+    }
+}
+
+.help-page section {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--pico-muted-border-color, #e0e0e0);
+}
+
+.help-page section:last-child {
+    border-bottom: none;
+}
+
+.help-page h2 {
+    color: var(--pico-primary, #1976d2);
+    border-bottom: 2px solid var(--pico-primary, #1976d2);
+    padding-bottom: 0.5rem;
+}
+
+.help-page h3 {
+    margin-top: 1.5rem;
+    color: var(--pico-secondary, #607d8b);
+}
+
+.help-page table {
+    margin: 1rem 0;
+}
+
+.help-page kbd {
+    background: var(--pico-muted-background-color, #e0e0e0);
+    border: 1px solid var(--pico-muted-border-color, #ccc);
+    border-radius: 4px;
+    padding: 0.15rem 0.4rem;
+    font-family: monospace;
+    font-size: 0.9em;
+}
+
+.help-page ol, .help-page ul {
+    margin-left: 1.5rem;
+}
+
+.help-page li {
+    margin-bottom: 0.5rem;
+}
+
+@media print {
+    .help-nav {
+        break-inside: avoid;
+    }
+    .help-page section {
+        break-inside: avoid;
+    }
+}
+</style>
+{% endblock %}

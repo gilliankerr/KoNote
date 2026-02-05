@@ -1,6 +1,6 @@
-# KoNote Web — Azure Deployment Guide
+# KoNote2 Web — Azure Deployment Guide
 
-This guide walks you through deploying KoNote Web to Microsoft Azure. We'll use Azure Container Apps to run the application and Azure Database for PostgreSQL to store your data.
+This guide walks you through deploying KoNote2 Web to Microsoft Azure. We'll use Azure Container Apps to run the application and Azure Database for PostgreSQL to store your data.
 
 **Time estimate:** 1–2 hours for first-time setup (depending on Azure experience and confirmation times from IT/security).
 
@@ -14,7 +14,7 @@ Before starting, you'll need:
 - A **domain name** (to configure SSL/TLS certificates and Azure AD)
 - **Azure CLI** installed on your computer ([install here](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows)), *or*
 - Access to the **Azure Portal** in your web browser (if you prefer to use the graphical interface)
-- A **GitHub account** with access to the KoNote Web repository
+- A **GitHub account** with access to the KoNote2 Web repository
 - **Docker Desktop** installed locally (for testing locally before deploy)
 - A text editor to manage environment variables
 
@@ -29,7 +29,7 @@ A resource group is a container that holds all the resources for your applicatio
 1. Go to [portal.azure.com](https://portal.azure.com) and log in.
 2. Click "Create a resource" or search for "Resource Group".
 3. Fill in:
-   - **Resource Group name:** e.g., `konote-prod` or `konote-nonprofit-name`
+   - **Resource Group name:** e.g., `KoNote2-prod` or `KoNote2-nonprofit-name`
    - **Region:** Choose the Azure region closest to your users (e.g., `Canada Central` for Canadian nonprofits)
 4. Click "Review + create", then "Create".
 5. Wait for the resource group to be created (usually < 1 minute).
@@ -39,18 +39,18 @@ A resource group is a container that holds all the resources for your applicatio
 Open a terminal/command prompt and run:
 
 ```bash
-az group create --name konote-prod --location canadacentral
+az group create --name KoNote2-prod --location canadacentral
 ```
 
-Replace `konote-prod` with your preferred resource group name. Replace `canadacentral` with your region of choice.
+Replace `KoNote2-prod` with your preferred resource group name. Replace `canadacentral` with your region of choice.
 
 ---
 
 ## Step 2: Create Two Azure PostgreSQL Databases
 
-KoNote Web needs two separate PostgreSQL databases:
-1. **konote** — main application database (stores clients, outcomes, notes, etc.)
-2. **konote_audit** — read-only audit log database (for security and compliance)
+KoNote2 Web needs two separate PostgreSQL databases:
+1. **KoNote2** — main application database (stores clients, outcomes, notes, etc.)
+2. **KoNote2_audit** — read-only audit log database (for security and compliance)
 
 ### Why two databases?
 
@@ -64,16 +64,16 @@ The audit database is intentionally read-only and isolated. This prevents accide
 2. Click "Create".
 3. **Project details:**
    - **Resource Group:** Select the one you created in Step 1.
-   - **Server name:** `konote-db` (this must be globally unique, so Azure may ask you to use something like `konote-db-abc123`)
+   - **Server name:** `KoNote2-db` (this must be globally unique, so Azure may ask you to use something like `KoNote2-db-abc123`)
    - **Region:** Same as your resource group.
    - **PostgreSQL version:** 16 (match your docker-compose.yml)
 4. **Administrator account:**
-   - **Admin username:** `konote`
+   - **Admin username:** `KoNote2`
    - **Password:** Generate a strong password. Save it in a secure location (password manager).
 5. Click "Review + create", then "Create".
 6. Wait for deployment (5–10 minutes).
 7. Once done, **repeat steps 1–6 for the second database:**
-   - Server name: `konote-audit-db`
+   - Server name: `KoNote2-audit-db`
    - Admin username: `audit_writer`
    - Password: Generate a different strong password. Save it.
 
@@ -82,17 +82,17 @@ The audit database is intentionally read-only and isolated. This prevents accide
 ```bash
 # Main database
 az postgres flexible-server create \
-  --resource-group konote-prod \
-  --name konote-db \
+  --resource-group KoNote2-prod \
+  --name KoNote2-db \
   --location canadacentral \
-  --admin-user konote \
+  --admin-user KoNote2 \
   --admin-password <YOUR_STRONG_PASSWORD> \
   --version 16
 
 # Audit database
 az postgres flexible-server create \
-  --resource-group konote-prod \
-  --name konote-audit-db \
+  --resource-group KoNote2-prod \
+  --name KoNote2-audit-db \
   --location canadacentral \
   --admin-user audit_writer \
   --admin-password <YOUR_STRONG_AUDIT_PASSWORD> \
@@ -103,30 +103,30 @@ Replace `<YOUR_STRONG_PASSWORD>` and `<YOUR_STRONG_AUDIT_PASSWORD>` with strong 
 
 ### Create the Databases Within Each Server
 
-Once each PostgreSQL server is created, you need to create the actual databases (`konote` and `konote_audit`).
+Once each PostgreSQL server is created, you need to create the actual databases (`KoNote2` and `KoNote2_audit`).
 
 #### Option A: Using Azure Portal
 
-1. Go to your first PostgreSQL server (`konote-db`).
+1. Go to your first PostgreSQL server (`KoNote2-db`).
 2. In the left menu, click "Databases".
 3. Click "+ Add".
-4. **Database name:** `konote`
+4. **Database name:** `KoNote2`
 5. Click "Save".
-6. Repeat for the audit server (`konote-audit-db`):
-   - Database name: `konote_audit`
+6. Repeat for the audit server (`KoNote2-audit-db`):
+   - Database name: `KoNote2_audit`
 
 #### Option B: Using Azure CLI
 
 ```bash
 az postgres flexible-server db create \
-  --resource-group konote-prod \
-  --server-name konote-db \
-  --database-name konote
+  --resource-group KoNote2-prod \
+  --server-name KoNote2-db \
+  --database-name KoNote2
 
 az postgres flexible-server db create \
-  --resource-group konote-prod \
-  --server-name konote-audit-db \
-  --database-name konote_audit
+  --resource-group KoNote2-prod \
+  --server-name KoNote2-audit-db \
+  --database-name KoNote2_audit
 ```
 
 ### Configure Firewall Rules (Allow Container App to Connect)
@@ -151,16 +151,16 @@ You'll need to allow your Azure Container App to connect to these databases. For
 ```bash
 # For main database
 az postgres flexible-server firewall-rule create \
-  --resource-group konote-prod \
-  --name konote-db \
+  --resource-group KoNote2-prod \
+  --name KoNote2-db \
   --rule-name allow-azure-services \
   --start-ip-address 0.0.0.0 \
   --end-ip-address 0.0.0.0
 
 # For audit database
 az postgres flexible-server firewall-rule create \
-  --resource-group konote-prod \
-  --name konote-audit-db \
+  --resource-group KoNote2-prod \
+  --name KoNote2-audit-db \
   --rule-name allow-azure-services \
   --start-ip-address 0.0.0.0 \
   --end-ip-address 0.0.0.0
@@ -178,18 +178,18 @@ An Azure Container Registry is where Docker images are stored. This is optional�
 2. Click "Create".
 3. **Details:**
    - **Resource Group:** Select your resource group.
-   - **Registry name:** `konoteregistry` (must be lowercase, no hyphens; Azure adds a unique suffix)
+   - **Registry name:** `KoNote2registry` (must be lowercase, no hyphens; Azure adds a unique suffix)
    - **Region:** Same as your resource group.
    - **SKU:** Basic (sufficient for most nonprofits)
 4. Click "Review + create", then "Create".
-5. Once created, go to your registry and note the **Login server** (e.g., `konoteregistry.azurecr.io`).
+5. Once created, go to your registry and note the **Login server** (e.g., `KoNote2registry.azurecr.io`).
 
 ### Option B: Using Azure CLI
 
 ```bash
 az acr create \
-  --resource-group konote-prod \
-  --name konoteregistry \
+  --resource-group KoNote2-prod \
+  --name KoNote2registry \
   --sku Basic
 ```
 
@@ -197,7 +197,7 @@ az acr create \
 
 ## Step 4: Prepare Your Docker Image
 
-Before deploying to Azure, you'll build a Docker image of KoNote Web locally and push it to a registry.
+Before deploying to Azure, you'll build a Docker image of KoNote2 Web locally and push it to a registry.
 
 ### Step 4a: Generate Encryption Keys (locally)
 
@@ -215,13 +215,13 @@ Save both keys somewhere secure (you'll need them for environment variables in S
 
 ### Step 4b: Build the Docker Image
 
-In the KoNote Web repository root directory, run:
+In the KoNote2 Web repository root directory, run:
 
 ```bash
-docker build -t konote:latest .
+docker build -t KoNote2:latest .
 ```
 
-This reads the `Dockerfile` and builds an image called `konote` with the tag `latest`. The build process:
+This reads the `Dockerfile` and builds an image called `KoNote2` with the tag `latest`. The build process:
 1. Starts with Python 3.12
 2. Installs dependencies from `requirements.txt`
 3. Copies your application code
@@ -234,20 +234,20 @@ If you created an Azure Container Registry (Step 3), authenticate and push:
 
 ```bash
 # Log in to Azure Container Registry
-az acr login --name konoteregistry
+az acr login --name KoNote2registry
 
 # Tag the image with your registry's login server
-docker tag konote:latest konoteregistry.azurecr.io/konote:latest
+docker tag KoNote2:latest KoNote2registry.azurecr.io/KoNote2:latest
 
 # Push to the registry
-docker push konoteregistry.azurecr.io/konote:latest
+docker push KoNote2registry.azurecr.io/KoNote2:latest
 ```
 
 **Alternative:** If you're using Docker Hub instead:
 
 ```bash
-docker tag konote:latest <your-dockerhub-username>/konote:latest
-docker push <your-dockerhub-username>/konote:latest
+docker tag KoNote2:latest <your-dockerhub-username>/KoNote2:latest
+docker push <your-dockerhub-username>/KoNote2:latest
 ```
 
 ---
@@ -262,13 +262,13 @@ Azure Container Apps is a managed service that runs your Docker container. Think
 2. Click "Create Container App".
 3. **Basics tab:**
    - **Resource Group:** Select your resource group.
-   - **Container App name:** `konote-web` or `konote-app`
+   - **Container App name:** `KoNote2-web` or `KoNote2-app`
    - **Region:** Same as your resource group.
    - **Container Apps Environment:** Create new. This takes a minute.
-     - **Name:** `konote-env`
+     - **Name:** `KoNote2-env`
 4. **Container tab:**
    - **Image source:** Select "Azure Container Registry" (if you pushed to ACR) or "Docker Hub" (if you pushed to Docker Hub).
-   - **Select image:** Browse and select `konote:latest`.
+   - **Select image:** Browse and select `KoNote2:latest`.
    - **CPU and memory:**
      - **CPU:** 0.5 cores
      - **Memory:** 1 Gi
@@ -284,18 +284,18 @@ Azure Container Apps is a managed service that runs your Docker container. Think
 
 ```bash
 az containerapp create \
-  --name konote-web \
-  --resource-group konote-prod \
-  --environment konote-env \
-  --image konoteregistry.azurecr.io/konote:latest \
+  --name KoNote2-web \
+  --resource-group KoNote2-prod \
+  --environment KoNote2-env \
+  --image KoNote2registry.azurecr.io/KoNote2:latest \
   --target-port 8000 \
   --ingress external \
-  --registry-server konoteregistry.azurecr.io \
+  --registry-server KoNote2registry.azurecr.io \
   --cpu 0.5 \
   --memory 1Gi
 ```
 
-Once created, note the Container App's **URL** (e.g., `https://konote-web.yellowplant-abc123.canadacentral.azurecontainerapps.io`). You'll use this to configure environment variables.
+Once created, note the Container App's **URL** (e.g., `https://KoNote2-web.yellowplant-abc123.canadacentral.azurecontainerapps.io`). You'll use this to configure environment variables.
 
 ---
 
@@ -311,9 +311,9 @@ Before setting environment variables, collect these values:
 |----------|-------|--------|
 | `SECRET_KEY` | (generated in Step 4a) | Your secure location |
 | `FIELD_ENCRYPTION_KEY` | (generated in Step 4a) | Your secure location |
-| `DATABASE_URL` | `postgresql://konote:<PASSWORD>@<SERVER_NAME>.postgres.database.azure.com:5432/konote` | From Step 2 (main DB) |
-| `AUDIT_DATABASE_URL` | `postgresql://audit_writer:<AUDIT_PASSWORD>@<SERVER_NAME_AUDIT>.postgres.database.azure.com:5432/konote_audit` | From Step 2 (audit DB) |
-| `DJANGO_SETTINGS_MODULE` | `konote.settings.production` | Fixed |
+| `DATABASE_URL` | `postgresql://KoNote2:<PASSWORD>@<SERVER_NAME>.postgres.database.azure.com:5432/KoNote2` | From Step 2 (main DB) |
+| `AUDIT_DATABASE_URL` | `postgresql://audit_writer:<AUDIT_PASSWORD>@<SERVER_NAME_AUDIT>.postgres.database.azure.com:5432/KoNote2_audit` | From Step 2 (audit DB) |
+| `DJANGO_SETTINGS_MODULE` | `KoNote2.settings.production` | Fixed |
 | `AUTH_MODE` | `azure` (for Azure AD) or `local` | Your choice |
 | `AZURE_CLIENT_ID` | (if using Azure AD) | Step 8 |
 | `AZURE_CLIENT_SECRET` | (if using Azure AD) | Step 8 |
@@ -323,10 +323,10 @@ Before setting environment variables, collect these values:
 
 ### Example DATABASE_URL
 
-If your main PostgreSQL server is named `konote-db` (Azure appends a suffix), the full server name is shown in the Azure Portal under "Server name". Let's say it's `konote-db-xyz123.postgres.database.azure.com`:
+If your main PostgreSQL server is named `KoNote2-db` (Azure appends a suffix), the full server name is shown in the Azure Portal under "Server name". Let's say it's `KoNote2-db-xyz123.postgres.database.azure.com`:
 
 ```
-postgresql://konote:YourStrongPassword@konote-db-xyz123.postgres.database.azure.com:5432/konote
+postgresql://KoNote2:YourStrongPassword@KoNote2-db-xyz123.postgres.database.azure.com:5432/KoNote2
 ```
 
 ### Set Environment Variables in Container App
@@ -349,12 +349,12 @@ postgresql://konote:YourStrongPassword@konote-db-xyz123.postgres.database.azure.
 
 ```bash
 az containerapp update \
-  --name konote-web \
-  --resource-group konote-prod \
+  --name KoNote2-web \
+  --resource-group KoNote2-prod \
   --set-env-vars \
-    DJANGO_SETTINGS_MODULE=konote.settings.production \
-    DATABASE_URL="postgresql://konote:PASSWORD@konote-db-xyz123.postgres.database.azure.com:5432/konote" \
-    AUDIT_DATABASE_URL="postgresql://audit_writer:AUDIT_PASSWORD@konote-audit-db-xyz123.postgres.database.azure.com:5432/konote_audit" \
+    DJANGO_SETTINGS_MODULE=KoNote2.settings.production \
+    DATABASE_URL="postgresql://KoNote2:PASSWORD@KoNote2-db-xyz123.postgres.database.azure.com:5432/KoNote2" \
+    AUDIT_DATABASE_URL="postgresql://audit_writer:AUDIT_PASSWORD@KoNote2-audit-db-xyz123.postgres.database.azure.com:5432/KoNote2_audit" \
     AUTH_MODE=local \
     ALLOWED_HOSTS="your-domain.com,www.your-domain.com"
 ```
@@ -363,8 +363,8 @@ For sensitive variables, use `--secrets`:
 
 ```bash
 az containerapp update \
-  --name konote-web \
-  --resource-group konote-prod \
+  --name KoNote2-web \
+  --resource-group KoNote2-prod \
   --secrets \
     SECRET_KEY="your-key-here" \
     FIELD_ENCRYPTION_KEY="your-key-here"
@@ -389,10 +389,10 @@ Container Apps don't have an easy way to run one-time commands like migrations. 
 2. Click "Create".
 3. **Project details:**
    - **Resource Group:** Your resource group.
-   - **Container name:** `konote-migrate`
+   - **Container name:** `KoNote2-migrate`
    - **Region:** Same as your resource group.
    - **Image source:** "Azure Container Registry" or "Docker Hub".
-   - **Image:** `konote:latest`
+   - **Image:** `KoNote2:latest`
    - **OS type:** Linux
 4. **Advanced tab:**
    - **Environment variables:** Add the same variables from Step 6.
@@ -408,9 +408,9 @@ Container Apps don't have an easy way to run one-time commands like migrations. 
 
 ```bash
 az container create \
-  --resource-group konote-prod \
-  --name konote-migrate \
-  --image konoteregistry.azurecr.io/konote:latest \
+  --resource-group KoNote2-prod \
+  --name KoNote2-migrate \
+  --image KoNote2registry.azurecr.io/KoNote2:latest \
   --environment-variables \
     DATABASE_URL="postgresql://..." \
     AUDIT_DATABASE_URL="postgresql://..." \
@@ -446,7 +446,7 @@ If you want users to log in with their Microsoft/Azure AD credentials (recommend
 3. In the left menu, click "App registrations".
 4. Click "+ New registration".
 5. **Register an application:**
-   - **Name:** `KoNote Web`
+   - **Name:** `KoNote2 Web`
    - **Supported account types:** "Accounts in this organisational directory only" (if internal) or "Multitenant" (if external users).
    - **Redirect URI (optional):**
      - **Platform:** Web
@@ -461,7 +461,7 @@ If you want users to log in with their Microsoft/Azure AD credentials (recommend
 1. In your app registration, go to "Certificates & secrets" (left menu).
 2. Click "+ New client secret".
 3. **Add a client secret:**
-   - **Description:** `KoNote Web deployment`
+   - **Description:** `KoNote2 Web deployment`
    - **Expires:** Choose a period (e.g., 24 months; set a calendar reminder to renew it).
 4. Click "Add".
 5. **Immediately copy and save the secret value** (you won't see it again). ← Store as `AZURE_CLIENT_SECRET`
@@ -490,7 +490,7 @@ AZURE_REDIRECT_URI=https://your-domain.com/auth/callback/
 
 ## Step 9: Configure Your Domain and SSL Certificate
 
-Your Container App currently has a generated Azure domain (e.g., `konote-web.yellowplant-abc123.azurecontainerapps.io`). To use your own domain, you need to:
+Your Container App currently has a generated Azure domain (e.g., `KoNote2-web.yellowplant-abc123.azurecontainerapps.io`). To use your own domain, you need to:
 
 1. Point your domain's DNS to Azure.
 2. Set up an SSL certificate (HTTPS).
@@ -501,7 +501,7 @@ Your Container App currently has a generated Azure domain (e.g., `konote-web.yel
 2. Click "Custom domains" (left menu).
 3. Click "+ Add custom domain".
 4. **Domain configuration:**
-   - **Domain:** Enter your domain (e.g., `konote.yournonprofit.ca`).
+   - **Domain:** Enter your domain (e.g., `KoNote2.yournonprofit.ca`).
 5. Azure will provide DNS validation instructions.
 6. Update your DNS provider (GoDaddy, Google Domains, etc.) with the CNAME record Azure provides.
 7. Return to the Azure Portal and click "Validate".
@@ -518,7 +518,7 @@ If you already have an SSL certificate, you can upload it. This is beyond the sc
 Once everything is set up, test that your application works:
 
 1. Go to your domain (or Container App URL if not using a custom domain).
-2. You should see the KoNote Web login page.
+2. You should see the KoNote2 Web login page.
 3. If using local auth:
    - Create a test user in the Django admin panel (`/admin/`).
    - Try logging in.
@@ -533,7 +533,7 @@ Once everything is set up, test that your application works:
 
 ## Step 11: Set Up Monitoring and Backups
 
-Your KoNote instance is now live. To keep it running reliably, set up monitoring and backups.
+Your KoNote2 instance is now live. To keep it running reliably, set up monitoring and backups.
 
 ### Enable Database Backups
 
@@ -554,7 +554,7 @@ Application Insights monitors your app's performance and errors.
 2. Click "Create".
 3. **Basics:**
    - **Resource Group:** Your resource group.
-   - **Name:** `konote-insights`
+   - **Name:** `KoNote2-insights`
    - **Region:** Same as your resource group.
 4. Click "Review + create", then "Create".
 5. Once created, go to your Container App.
@@ -586,8 +586,8 @@ Application Insights monitors your app's performance and errors.
 When you have new code to deploy:
 
 1. Test locally with Docker Compose (see `README.md`).
-2. Build a new Docker image: `docker build -t konote:v1.2.0 .`
-3. Push to your registry: `docker push konoteregistry.azurecr.io/konote:v1.2.0`
+2. Build a new Docker image: `docker build -t KoNote2:v1.2.0 .`
+3. Push to your registry: `docker push KoNote2registry.azurecr.io/KoNote2:v1.2.0`
 4. Update your Container App to use the new image tag.
 5. Run migrations (if needed) using the Container Instance method (Step 7).
 
@@ -621,7 +621,7 @@ If you created an Azure AD client secret (Step 8), mark your calendar 30 days be
 - Verify server names and passwords are correct in DATABASE_URL and AUDIT_DATABASE_URL.
 - Test connectivity from your local machine using `psql`:
   ```bash
-  psql -h <server-name>.postgres.database.azure.com -U konote -d konote
+  psql -h <server-name>.postgres.database.azure.com -U KoNote2 -d KoNote2
   ```
 - Check PostgreSQL firewall rules (Step 2).
 
@@ -650,7 +650,7 @@ If you created an Azure AD client secret (Step 8), mark your calendar 30 days be
 - **Azure Documentation:** [Azure Container Apps](https://learn.microsoft.com/en-us/azure/container-apps/)
 - **PostgreSQL on Azure:** [Azure Database for PostgreSQL](https://learn.microsoft.com/en-us/azure/postgresql/)
 - **Django Deployment:** [Django Deployment Checklist](https://docs.djangoproject.com/en/stable/howto/deployment/checklist/)
-- **KoNote Web Repository:** Check `README.md` for local development setup.
+- **KoNote2 Web Repository:** Check `README.md` for local development setup.
 
 ---
 

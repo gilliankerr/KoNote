@@ -1,7 +1,7 @@
 """Client file and custom field models."""
 from django.db import models
 
-from konote.encryption import decrypt_field, encrypt_field
+from KoNote2.encryption import decrypt_field, encrypt_field
 
 
 class ClientFile(models.Model):

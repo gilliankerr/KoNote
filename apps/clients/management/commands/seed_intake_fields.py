@@ -9,8 +9,8 @@ intake form, based on:
 - Practical service delivery needs (contact, emergency, baseline status)
 
 Field groups are organized for two use cases:
-1. Clinical/counselling services (groups 10-70)
-2. Youth/recreation programs (groups 80-90) — optional additions
+1. Clinical/counselling services (groups 10-70) — active by default
+2. Youth/recreation programs (groups 80-90) — archived by default (reactivate if needed)
 
 All demographic fields are optional with "Prefer not to answer" options.
 Agencies can customize, archive, or add fields after seeding.
@@ -39,6 +39,14 @@ from apps.clients.models import CustomFieldDefinition, CustomFieldGroup
 # For self-service registration (youth/recreation):
 # - Participant or parent fills out: Contact, Emergency, Guardian, Health, Consents
 # - Staff reviews and approves submission
+
+# Field groups that should be archived by default (youth/recreation programs)
+# Agencies that need these can reactivate them in the admin interface.
+ARCHIVED_BY_DEFAULT = {
+    "Parent/Guardian Information",
+    "Health & Safety",
+    "Program Consents",
+}
 
 INTAKE_FIELD_GROUPS = [
     # =========================================================================
@@ -435,9 +443,11 @@ class Command(BaseCommand):
 
         for group_title, group_sort_order, fields in INTAKE_FIELD_GROUPS:
             # Create or get the group
+            # Youth/recreation groups are archived by default — agencies can reactivate if needed
+            initial_status = "archived" if group_title in ARCHIVED_BY_DEFAULT else "active"
             group, was_group_created = CustomFieldGroup.objects.get_or_create(
                 title=group_title,
-                defaults={"sort_order": group_sort_order, "status": "active"},
+                defaults={"sort_order": group_sort_order, "status": initial_status},
             )
             if was_group_created:
                 groups_created += 1
@@ -471,4 +481,5 @@ class Command(BaseCommand):
                 f"  Intake fields: {groups_created} groups and {fields_created} fields created."
             )
         )
-        self.stdout.write("  Tip: Archive field groups you don't need (e.g., Youth fields for adult services).")
+        self.stdout.write("  Note: Youth/recreation field groups (Parent/Guardian, Health & Safety, Program Consents)")
+        self.stdout.write("        are archived by default. Reactivate them in Admin > Custom Fields if needed.")

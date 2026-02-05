@@ -5,8 +5,8 @@ from django.shortcuts import render
 from django_ratelimit.decorators import ratelimit
 
 from apps.admin_settings.models import FeatureToggle
-from konote import ai
-from konote.forms import (
+from KoNote2 import ai
+from KoNote2.forms import (
     GenerateNarrativeForm,
     ImproveOutcomeForm,
     SuggestMetricsForm,
