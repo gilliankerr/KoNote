@@ -1,0 +1,532 @@
+"""Tests for Phase 3.5 Export Permission Alignment (PERM1-10).
+
+Verifies that export access follows the role model:
+- Admin: system config + any export + manage/revoke links
+- Program Manager: metrics/CMT exports scoped to their programs + download own
+- Staff/Front Desk/Executive: no export access
+"""
+import os
+import shutil
+import tempfile
+import uuid
+
+from django.conf import settings
+from django.test import Client, TestCase, override_settings
+from django.utils import timezone
+from cryptography.fernet import Fernet
+from datetime import timedelta
+
+from apps.auth_app.models import User
+from apps.programs.models import Program, UserProgramRole
+from apps.reports.models import SecureExportLink
+from apps.reports.utils import can_create_export, get_manageable_programs
+import konote.encryption as enc_module
+
+TEST_KEY = Fernet.generate_key().decode()
+
+
+def _create_link(user, export_dir, **overrides):
+    """Create a SecureExportLink with a real file on disk."""
+    link_id = overrides.pop("id", uuid.uuid4())
+    filename = overrides.pop("filename", "test_export.csv")
+    content = overrides.pop("content", "record_id,metric,value\nTEST-001,Score,5")
+    expires_at = overrides.pop("expires_at", timezone.now() + timedelta(hours=24))
+    export_type = overrides.pop("export_type", "metrics")
+    client_count = overrides.pop("client_count", 1)
+    recipient = overrides.pop("recipient", "Self — for my own records")
+
+    safe_filename = f"{link_id}_{filename}"
+    file_path = os.path.join(export_dir, safe_filename)
+
+    os.makedirs(export_dir, exist_ok=True)
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(content)
+
+    link = SecureExportLink.objects.create(
+        id=link_id,
+        created_by=user,
+        expires_at=expires_at,
+        export_type=export_type,
+        client_count=client_count,
+        includes_notes=overrides.pop("includes_notes", False),
+        recipient=recipient,
+        filename=filename,
+        file_path=file_path,
+        revoked=overrides.pop("revoked", False),
+        filters_json=overrides.pop("filters_json", "{}"),
+    )
+    return link
+
+
+# ═════════════════════════════════════════════════════════════════════
+# 1. can_create_export() helper tests
+# ═════════════════════════════════════════════════════════════════════
+
+
+@override_settings(FIELD_ENCRYPTION_KEY=TEST_KEY)
+class CanCreateExportHelperTest(TestCase):
+    """Test the can_create_export() permission helper."""
+
+    def setUp(self):
+        enc_module._fernet = None
+        self.admin = User.objects.create_user(
+            username="admin", password="testpass123", is_admin=True, display_name="Admin"
+        )
+        self.pm_user = User.objects.create_user(
+            username="pm", password="testpass123", is_admin=False, display_name="PM"
+        )
+        self.staff_user = User.objects.create_user(
+            username="staff", password="testpass123", is_admin=False, display_name="Staff"
+        )
+        self.exec_user = User.objects.create_user(
+            username="exec", password="testpass123", is_admin=False, display_name="Exec"
+        )
+
+        self.program_a = Program.objects.create(name="Program A")
+        self.program_b = Program.objects.create(name="Program B")
+
+        # PM manages program A only
+        UserProgramRole.objects.create(
+            user=self.pm_user, program=self.program_a, role="program_manager"
+        )
+        # Staff in program A
+        UserProgramRole.objects.create(
+            user=self.staff_user, program=self.program_a, role="staff"
+        )
+        # Executive in program A
+        UserProgramRole.objects.create(
+            user=self.exec_user, program=self.program_a, role="executive"
+        )
+
+    # ── Admin ────────────────────────────────────────────────────
+
+    def test_admin_can_create_client_data_export(self):
+        self.assertTrue(can_create_export(self.admin, "client_data"))
+
+    def test_admin_can_create_metrics_export(self):
+        self.assertTrue(can_create_export(self.admin, "metrics"))
+
+    def test_admin_can_create_cmt_export(self):
+        self.assertTrue(can_create_export(self.admin, "cmt"))
+
+    def test_admin_can_export_any_program(self):
+        self.assertTrue(can_create_export(self.admin, "metrics", program=self.program_a))
+        self.assertTrue(can_create_export(self.admin, "metrics", program=self.program_b))
+
+    # ── Program Manager ──────────────────────────────────────────
+
+    def test_pm_cannot_create_client_data_export(self):
+        self.assertFalse(can_create_export(self.pm_user, "client_data"))
+
+    def test_pm_can_create_metrics_export(self):
+        self.assertTrue(can_create_export(self.pm_user, "metrics"))
+
+    def test_pm_can_create_cmt_export(self):
+        self.assertTrue(can_create_export(self.pm_user, "cmt"))
+
+    def test_pm_can_export_own_program(self):
+        self.assertTrue(can_create_export(self.pm_user, "metrics", program=self.program_a))
+
+    def test_pm_cannot_export_other_program(self):
+        self.assertFalse(can_create_export(self.pm_user, "metrics", program=self.program_b))
+
+    # ── Staff ────────────────────────────────────────────────────
+
+    def test_staff_cannot_create_any_export(self):
+        self.assertFalse(can_create_export(self.staff_user, "client_data"))
+        self.assertFalse(can_create_export(self.staff_user, "metrics"))
+        self.assertFalse(can_create_export(self.staff_user, "cmt"))
+
+    # ── Executive ────────────────────────────────────────────────
+
+    def test_executive_cannot_create_any_export(self):
+        self.assertFalse(can_create_export(self.exec_user, "client_data"))
+        self.assertFalse(can_create_export(self.exec_user, "metrics"))
+        self.assertFalse(can_create_export(self.exec_user, "cmt"))
+
+
+# ═════════════════════════════════════════════════════════════════════
+# 2. get_manageable_programs() helper tests
+# ═════════════════════════════════════════════════════════════════════
+
+
+@override_settings(FIELD_ENCRYPTION_KEY=TEST_KEY)
+class GetManageableProgramsTest(TestCase):
+    """Test the get_manageable_programs() scoping helper."""
+
+    def setUp(self):
+        enc_module._fernet = None
+        self.admin = User.objects.create_user(
+            username="admin", password="testpass123", is_admin=True, display_name="Admin"
+        )
+        self.pm_user = User.objects.create_user(
+            username="pm", password="testpass123", is_admin=False, display_name="PM"
+        )
+        self.program_a = Program.objects.create(name="Program A")
+        self.program_b = Program.objects.create(name="Program B")
+        self.archived = Program.objects.create(name="Archived", status="archived")
+
+        UserProgramRole.objects.create(
+            user=self.pm_user, program=self.program_a, role="program_manager"
+        )
+
+    def test_admin_sees_all_active_programs(self):
+        programs = get_manageable_programs(self.admin)
+        self.assertIn(self.program_a, programs)
+        self.assertIn(self.program_b, programs)
+        self.assertNotIn(self.archived, programs)
+
+    def test_pm_sees_only_managed_programs(self):
+        programs = get_manageable_programs(self.pm_user)
+        self.assertIn(self.program_a, programs)
+        self.assertNotIn(self.program_b, programs)
+        self.assertNotIn(self.archived, programs)
+
+
+# ═════════════════════════════════════════════════════════════════════
+# 3. Metrics export view permission tests
+# ═════════════════════════════════════════════════════════════════════
+
+
+@override_settings(FIELD_ENCRYPTION_KEY=TEST_KEY)
+class MetricsExportPermissionTest(TestCase):
+    """Test export_form view permissions for different roles."""
+
+    def setUp(self):
+        enc_module._fernet = None
+        self.http_client = Client()
+
+        self.admin = User.objects.create_user(
+            username="admin", password="testpass123", is_admin=True, display_name="Admin"
+        )
+        self.pm_user = User.objects.create_user(
+            username="pm", password="testpass123", is_admin=False, display_name="PM"
+        )
+        self.staff_user = User.objects.create_user(
+            username="staff", password="testpass123", is_admin=False, display_name="Staff"
+        )
+        self.exec_user = User.objects.create_user(
+            username="exec", password="testpass123", is_admin=False, display_name="Exec"
+        )
+        self.receptionist = User.objects.create_user(
+            username="frontdesk", password="testpass123", is_admin=False, display_name="FD"
+        )
+
+        self.program_a = Program.objects.create(name="Program A")
+
+        UserProgramRole.objects.create(
+            user=self.pm_user, program=self.program_a, role="program_manager"
+        )
+        UserProgramRole.objects.create(
+            user=self.staff_user, program=self.program_a, role="staff"
+        )
+        UserProgramRole.objects.create(
+            user=self.exec_user, program=self.program_a, role="executive"
+        )
+        UserProgramRole.objects.create(
+            user=self.receptionist, program=self.program_a, role="receptionist"
+        )
+
+    def test_admin_can_access_metrics_export(self):
+        self.http_client.login(username="admin", password="testpass123")
+        resp = self.http_client.get("/reports/export/")
+        self.assertEqual(resp.status_code, 200)
+
+    def test_pm_can_access_metrics_export(self):
+        self.http_client.login(username="pm", password="testpass123")
+        resp = self.http_client.get("/reports/export/")
+        self.assertEqual(resp.status_code, 200)
+
+    def test_staff_gets_403_on_metrics_export(self):
+        self.http_client.login(username="staff", password="testpass123")
+        resp = self.http_client.get("/reports/export/")
+        self.assertEqual(resp.status_code, 403)
+
+    def test_executive_gets_403_on_metrics_export(self):
+        self.http_client.login(username="exec", password="testpass123")
+        resp = self.http_client.get("/reports/export/")
+        self.assertEqual(resp.status_code, 403)
+
+    def test_receptionist_gets_403_on_metrics_export(self):
+        self.http_client.login(username="frontdesk", password="testpass123")
+        resp = self.http_client.get("/reports/export/")
+        self.assertEqual(resp.status_code, 403)
+
+
+# ═════════════════════════════════════════════════════════════════════
+# 4. CMT export view permission tests
+# ═════════════════════════════════════════════════════════════════════
+
+
+@override_settings(FIELD_ENCRYPTION_KEY=TEST_KEY)
+class CMTExportPermissionTest(TestCase):
+    """Test cmt_export_form view permissions for different roles."""
+
+    def setUp(self):
+        enc_module._fernet = None
+        self.http_client = Client()
+
+        self.admin = User.objects.create_user(
+            username="admin", password="testpass123", is_admin=True, display_name="Admin"
+        )
+        self.pm_user = User.objects.create_user(
+            username="pm", password="testpass123", is_admin=False, display_name="PM"
+        )
+        self.staff_user = User.objects.create_user(
+            username="staff", password="testpass123", is_admin=False, display_name="Staff"
+        )
+        self.exec_user = User.objects.create_user(
+            username="exec", password="testpass123", is_admin=False, display_name="Exec"
+        )
+
+        self.program_a = Program.objects.create(name="Program A")
+
+        UserProgramRole.objects.create(
+            user=self.pm_user, program=self.program_a, role="program_manager"
+        )
+        UserProgramRole.objects.create(
+            user=self.staff_user, program=self.program_a, role="staff"
+        )
+        UserProgramRole.objects.create(
+            user=self.exec_user, program=self.program_a, role="executive"
+        )
+
+    def test_admin_can_access_cmt_export(self):
+        self.http_client.login(username="admin", password="testpass123")
+        resp = self.http_client.get("/reports/cmt-export/")
+        self.assertEqual(resp.status_code, 200)
+
+    def test_pm_can_access_cmt_export(self):
+        self.http_client.login(username="pm", password="testpass123")
+        resp = self.http_client.get("/reports/cmt-export/")
+        self.assertEqual(resp.status_code, 200)
+
+    def test_staff_gets_403_on_cmt_export(self):
+        self.http_client.login(username="staff", password="testpass123")
+        resp = self.http_client.get("/reports/cmt-export/")
+        self.assertEqual(resp.status_code, 403)
+
+    def test_executive_gets_403_on_cmt_export(self):
+        self.http_client.login(username="exec", password="testpass123")
+        resp = self.http_client.get("/reports/cmt-export/")
+        self.assertEqual(resp.status_code, 403)
+
+
+# ═════════════════════════════════════════════════════════════════════
+# 5. Client data export stays admin-only
+# ═════════════════════════════════════════════════════════════════════
+
+
+@override_settings(FIELD_ENCRYPTION_KEY=TEST_KEY)
+class ClientDataExportPermissionTest(TestCase):
+    """Verify client_data_export remains admin-only (PERM3)."""
+
+    def setUp(self):
+        enc_module._fernet = None
+        self.http_client = Client()
+
+        self.admin = User.objects.create_user(
+            username="admin", password="testpass123", is_admin=True, display_name="Admin"
+        )
+        self.pm_user = User.objects.create_user(
+            username="pm", password="testpass123", is_admin=False, display_name="PM"
+        )
+
+        self.program_a = Program.objects.create(name="Program A")
+        UserProgramRole.objects.create(
+            user=self.pm_user, program=self.program_a, role="program_manager"
+        )
+
+    def test_admin_can_access_client_data_export(self):
+        self.http_client.login(username="admin", password="testpass123")
+        resp = self.http_client.get("/reports/client-data-export/")
+        self.assertEqual(resp.status_code, 200)
+
+    def test_pm_gets_403_on_client_data_export(self):
+        """Program managers should NOT have access to the full PII dump."""
+        self.http_client.login(username="pm", password="testpass123")
+        resp = self.http_client.get("/reports/client-data-export/")
+        self.assertEqual(resp.status_code, 403)
+
+
+# ═════════════════════════════════════════════════════════════════════
+# 6. Download permission tests (PERM4)
+# ═════════════════════════════════════════════════════════════════════
+
+
+@override_settings(FIELD_ENCRYPTION_KEY=TEST_KEY)
+class DownloadExportPermissionTest(TestCase):
+    """Test download_export: creator can download own, admin any, others blocked."""
+
+    databases = {"default", "audit"}
+
+    def setUp(self):
+        enc_module._fernet = None
+        self.export_dir = tempfile.mkdtemp(prefix="konote_test_exports_")
+        self.http_client = Client()
+
+        self.admin = User.objects.create_user(
+            username="admin", password="testpass123", is_admin=True, display_name="Admin"
+        )
+        self.pm_user = User.objects.create_user(
+            username="pm", password="testpass123", is_admin=False, display_name="PM"
+        )
+        self.pm_user2 = User.objects.create_user(
+            username="pm2", password="testpass123", is_admin=False, display_name="PM2"
+        )
+        self.staff_user = User.objects.create_user(
+            username="staff", password="testpass123", is_admin=False, display_name="Staff"
+        )
+
+        self.program_a = Program.objects.create(name="Program A")
+        UserProgramRole.objects.create(
+            user=self.pm_user, program=self.program_a, role="program_manager"
+        )
+        UserProgramRole.objects.create(
+            user=self.pm_user2, program=self.program_a, role="program_manager"
+        )
+
+    def tearDown(self):
+        shutil.rmtree(self.export_dir, ignore_errors=True)
+
+    @override_settings()
+    def test_creator_can_download_own_export(self):
+        """A PM who created an export should be able to download it."""
+        settings.SECURE_EXPORT_DIR = self.export_dir
+        link = _create_link(self.pm_user, self.export_dir)
+        self.http_client.login(username="pm", password="testpass123")
+        resp = self.http_client.get(f"/reports/download/{link.id}/")
+        self.assertEqual(resp.status_code, 200)
+
+    @override_settings()
+    def test_admin_can_download_any_export(self):
+        """Admin should be able to download any export, even ones they didn't create."""
+        settings.SECURE_EXPORT_DIR = self.export_dir
+        link = _create_link(self.pm_user, self.export_dir)
+        self.http_client.login(username="admin", password="testpass123")
+        resp = self.http_client.get(f"/reports/download/{link.id}/")
+        self.assertEqual(resp.status_code, 200)
+
+    @override_settings()
+    def test_other_pm_cannot_download_someone_elses_export(self):
+        """A PM should NOT be able to download another PM's export."""
+        settings.SECURE_EXPORT_DIR = self.export_dir
+        link = _create_link(self.pm_user, self.export_dir)
+        self.http_client.login(username="pm2", password="testpass123")
+        resp = self.http_client.get(f"/reports/download/{link.id}/")
+        self.assertEqual(resp.status_code, 403)
+
+    @override_settings()
+    def test_staff_cannot_download_export(self):
+        """Staff users should not be able to download any export."""
+        settings.SECURE_EXPORT_DIR = self.export_dir
+        link = _create_link(self.admin, self.export_dir)
+        self.http_client.login(username="staff", password="testpass123")
+        resp = self.http_client.get(f"/reports/download/{link.id}/")
+        self.assertEqual(resp.status_code, 403)
+
+
+# ═════════════════════════════════════════════════════════════════════
+# 7. Manage/revoke stays admin-only (PERM5)
+# ═════════════════════════════════════════════════════════════════════
+
+
+@override_settings(FIELD_ENCRYPTION_KEY=TEST_KEY)
+class ManageRevokePermissionTest(TestCase):
+    """Verify manage and revoke views remain admin-only (PERM5)."""
+
+    def setUp(self):
+        enc_module._fernet = None
+        self.export_dir = tempfile.mkdtemp(prefix="konote_test_exports_")
+        self.http_client = Client()
+
+        self.admin = User.objects.create_user(
+            username="admin", password="testpass123", is_admin=True, display_name="Admin"
+        )
+        self.pm_user = User.objects.create_user(
+            username="pm", password="testpass123", is_admin=False, display_name="PM"
+        )
+
+        self.program_a = Program.objects.create(name="Program A")
+        UserProgramRole.objects.create(
+            user=self.pm_user, program=self.program_a, role="program_manager"
+        )
+
+    def tearDown(self):
+        shutil.rmtree(self.export_dir, ignore_errors=True)
+
+    def test_pm_gets_403_on_manage_links(self):
+        self.http_client.login(username="pm", password="testpass123")
+        resp = self.http_client.get("/reports/export-links/")
+        self.assertEqual(resp.status_code, 403)
+
+    def test_pm_gets_403_on_revoke_link(self):
+        link = _create_link(self.pm_user, self.export_dir)
+        self.http_client.login(username="pm", password="testpass123")
+        resp = self.http_client.post(f"/reports/export-links/{link.id}/revoke/")
+        self.assertEqual(resp.status_code, 403)
+
+    def test_admin_can_manage_links(self):
+        self.http_client.login(username="admin", password="testpass123")
+        resp = self.http_client.get("/reports/export-links/")
+        self.assertEqual(resp.status_code, 200)
+
+
+# ═════════════════════════════════════════════════════════════════════
+# 8. Context processor tests — has_export_access
+# ═════════════════════════════════════════════════════════════════════
+
+
+@override_settings(FIELD_ENCRYPTION_KEY=TEST_KEY)
+class ExportAccessContextTest(TestCase):
+    """Test that has_export_access is correctly set in template context."""
+
+    def setUp(self):
+        enc_module._fernet = None
+        self.http_client = Client()
+
+        self.admin = User.objects.create_user(
+            username="admin", password="testpass123", is_admin=True, display_name="Admin"
+        )
+        self.pm_user = User.objects.create_user(
+            username="pm", password="testpass123", is_admin=False, display_name="PM"
+        )
+        self.staff_user = User.objects.create_user(
+            username="staff", password="testpass123", is_admin=False, display_name="Staff"
+        )
+        self.exec_user = User.objects.create_user(
+            username="exec", password="testpass123", is_admin=False, display_name="Exec"
+        )
+
+        self.program_a = Program.objects.create(name="Program A")
+        UserProgramRole.objects.create(
+            user=self.pm_user, program=self.program_a, role="program_manager"
+        )
+        UserProgramRole.objects.create(
+            user=self.staff_user, program=self.program_a, role="staff"
+        )
+        UserProgramRole.objects.create(
+            user=self.exec_user, program=self.program_a, role="executive"
+        )
+
+    def _get_context(self, username):
+        """Log in and hit the home page to get template context."""
+        self.http_client.login(username=username, password="testpass123")
+        resp = self.http_client.get("/", follow=True)
+        return resp.context or {}
+
+    def test_admin_has_export_access(self):
+        ctx = self._get_context("admin")
+        self.assertTrue(ctx.get("has_export_access"))
+
+    def test_pm_has_export_access(self):
+        ctx = self._get_context("pm")
+        self.assertTrue(ctx.get("has_export_access"))
+
+    def test_staff_does_not_have_export_access(self):
+        ctx = self._get_context("staff")
+        self.assertFalse(ctx.get("has_export_access"))
+
+    def test_executive_does_not_have_export_access(self):
+        ctx = self._get_context("exec")
+        self.assertFalse(ctx.get("has_export_access"))

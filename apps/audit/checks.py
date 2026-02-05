@@ -56,8 +56,8 @@ def check_middleware_chain(app_configs, **kwargs):
     errors = []
 
     required_middleware = [
-        ("KoNote2.middleware.program_access.ProgramAccessMiddleware", "RBAC enforcement"),
-        ("KoNote2.middleware.audit.AuditMiddleware", "Audit logging"),
+        ("konote.middleware.program_access.ProgramAccessMiddleware", "RBAC enforcement"),
+        ("konote.middleware.audit.AuditMiddleware", "Audit logging"),
     ]
 
     middleware = getattr(settings, "MIDDLEWARE", [])

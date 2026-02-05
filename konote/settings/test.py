@@ -32,6 +32,9 @@ PASSWORD_HASHERS = [
 # Disable CSP in tests
 MIDDLEWARE = [m for m in MIDDLEWARE if m != "csp.middleware.CSPMiddleware"]
 
+# Disable rate limiting in tests (prevents 403s from cumulative POST counts)
+RATELIMIT_ENABLE = False
+
 # Use simple static files storage (no manifest needed)
 STORAGES = {
     "staticfiles": {

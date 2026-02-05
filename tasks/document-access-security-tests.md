@@ -368,7 +368,7 @@ class DocumentAccessSecurityMonitoringTests(TestCase):
         """Ensure audit logging middleware is active."""
         from django.conf import settings
         self.assertIn(
-            'KoNote2.middleware.audit.AuditMiddleware',
+            'konote.middleware.audit.AuditMiddleware',
             settings.MIDDLEWARE
         )
 

@@ -79,8 +79,8 @@ Invoke-RestMethod -Uri "https://app.vap.fullhost.cloud/1.0/environment/control/r
 - `fullhost-manifest.jps` — JPS manifest for one-click deployment
 - `docs/deploy-fullhost.md` — Step-by-step guide for non-technical users
 - `docs/deploying-KoNote2.md` — Updated with FullHost option
-- `KoNote2/wsgi.py` — Auto-detects FullHost environment
-- `KoNote2/settings/production.py` — Auto-allows FullHost domains
+- `konote/wsgi.py` — Auto-detects FullHost environment
+- `konote/settings/production.py` — Auto-allows FullHost domains
 
 ## Pre-Publication Checklist
 
@@ -92,7 +92,7 @@ The manifest currently references a placeholder repository. Update to the actual
 
 ```yaml
 # Change this line:
-baseUrl: https://raw.githubusercontent.com/KoNote2/KoNote2-web/main
+baseUrl: https://raw.githubusercontent.com/konote/KoNote2-web/main
 
 # To your actual repository:
 baseUrl: https://raw.githubusercontent.com/YOUR_ORG/KoNote2-web/main
@@ -246,8 +246,8 @@ When creating an API token, check these under **API Access**:
 ### Environment Variable: JELASTIC_ENVIRONMENT
 
 The code assumes FullHost sets `JELASTIC_ENVIRONMENT`. If they use a different variable name, update:
-- `KoNote2/wsgi.py` (line ~35)
-- `KoNote2/settings/production.py` (line ~52)
+- `konote/wsgi.py` (line ~35)
+- `konote/settings/production.py` (line ~52)
 
 ### Database Initialisation
 
@@ -286,5 +286,5 @@ Once testing is complete:
 - [fullhost-manifest.jps](../fullhost-manifest.jps)
 - [docs/deploy-fullhost.md](../docs/deploy-fullhost.md)
 - [docs/deploying-KoNote2.md](../docs/deploying-KoNote2.md)
-- [KoNote2/wsgi.py](../KoNote2/wsgi.py)
-- [KoNote2/settings/production.py](../KoNote2/settings/production.py)
+- [konote/wsgi.py](../konote/wsgi.py)
+- [konote/settings/production.py](../konote/settings/production.py)

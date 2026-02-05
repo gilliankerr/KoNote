@@ -10,8 +10,8 @@ from apps.auth_app.decorators import minimum_role
 from apps.auth_app.models import Invite, User
 from apps.clients.models import ClientFile, ClientProgramEnrolment
 from apps.programs.models import Program, UserProgramRole
-from KoNote2.middleware.program_access import ProgramAccessMiddleware
-import KoNote2.encryption as enc_module
+from konote.middleware.program_access import ProgramAccessMiddleware
+import konote.encryption as enc_module
 
 
 TEST_KEY = Fernet.generate_key().decode()
@@ -34,13 +34,13 @@ class RoleHierarchyTest(TestCase):
 
         # Create users with different roles
         self.receptionist = User.objects.create_user(
-            username="receptionist", password="testpass123", display_name="Receptionist"
+            username="receptionist", password="testpass123", display_name="Front Desk"
         )
         UserProgramRole.objects.create(
             user=self.receptionist, program=self.program, role="receptionist"
         )
         self.counsellor = User.objects.create_user(
-            username="counsellor", password="testpass123", display_name="Counsellor"
+            username="counsellor", password="testpass123", display_name="Direct Service"
         )
         UserProgramRole.objects.create(
             user=self.counsellor, program=self.program, role="staff"
@@ -86,7 +86,7 @@ class RoleHierarchyTest(TestCase):
         self.assertEqual(request.user_program_role, "program_manager")
 
     def test_minimum_role_blocks_receptionist_from_staff_view(self):
-        """minimum_role('staff') should block receptionists."""
+        """minimum_role('staff') should block front desk staff."""
         @minimum_role("staff")
         def staff_view(request):
             from django.http import HttpResponse
@@ -190,14 +190,14 @@ class InviteAcceptViewTest(TestCase):
     def test_accept_creates_user_with_role(self):
         response = self.client.post(f"/auth/join/{self.invite.code}/", {
             "username": "newcounsellor",
-            "display_name": "New Counsellor",
+            "display_name": "New Direct Service",
             "password": "securepass123",
             "password_confirm": "securepass123",
         })
         self.assertEqual(response.status_code, 302)  # Redirect to home
 
         user = User.objects.get(username="newcounsellor")
-        self.assertEqual(user.display_name, "New Counsellor")
+        self.assertEqual(user.display_name, "New Direct Service")
         self.assertFalse(user.is_admin)
 
         # Check program role
@@ -267,14 +267,14 @@ class DemoLoginTest(TestCase):
     def setUp(self):
         enc_module._fernet = None
         self.demo_user = User.objects.create_user(
-            username="demo-counsellor", password="demo1234", display_name="Casey Counsellor"
+            username="demo-worker", password="demo1234", display_name="Casey Worker"
         )
 
     def tearDown(self):
         enc_module._fernet = None
 
     def test_demo_login_works_when_enabled(self):
-        response = self.client.get("/auth/demo-login/staff/")
+        response = self.client.get("/auth/demo-login/worker/")
         self.assertEqual(response.status_code, 302)  # Redirect to home
 
     def test_demo_login_invalid_role_404(self):
@@ -293,5 +293,5 @@ class DemoLoginDisabledTest(TestCase):
         enc_module._fernet = None
 
     def test_demo_login_404_when_disabled(self):
-        response = self.client.get("/auth/demo-login/staff/")
+        response = self.client.get("/auth/demo-login/worker/")
         self.assertEqual(response.status_code, 404)

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Manage Export Links" %} — {{ site.product_name|default:"KoNote2" }}{% endblock %}
+
+{% block content %}
+<hgroup>
+    <h1>{% trans "Manage Export Links" %}</h1>
+    <p>{% trans "View and revoke active secure download links. Links from the last 7 days are shown." %}</p>
+</hgroup>
+
+{% if messages %}
+{% for message in messages %}
+<article aria-label="{% trans 'Status message' %}" role="status" style="border-left: 4px solid {% if message.tags == 'success' %}var(--pico-color-green-500){% else %}var(--pico-color-yellow-500){% endif %}; padding: 1rem; margin-bottom: 1.5rem;">
+    <p style="margin-bottom: 0;">{{ message }}</p>
+</article>
+{% endfor %}
+{% endif %}
+
+{% if pending_elevated %}
+<article aria-label="{% trans 'Pending elevated exports' %}" role="alert" style="border-left: 4px solid var(--pico-color-red-500); padding: 1rem; margin-bottom: 1.5rem; background: var(--pico-color-red-50, #fff5f5);">
+    <strong><span aria-hidden="true">&#x26A0;</span> {% blocktrans count counter=pending_elevated|length %}{{ counter }} elevated export is pending review{% plural %}{{ counter }} elevated exports are pending review{% endblocktrans %}</strong>
+    <p style="margin-bottom: 0;">
+        {% trans "The exports below are in the delay period. You can revoke them before the download becomes available." %}
+    </p>
+</article>
+{% endif %}
+
+{% if links %}
+<figure>
+<table role="grid">
+    <thead>
+        <tr>
+            <th scope="col">{% trans "Created" %}</th>
+            <th scope="col">{% trans "Type" %}</th>
+            <th scope="col">{% trans "Created by" %}</th>
+            <th scope="col">{% trans "Clients" %}</th>
+            <th scope="col">{% trans "Recipient" %}</th>
+            <th scope="col">{% trans "Downloads" %}</th>
+            <th scope="col">{% trans "Status" %}</th>
+            <th scope="col">{% trans "Actions" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for link in links %}
+        <tr>
+            <td>{{ link.created_at|date:"Y-m-d H:i" }}</td>
+            <td>{{ link.get_export_type_display }}</td>
+            <td>{{ link.created_by.display_name }}</td>
+            <td>{{ link.client_count }}</td>
+            <td>{{ link.recipient }}</td>
+            <td>
+                {{ link.download_count }}
+                {% if link.last_downloaded_by %}
+                    <br><small>{% blocktrans with name=link.last_downloaded_by.display_name %}Last: {{ name }}{% endblocktrans %}</small>
+                {% endif %}
+            </td>
+            <td>
+                {% if link.is_elevated %}
+                    <mark style="background: var(--pico-color-orange-100, #fff3e0); color: var(--pico-color-orange-700, #e65100); font-size: 0.75rem; margin-bottom: 0.25rem;">{% trans "Elevated" %}</mark><br>
+                {% endif %}
+                {% if link.revoked %}
+                    <mark style="background: var(--pico-color-red-100); color: var(--pico-color-red-700);">{% trans "Revoked" %}</mark>
+                    {% if link.revoked_by %}
+                        <br><small>{% blocktrans with name=link.revoked_by.display_name %}by {{ name }}{% endblocktrans %}</small>
+                    {% endif %}
+                {% elif link.status_display == "Expired" %}
+                    <mark style="background: var(--pico-color-yellow-100); color: var(--pico-color-yellow-700);">{% trans "Expired" %}</mark>
+                {% elif link.status_display == "File Missing" %}
+                    <mark style="background: var(--pico-color-yellow-100); color: var(--pico-color-yellow-700);">{% trans "File Missing" %}</mark>
+                {% elif link.status_display == "Pending" %}
+                    <mark style="background: var(--pico-color-orange-100, #fff3e0); color: var(--pico-color-orange-700, #e65100);">{% trans "Pending" %}</mark>
+                    <br><small>{% blocktrans with time=link.available_at|date:"H:i" %}Available at {{ time }}{% endblocktrans %}</small>
+                {% else %}
+                    <mark style="background: var(--pico-color-green-100); color: var(--pico-color-green-700);">{% trans "Active" %}</mark>
+                    <br><small>{% blocktrans with time=link.expires_at|date:"Y-m-d H:i" %}Expires: {{ time }}{% endblocktrans %}</small>
+                {% endif %}
+            </td>
+            <td>
+                {% if link.status_display == "Active" or link.status_display == "Pending" %}
+                <form method="post" action="{% url 'reports:revoke_export_link' link.id %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="{% if link.status_display == 'Pending' %}contrast{% else %}secondary outline{% endif %}" style="padding: 0.25rem 0.5rem; font-size: 0.85rem;"
+                            onclick="return confirm('{% trans "Revoke this export link? The file will be deleted and the link will stop working." %}')">
+                        {% trans "Revoke" %}
+                    </button>
+                </form>
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</figure>
+{% else %}
+<article aria-label="{% trans 'No links' %}">
+    <p>{% trans "No export links found in the last 7 days." %}</p>
+</article>
+{% endif %}
+
+<a href="{% url 'reports:export_form' %}" role="button" class="secondary">
+    <span aria-hidden="true">&larr;</span> {% trans "Back to Reports" %}
+</a>
+{% endblock %}

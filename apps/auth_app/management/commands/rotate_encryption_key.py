@@ -21,6 +21,9 @@ Models and fields affected:
     - clients.ClientFile: _first_name_encrypted, _middle_name_encrypted,
       _last_name_encrypted, _birth_date_encrypted
     - clients.ClientDetailValue: _value_encrypted (all rows, not just sensitive)
+    - notes.ProgressNote: _notes_text_encrypted, _summary_encrypted,
+      _participant_reflection_encrypted
+    - notes.ProgressNoteTarget: _notes_encrypted
 """
 
 from cryptography.fernet import Fernet, InvalidToken
@@ -33,6 +36,7 @@ def _get_encrypted_models():
     """Import models lazily to avoid app-registry issues."""
     from apps.auth_app.models import User
     from apps.clients.models import ClientDetailValue, ClientFile
+    from apps.notes.models import ProgressNote, ProgressNoteTarget
 
     return [
         (User, ["_email_encrypted"]),
@@ -43,6 +47,12 @@ def _get_encrypted_models():
             "_birth_date_encrypted",
         ]),
         (ClientDetailValue, ["_value_encrypted"]),
+        (ProgressNote, [
+            "_notes_text_encrypted",
+            "_summary_encrypted",
+            "_participant_reflection_encrypted",
+        ]),
+        (ProgressNoteTarget, ["_notes_encrypted"]),
     ]
 
 

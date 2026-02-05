@@ -9,7 +9,7 @@ from apps.auth_app.models import User
 from apps.clients.models import ClientFile, ClientProgramEnrolment
 from apps.plans.models import MetricDefinition, PlanSection, PlanTarget, PlanTargetMetric
 from apps.programs.models import Program, UserProgramRole
-import KoNote2.encryption as enc_module
+import konote.encryption as enc_module
 
 
 TEST_KEY = Fernet.generate_key().decode()
@@ -72,7 +72,7 @@ class SuggestMetricsViewTest(AIEndpointBaseTest):
         resp = self.http.post(self.url, {"target_description": "Find housing"})
         self.assertEqual(resp.status_code, 403)
 
-    @patch("KoNote2.ai.suggest_metrics")
+    @patch("konote.ai.suggest_metrics")
     def test_happy_path_returns_suggestions(self, mock_suggest):
         mock_suggest.return_value = [
             {"metric_id": self.metric.pk, "name": "PHQ-9", "reason": "Relevant for mental health"}
@@ -85,7 +85,7 @@ class SuggestMetricsViewTest(AIEndpointBaseTest):
         call_args = mock_suggest.call_args
         self.assertEqual(call_args[0][0], "Improve mental health")
 
-    @patch("KoNote2.ai.suggest_metrics")
+    @patch("konote.ai.suggest_metrics")
     def test_ai_failure_returns_error_message(self, mock_suggest):
         mock_suggest.return_value = None
         self.http.login(username="staff", password="pass")
@@ -113,7 +113,7 @@ class ImproveOutcomeViewTest(AIEndpointBaseTest):
         resp = self.http.post(self.url, {"draft_text": "Get better at stuff"})
         self.assertEqual(resp.status_code, 403)
 
-    @patch("KoNote2.ai.improve_outcome")
+    @patch("konote.ai.improve_outcome")
     def test_happy_path_returns_improved_text(self, mock_improve):
         mock_improve.return_value = "Client will achieve stable housing within 3 months."
         self.http.login(username="staff", password="pass")
@@ -121,7 +121,7 @@ class ImproveOutcomeViewTest(AIEndpointBaseTest):
         self.assertEqual(resp.status_code, 200)
         mock_improve.assert_called_once_with("Get housing")
 
-    @patch("KoNote2.ai.improve_outcome")
+    @patch("konote.ai.improve_outcome")
     def test_ai_failure_returns_error_message(self, mock_improve):
         mock_improve.return_value = None
         self.http.login(username="staff", password="pass")
@@ -158,7 +158,7 @@ class GenerateNarrativeViewTest(AIEndpointBaseTest):
         })
         self.assertEqual(resp.status_code, 400)
 
-    @patch("KoNote2.ai.generate_narrative")
+    @patch("konote.ai.generate_narrative")
     def test_no_metric_data_returns_error(self, mock_narrative):
         """When there are no metric values for the period, show an error."""
         self.http.login(username="staff", password="pass")
@@ -227,7 +227,7 @@ class SuggestNoteStructureViewTest(AIEndpointBaseTest):
         resp = self.http.post(self.url, {"target_id": self.target.pk})
         self.assertEqual(resp.status_code, 403)
 
-    @patch("KoNote2.ai.suggest_note_structure")
+    @patch("konote.ai.suggest_note_structure")
     def test_happy_path_returns_structure(self, mock_suggest):
         mock_suggest.return_value = [
             {"section": "Observation", "prompt": "Describe what you observed."},
@@ -241,7 +241,7 @@ class SuggestNoteStructureViewTest(AIEndpointBaseTest):
         self.assertEqual(call_args[0], "Find Housing")
         self.assertEqual(call_args[1], "Stable housing within 3 months")
 
-    @patch("KoNote2.ai.suggest_note_structure")
+    @patch("konote.ai.suggest_note_structure")
     def test_ai_failure_returns_error_message(self, mock_suggest):
         mock_suggest.return_value = None
         self.http.login(username="staff", password="pass")

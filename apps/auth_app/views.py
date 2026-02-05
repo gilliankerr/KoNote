@@ -5,8 +5,11 @@ from django.conf import settings
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
+from django.http import HttpResponseNotAllowed
 from django.shortcuts import redirect, render
 from django.utils import timezone
+from django.utils import translation
+from django.utils.http import url_has_allowed_host_and_scheme
 from django_ratelimit.decorators import ratelimit
 
 logger = logging.getLogger(__name__)
@@ -51,6 +54,66 @@ def _clear_failed_attempts(ip):
     cache.delete(key)
 
 
+def sync_language_on_login(request, user):
+    """Sync language preference between session and user profile.
+
+    Called after successful login on all paths (local, Azure, demo).
+    - If user has a saved preference → activate it for this request
+    - If no preference saved → save current language to profile
+    Note: The language cookie (set by switch_language view) is the primary
+    persistence mechanism. This just syncs the User model for roaming.
+    """
+    if user.preferred_language:
+        translation.activate(user.preferred_language)
+    else:
+        current_lang = translation.get_language() or "en"
+        user.preferred_language = current_lang
+        user.save(update_fields=["preferred_language"])
+
+
+def switch_language(request):
+    """Switch language — sets session, cookie, AND user.preferred_language.
+
+    Replaces Django's built-in set_language for authenticated users so that
+    the User model stays in sync with the session/cookie.
+    """
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    lang_code = request.POST.get("language", "en")
+    # Validate against configured languages
+    valid_codes = [code for code, _name in settings.LANGUAGES]
+    if lang_code not in valid_codes:
+        lang_code = "en"
+
+    # Activate for this request
+    translation.activate(lang_code)
+
+    # Save to user profile if logged in
+    if request.user.is_authenticated:
+        request.user.preferred_language = lang_code
+        request.user.save(update_fields=["preferred_language"])
+
+    # Redirect back to referring page (with safety check)
+    next_url = request.POST.get("next", request.META.get("HTTP_REFERER", "/"))
+    if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        next_url = "/"
+
+    response = redirect(next_url)
+    # Set language cookie (persists across browser sessions)
+    response.set_cookie(
+        settings.LANGUAGE_COOKIE_NAME,
+        lang_code,
+        max_age=settings.LANGUAGE_COOKIE_AGE,
+        path=settings.LANGUAGE_COOKIE_PATH,
+        domain=settings.LANGUAGE_COOKIE_DOMAIN,
+        secure=settings.LANGUAGE_COOKIE_SECURE,
+        httponly=settings.LANGUAGE_COOKIE_HTTPONLY,
+        samesite=settings.LANGUAGE_COOKIE_SAMESITE,
+    )
+    return response
+
+
 def login_view(request):
     """Route to appropriate login method based on AUTH_MODE."""
     if request.user.is_authenticated:
@@ -91,6 +154,7 @@ def _local_login(request):
                     user.last_login_at = timezone.now()
                     user.save(update_fields=["last_login_at"])
                     _audit_login(request, user)
+                    sync_language_on_login(request, user)
                     return redirect("/")
                 else:
                     attempts = _record_failed_attempt(client_ip)
@@ -113,11 +177,13 @@ def _local_login(request):
     else:
         form = LoginForm()
 
+    has_language_cookie = bool(request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME))
     return render(request, "auth/login.html", {
         "error": error,
         "form": form,
         "auth_mode": "local",
         "demo_mode": settings.DEMO_MODE,
+        "has_language_cookie": has_language_cookie,
     })
 
 
@@ -180,6 +246,7 @@ def azure_callback(request):
 
     login(request, user)
     _audit_login(request, user)
+    sync_language_on_login(request, user)
     return redirect("/")
 
 
@@ -192,9 +259,10 @@ def demo_login(request, role):
     from apps.auth_app.models import User
 
     demo_usernames = {
-        "receptionist": "demo-receptionist",
-        "staff": "demo-counsellor",
+        "frontdesk": "demo-frontdesk",
+        "worker": "demo-worker",
         "manager": "demo-manager",
+        "executive": "demo-executive",
         "admin": "demo-admin",
     }
     username = demo_usernames.get(role)
@@ -211,6 +279,7 @@ def demo_login(request, role):
     login(request, user)
     user.last_login_at = timezone.now()
     user.save(update_fields=["last_login_at"])
+    sync_language_on_login(request, user)
     return redirect("/")
 
 

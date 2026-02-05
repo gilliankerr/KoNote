@@ -46,7 +46,7 @@ I'm building KoNote2 Web, a nonprofit client management system. Phases 1-6 are d
   - Login: 5/min/IP (already set)
   - API endpoints: 60/min/user
   - Export endpoints: 5/min/user
-- Document the rate limits in a comment block in `KoNote2/settings/base.py`
+- Document the rate limits in a comment block in `konote/settings/base.py`
 
 **4. Deployment Guide: Azure**
 - Create `docs/deploy-azure.md`

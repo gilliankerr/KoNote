@@ -347,5 +347,5 @@ templates/registration/
 
 ### Modified Files
 
-- `KoNote2/urls.py` — Add registration URLs
-- `KoNote2/settings.py` — Add `apps.registration` to INSTALLED_APPS
+- `konote/urls.py` — Add registration URLs
+- `konote/settings.py` — Add `apps.registration` to INSTALLED_APPS

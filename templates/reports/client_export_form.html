@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Export Client Data" %} — {{ site.product_name|default:"KoNote2" }}{% endblock %}
+
+{% block content %}
+<hgroup>
+    <h1>{% trans "Export Client Data" %}</h1>
+    <p>{% blocktrans with name=client_name %}Export all data for {{ name }}.{% endblocktrans %}</p>
+</hgroup>
+
+<article aria-label="{% trans 'Privacy notice' %}" style="border-left: 4px solid var(--pico-color-blue-500); padding: 1rem; margin-bottom: 1.5rem;">
+    <strong><span aria-hidden="true">&#x1F6C8;</span> {% trans "PIPEDA Data Portability" %}</strong>
+    <p style="margin-bottom: 0;">
+        {% trans "Under PIPEDA, individuals have the right to access their personal information. This export includes all data held for this client." %}
+    </p>
+</article>
+
+<form method="post">
+    {% csrf_token %}
+
+    <fieldset>
+        <legend>{% trans "What to include" %}</legend>
+
+        <label>
+            <input type="checkbox" name="include_plans" value="1" checked>
+            {% trans "Plan sections and targets" %}
+        </label>
+
+        <label>
+            <input type="checkbox" name="include_notes" value="1" checked>
+            {% trans "Progress notes" %}
+        </label>
+
+        <label>
+            <input type="checkbox" name="include_metrics" value="1" checked>
+            {% trans "Metric values" %}
+        </label>
+
+        <label>
+            <input type="checkbox" name="include_events" value="1" checked>
+            {% trans "Events" %}
+        </label>
+
+        <label>
+            <input type="checkbox" name="include_custom_fields" value="1" checked>
+            {% trans "Custom fields" %}
+        </label>
+    </fieldset>
+
+    <fieldset>
+        <legend>{% trans "Format" %}</legend>
+        {{ form.format }}
+    </fieldset>
+
+    <fieldset>
+        <legend>{% trans "Recipient" %}</legend>
+        <div class="grid">
+            <div>
+                <label for="id_recipient">{{ form.recipient.label }}</label>
+                {{ form.recipient }}
+                {% if form.recipient.help_text %}<small>{{ form.recipient.help_text }}</small>{% endif %}
+            </div>
+            <div>
+                <label for="id_recipient_detail">{{ form.recipient_detail.label }}</label>
+                {{ form.recipient_detail }}
+                {% if form.recipient_detail.help_text %}<small>{{ form.recipient_detail.help_text }}</small>{% endif %}
+            </div>
+        </div>
+    </fieldset>
+
+    {% if form.errors %}
+    <article aria-label="{% trans 'Errors' %}" role="alert" style="border-left: 4px solid var(--pico-color-red-500); padding: 1rem; margin-bottom: 1.5rem;">
+        <strong>{% trans "Please correct the following:" %}</strong>
+        <ul>
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </article>
+    {% endif %}
+
+    <div class="grid">
+        <button type="submit">
+            <span aria-hidden="true">&#x1F4E5;</span> {% trans "Export Client Data" %}
+        </button>
+        <a href="{% url 'clients:client_detail' client_id=client.pk %}" role="button" class="secondary">
+            {% trans "Cancel" %}
+        </a>
+    </div>
+</form>
+{% endblock %}

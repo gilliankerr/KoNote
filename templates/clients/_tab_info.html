@@ -17,19 +17,13 @@
 </section>
 {% endif %}
 
-{# Quick info row - high-frequency data for receptionists #}
+{# Quick info row - high-frequency data for front desk #}
 <section class="quick-info-section">
     <dl class="quick-info">
         {% if client.birth_date %}
         <div class="quick-info-item">
             <dt>{% trans "DOB" %}</dt>
             <dd>{{ client.birth_date }}</dd>
-        </div>
-        {% endif %}
-        {% if client.phone %}
-        <div class="quick-info-item">
-            <dt>{% trans "Phone" %}</dt>
-            <dd><a href="tel:{{ client.phone }}">{{ client.phone }}</a></dd>
         </div>
         {% endif %}
         {% if enrolments %}

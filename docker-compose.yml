@@ -2,7 +2,7 @@ services:
   web:
     build: .
     environment:
-      - DJANGO_SETTINGS_MODULE=KoNote2.settings.production
+      - DJANGO_SETTINGS_MODULE=konote.settings.production
       - KoNote2_MODE=${KoNote2_MODE:-production}
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-KoNote2}
       - AUDIT_DATABASE_URL=postgresql://${AUDIT_POSTGRES_USER}:${AUDIT_POSTGRES_PASSWORD}@audit_db:5432/${AUDIT_POSTGRES_DB:-KoNote2_audit}

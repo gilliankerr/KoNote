@@ -15,6 +15,28 @@
 </article>
 {% endif %}
 
+<article aria-label="{% trans 'Export Info' %}" style="margin-bottom: 1.5rem;">
+    <strong><span aria-hidden="true">📋</span> {% trans "About This Export" %}</strong>
+    <p style="margin-bottom: 0;">
+        {% blocktrans %}
+        The exported file will include a summary header showing the <strong>total client count</strong>
+        and <strong>data points</strong> matching your selected filters.
+        {% endblocktrans %}
+    </p>
+</article>
+
+<article class="pico-background-yellow-50" aria-label="{% trans 'PII Warning' %}" role="alert" style="border-left: 4px solid var(--pico-color-yellow-500); padding: 1rem; margin-bottom: 1.5rem;">
+    <strong><span aria-hidden="true">⚠️</span> {% trans "This export includes personal information" %}</strong>
+    <p style="margin-bottom: 0;">
+        {% blocktrans %}
+        The exported file will contain: <strong>client record IDs</strong>, <strong>metric values</strong>,
+        <strong>dates of service</strong>, and <strong>staff names</strong>. If demographic grouping is selected,
+        it may also include <strong>birth dates</strong> (for age calculations) or <strong>custom field values</strong>.
+        Handle the exported file according to your organisation's data protection policies.
+        {% endblocktrans %}
+    </p>
+</article>
+
 <form method="post">
     {% csrf_token %}
 
@@ -115,6 +137,34 @@
             {{ form.include_achievement_rate.label }}
             {% if form.include_achievement_rate.help_text %}
             <small>{{ form.include_achievement_rate.help_text }}</small>
+            {% endif %}
+        </label>
+    </fieldset>
+
+    {# Recipient tracking for audit purposes #}
+    <fieldset>
+        <legend>{% trans "Export Recipient" %}</legend>
+        <p class="helper-text" style="margin-bottom: 1rem; color: var(--pico-muted-color);">
+            {% trans "For audit purposes, please indicate who will receive this exported data." %}
+        </p>
+        <label for="{{ form.recipient.id_for_label }}">
+            {{ form.recipient.label }}
+            {{ form.recipient }}
+            {% if form.recipient.help_text %}
+            <small>{{ form.recipient.help_text }}</small>
+            {% endif %}
+            {% if form.recipient.errors %}
+            <small class="error" role="alert">{{ form.recipient.errors.0 }}</small>
+            {% endif %}
+        </label>
+        <label for="{{ form.recipient_detail.id_for_label }}" id="recipient-detail-wrapper">
+            {{ form.recipient_detail.label }}
+            {{ form.recipient_detail }}
+            {% if form.recipient_detail.help_text %}
+            <small>{{ form.recipient_detail.help_text }}</small>
+            {% endif %}
+            {% if form.recipient_detail.errors %}
+            <small class="error" role="alert">{{ form.recipient_detail.errors.0 }}</small>
             {% endif %}
         </label>
     </fieldset>

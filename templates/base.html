@@ -24,6 +24,12 @@
     <!-- Loading bar — shown during HTMX requests -->
     <div id="loading-bar" class="loading-bar htmx-indicator"></div>
 
+    {% if user.is_authenticated and user.is_demo %}
+    <div class="demo-banner" role="alert" aria-live="polite">
+        <strong>Demo Mode:</strong> You are logged in as {{ user.display_name }}. Changes affect demo data only.
+    </div>
+    {% endif %}
+
     {% if user.is_authenticated %}
     <nav class="container-fluid">
         <ul>
@@ -38,14 +44,19 @@
             </li>
         </ul>
         <ul id="nav-menu">
-            {% if not is_admin_only %}
+            {% if not is_admin_only and not is_executive_only %}
             <li><a href="/"{% if nav_active == "clients" %} class="nav-active"{% endif %}>{{ term.client_plural|default:"Clients" }}</a></li>
+            {% endif %}
+            {% if is_executive_only %}
+            <li><a href="{% url 'clients:executive_dashboard' %}"{% if nav_active == "executive" %} class="nav-active"{% endif %}>{% trans "Dashboard" %}</a></li>
             {% endif %}
             {% if features.programs %}
             <li><a href="/programs/"{% if nav_active == "programs" %} class="nav-active"{% endif %}>{{ term.program_plural|default:"Programs" }}</a></li>
             {% endif %}
-            {% if user.is_admin %}
+            {% if has_export_access %}
             <li><a href="/reports/export/"{% if nav_active == "reports" %} class="nav-active"{% endif %}>{% trans "Reports" %}</a></li>
+            {% endif %}
+            {% if user.is_admin %}
             <li>
                 <details class="dropdown" role="list">
                     <summary aria-haspopup="listbox"{% if nav_active == "admin" %} class="nav-active"{% endif %}>{% trans "Admin" %}</summary>
@@ -73,18 +84,29 @@
                 </details>
             </li>
             <li>
-                <!-- Language switcher -->
-                <form action="{% url 'set_language' %}" method="post" style="margin: 0;">
-                    {% csrf_token %}
-                    <input type="hidden" name="next" value="{{ request.path }}">
-                    <select name="language" onchange="this.form.submit()" aria-label="{% trans 'Select language' %}" style="padding: 0.25rem 0.5rem; min-width: auto;">
-                        {% get_current_language as LANGUAGE_CODE %}
-                        {% get_available_languages as LANGUAGES %}
-                        {% for lang_code, lang_name in LANGUAGES %}
-                        <option value="{{ lang_code }}"{% if lang_code == LANGUAGE_CODE %} selected{% endif %}>{{ lang_name }}</option>
-                        {% endfor %}
-                    </select>
-                </form>
+                <!-- Language toggle [EN | FR] -->
+                {% get_current_language as CURRENT_LANG %}
+                <div class="lang-switcher" role="group" aria-label="{% trans 'Language' %}" style="margin-bottom: 0;">
+                    {% if CURRENT_LANG == "en" %}
+                    <strong>EN</strong>
+                    <span class="lang-divider">|</span>
+                    <form action="{% url 'switch_language' %}" method="post" class="lang-switcher-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <input type="hidden" name="language" value="fr">
+                        <button type="submit" class="lang-switcher-link">FR</button>
+                    </form>
+                    {% else %}
+                    <form action="{% url 'switch_language' %}" method="post" class="lang-switcher-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <input type="hidden" name="language" value="en">
+                        <button type="submit" class="lang-switcher-link">EN</button>
+                    </form>
+                    <span class="lang-divider">|</span>
+                    <strong>FR</strong>
+                    {% endif %}
+                </div>
             </li>
         </ul>
     </nav>

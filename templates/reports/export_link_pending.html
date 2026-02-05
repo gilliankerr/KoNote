@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Export Pending" %} — {{ site.product_name|default:"KoNote2" }}{% endblock %}
+
+{% block content %}
+<hgroup>
+    <h1>{% trans "Export Pending" %}</h1>
+    <p>{% trans "This export is being reviewed before the download becomes available." %}</p>
+</hgroup>
+
+{# Pending notice #}
+<article aria-label="{% trans 'Pending notice' %}" style="border-left: 4px solid var(--pico-color-yellow-500); padding: 1rem; margin-bottom: 1.5rem;">
+    <strong><span aria-hidden="true">&#x23F3;</span> {% trans "Elevated Export — Download Not Yet Available" %}</strong>
+    <p>
+        {% blocktrans with time=available_at|date:"H:i" %}
+        This export contains a large number of clients or clinical notes. For security,
+        there is a short delay before the download becomes available. Administrators have
+        been notified.
+        {% endblocktrans %}
+    </p>
+    <p style="margin-bottom: 0;">
+        {% blocktrans with time=available_at|date:"H:i" %}
+        <strong>The download will be available at {{ time }}.</strong>
+        {% endblocktrans %}
+    </p>
+</article>
+
+{# Export details #}
+<article aria-label="{% trans 'Export details' %}" style="margin-bottom: 1.5rem;">
+    <strong><span aria-hidden="true">&#x1F4CB;</span> {% trans "Export Details" %}</strong>
+    <table role="grid">
+        <tbody>
+            <tr>
+                <th scope="row">{% trans "Export type" %}</th>
+                <td>{{ link.get_export_type_display }}</td>
+            </tr>
+            <tr>
+                <th scope="row">{% trans "Client count" %}</th>
+                <td>{{ link.client_count }}</td>
+            </tr>
+            <tr>
+                <th scope="row">{% trans "Recipient" %}</th>
+                <td>{{ link.recipient }}</td>
+            </tr>
+            <tr>
+                <th scope="row">{% trans "Available at" %}</th>
+                <td>{{ available_at|date:"H:i" }}</td>
+            </tr>
+            <tr>
+                <th scope="row">{% trans "Expires" %}</th>
+                <td>{{ link.expires_at }}</td>
+            </tr>
+        </tbody>
+    </table>
+</article>
+
+<div class="grid">
+    <a href="{% url 'reports:download_export' link.id %}" role="button">
+        <span aria-hidden="true">&#x1F504;</span> {% trans "Try Again" %}
+    </a>
+    <a href="{% url 'reports:export_form' %}" role="button" class="secondary">
+        <span aria-hidden="true">&larr;</span> {% trans "Back to Reports" %}
+    </a>
+</div>
+{% endblock %}

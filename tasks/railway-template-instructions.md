@@ -63,7 +63,7 @@ Click on **KoNote2** service → **Variables** → add these:
 | `AUDIT_DATABASE_URL` | `${{KoNote2-Audit-DB.DATABASE_URL}}` |
 | `SECRET_KEY` | _(leave blank — user provides at deploy time)_ |
 | `FIELD_ENCRYPTION_KEY` | _(leave blank — user provides at deploy time)_ |
-| `DJANGO_SETTINGS_MODULE` | `KoNote2.settings.production` |
+| `DJANGO_SETTINGS_MODULE` | `konote.settings.production` |
 
 ### Step 4: Test the deployment
 

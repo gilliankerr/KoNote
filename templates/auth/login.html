@@ -12,21 +12,62 @@
 </head>
 <body>
     <main class="container login-container">
+
+        {% if not has_language_cookie %}
+        {# ── First visit: bilingual hero with language chooser ── #}
+        <div class="login-wordmark">{{ site.product_name|default:"KoNote2" }}</div>
+        <p class="login-tagline-bilingual">
+            Participant Outcome Management<br>
+            <span lang="fr">Gestion des résultats des participants</span>
+        </p>
+
+        <div class="lang-chooser">
+            <form action="{% url 'switch_language' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <input type="hidden" name="language" value="en">
+                <button type="submit" class="lang-chooser-btn">English</button>
+            </form>
+            <form action="{% url 'switch_language' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <input type="hidden" name="language" value="fr">
+                <button type="submit" class="lang-chooser-btn">Français</button>
+            </form>
+        </div>
+
+        <hr>
+        {% else %}
+        {# ── Return visit: compact language toggle ── #}
         <div class="login-wordmark">{{ site.product_name|default:"KoNote2" }}</div>
         <p class="login-tagline">{% trans "Participant Outcome Management" %}</p>
+        {% endif %}
 
-        <!-- Language switcher for login page -->
-        <form action="{% url 'set_language' %}" method="post" style="text-align: center; margin-bottom: 1rem;">
-            {% csrf_token %}
-            <input type="hidden" name="next" value="{{ request.path }}">
-            <select name="language" onchange="this.form.submit()" aria-label="{% trans 'Select language' %}" style="display: inline-block; width: auto; padding: 0.25rem 0.5rem;">
-                {% get_current_language as LANGUAGE_CODE %}
-                {% get_available_languages as LANGUAGES %}
-                {% for lang_code, lang_name in LANGUAGES %}
-                <option value="{{ lang_code }}"{% if lang_code == LANGUAGE_CODE %} selected{% endif %}>{{ lang_name }}</option>
-                {% endfor %}
-            </select>
-        </form>
+        {# ── Compact [EN | FR] toggle (shown when cookie exists) ── #}
+        {% if has_language_cookie %}
+        {% get_current_language as CURRENT_LANG %}
+        <div class="lang-switcher" role="group" aria-label="{% trans 'Language' %}">
+            {% if CURRENT_LANG == "en" %}
+            <strong>EN</strong>
+            <span class="lang-divider">|</span>
+            <form action="{% url 'switch_language' %}" method="post" class="lang-switcher-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <input type="hidden" name="language" value="fr">
+                <button type="submit" class="lang-switcher-link">FR</button>
+            </form>
+            {% else %}
+            <form action="{% url 'switch_language' %}" method="post" class="lang-switcher-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <input type="hidden" name="language" value="en">
+                <button type="submit" class="lang-switcher-link">EN</button>
+            </form>
+            <span class="lang-divider">|</span>
+            <strong>FR</strong>
+            {% endif %}
+        </div>
+        {% endif %}
 
         <article>
             {% if error %}
@@ -59,10 +100,11 @@
                 <p>{% trans "Sign in instantly as a demo user to explore the system" %}</p>
             </hgroup>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                <a href="/auth/demo-login/receptionist/" role="button" class="secondary">{% trans "Receptionist" %}</a>
-                <a href="/auth/demo-login/staff/" role="button" class="secondary">{% trans "Counsellor" %}</a>
+                <a href="/auth/demo-login/frontdesk/" role="button" class="secondary">{% trans "Front Desk" %}</a>
+                <a href="/auth/demo-login/worker/" role="button" class="secondary">{% trans "Direct Service" %}</a>
                 <a href="/auth/demo-login/manager/" role="button" class="secondary">{% trans "Manager" %}</a>
-                <a href="/auth/demo-login/admin/" role="button" class="secondary">{% trans "Administrator" %}</a>
+                <a href="/auth/demo-login/executive/" role="button" class="secondary">{% trans "Executive" %}</a>
+                <a href="/auth/demo-login/admin/" role="button" class="secondary" style="grid-column: span 2;">{% trans "Administrator" %}</a>
             </div>
         </article>
         {% endif %}

@@ -18,7 +18,7 @@ from cryptography.fernet import Fernet
 from apps.auth_app.models import User
 from apps.programs.models import Program, UserProgramRole
 from apps.clients.models import ClientFile, ClientProgramEnrolment
-import KoNote2.encryption as enc_module
+import konote.encryption as enc_module
 
 
 TEST_KEY = Fernet.generate_key().decode()
@@ -122,11 +122,11 @@ class SensitiveCustomFieldTest(TestCase):
         )
 
         # Create a sensitive field definition
-        group = CustomFieldGroup.objects.create(name="Test Group")
+        group = CustomFieldGroup.objects.create(title="Test Group")
         field_def = CustomFieldDefinition.objects.create(
             group=group,
             name="Social Insurance Number",
-            field_type="text",
+            input_type="text",
             is_sensitive=True,
         )
 
@@ -317,7 +317,7 @@ class ConfigurationDriftTest(TestCase):
         from django.conf import settings
 
         self.assertIn(
-            "KoNote2.middleware.audit.AuditMiddleware",
+            "konote.middleware.audit.AuditMiddleware",
             settings.MIDDLEWARE,
             "AuditMiddleware must be in MIDDLEWARE for audit logging",
         )
@@ -327,7 +327,7 @@ class ConfigurationDriftTest(TestCase):
         from django.conf import settings
 
         self.assertIn(
-            "KoNote2.middleware.program_access.ProgramAccessMiddleware",
+            "konote.middleware.program_access.ProgramAccessMiddleware",
             settings.MIDDLEWARE,
             "ProgramAccessMiddleware must be in MIDDLEWARE for RBAC",
         )

@@ -40,10 +40,10 @@ Complete these items before entering any real client information:
 ### 3. User Accounts Set Up
 
 - [ ] I have created accounts for all staff who will use KoNote2
-- [ ] Each user has the correct role (Admin, Case Manager, Receptionist)
+- [ ] Each user has the correct role (Admin, Case Manager, Front Desk)
 - [ ] Test users and demo accounts have been removed or disabled
 
-**Why this matters:** Receptionists can only see limited client information. Case managers can see full details for their clients. Make sure roles are assigned correctly.
+**Why this matters:** Front desk staff can only see limited client information. Case managers can see full details for their clients. Make sure roles are assigned correctly.
 
 ---
 
@@ -87,7 +87,7 @@ Before entering sensitive data, remember:
 | Client names, emails, birth dates | Encrypted in database with `FIELD_ENCRYPTION_KEY` |
 | User sessions | Protected by `SECRET_KEY` |
 | Who changed what | Recorded in separate audit database |
-| Screen access | Role-based permissions (Admin, Case Manager, Receptionist) |
+| Screen access | Role-based permissions (Admin, Case Manager, Front Desk) |
 
 **What's NOT encrypted:**
 - Program names and descriptions

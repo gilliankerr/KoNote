@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from apps.auth_app.models import Invite, User
 from apps.programs.models import Program, UserProgramRole
-import KoNote2.encryption as enc_module
+import konote.encryption as enc_module
 
 
 TEST_KEY = Fernet.generate_key().decode()
@@ -283,3 +283,149 @@ class AdminRoutePermissionTest(TestCase):
         resp = self.http.get("/auth/users/")
         self.assertEqual(resp.status_code, 302)
         self.assertIn("/auth/login", resp.url)
+
+
+@override_settings(FIELD_ENCRYPTION_KEY=TEST_KEY)
+class ImpersonationGuardTest(TestCase):
+    """
+    Test the impersonation security guard.
+
+    CRITICAL: Admins can ONLY impersonate demo users (is_demo=True).
+    Real users cannot be impersonated regardless of admin privileges.
+    """
+
+    databases = {"default", "audit"}
+
+    def setUp(self):
+        enc_module._fernet = None
+        self.http = Client()
+        # Admin who will attempt impersonation
+        self.admin = User.objects.create_user(
+            username="admin", password="adminpass", display_name="Admin User", is_admin=True
+        )
+        # Demo user (CAN be impersonated)
+        self.demo_user = User.objects.create_user(
+            username="demo-staff", password="demopass", display_name="Demo Staff",
+            is_demo=True, is_admin=False
+        )
+        # Real user (CANNOT be impersonated)
+        self.real_user = User.objects.create_user(
+            username="real-staff", password="realpass", display_name="Real Staff",
+            is_demo=False, is_admin=False
+        )
+        # Inactive demo user (CANNOT be impersonated even though is_demo=True)
+        self.inactive_demo = User.objects.create_user(
+            username="inactive-demo", password="inactivepass", display_name="Inactive Demo",
+            is_demo=True, is_active=False
+        )
+
+    def tearDown(self):
+        enc_module._fernet = None
+
+    def test_admin_can_impersonate_demo_user(self):
+        """Admin should successfully impersonate a demo user."""
+        self.http.login(username="admin", password="adminpass")
+        resp = self.http.get(f"/auth/users/{self.demo_user.pk}/impersonate/")
+
+        # Should redirect to home page after successful impersonation
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp.url, "/")
+
+        # Verify the session is now the demo user
+        resp = self.http.get("/")
+        # Check that we're logged in as demo user (the session user changed)
+        # We need to check via a follow-up request or session inspection
+        self.assertEqual(int(self.http.session["_auth_user_id"]), self.demo_user.pk)
+
+    def test_admin_cannot_impersonate_real_user(self):
+        """CRITICAL: Admin must NOT be able to impersonate real users."""
+        self.http.login(username="admin", password="adminpass")
+        resp = self.http.get(f"/auth/users/{self.real_user.pk}/impersonate/")
+
+        # Should redirect back to user list (not home)
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp.url, "/auth/users/")
+
+        # Verify the admin is still logged in as themselves
+        self.assertEqual(int(self.http.session["_auth_user_id"]), self.admin.pk)
+
+    def test_admin_cannot_impersonate_inactive_demo_user(self):
+        """Admin cannot impersonate inactive users even if they are demo users."""
+        self.http.login(username="admin", password="adminpass")
+        resp = self.http.get(f"/auth/users/{self.inactive_demo.pk}/impersonate/")
+
+        # Should redirect back to user list
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp.url, "/auth/users/")
+
+        # Admin still logged in as themselves
+        self.assertEqual(int(self.http.session["_auth_user_id"]), self.admin.pk)
+
+    def test_non_admin_cannot_impersonate_anyone(self):
+        """Non-admin users cannot access the impersonation endpoint at all."""
+        # Create a non-admin user
+        regular = User.objects.create_user(
+            username="regular", password="regularpass", display_name="Regular User"
+        )
+        self.http.login(username="regular", password="regularpass")
+
+        # Try to impersonate demo user
+        resp = self.http.get(f"/auth/users/{self.demo_user.pk}/impersonate/")
+
+        # Should get 403 Forbidden
+        self.assertEqual(resp.status_code, 403)
+
+    def test_unauthenticated_cannot_impersonate(self):
+        """Unauthenticated users are redirected to login."""
+        resp = self.http.get(f"/auth/users/{self.demo_user.pk}/impersonate/")
+
+        # Should redirect to login
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn("/auth/login", resp.url)
+
+    def test_impersonation_creates_audit_log(self):
+        """Successful impersonation should create an audit log entry."""
+        from apps.audit.models import AuditLog
+
+        self.http.login(username="admin", password="adminpass")
+        self.http.get(f"/auth/users/{self.demo_user.pk}/impersonate/")
+
+        # Check audit log was created
+        log = AuditLog.objects.using("audit").filter(
+            resource_type="impersonation",
+            resource_id=self.demo_user.pk,
+        ).first()
+
+        self.assertIsNotNone(log)
+        self.assertEqual(log.user_id, self.admin.pk)
+        self.assertEqual(log.action, "login")
+        self.assertEqual(log.metadata["impersonated_user_id"], self.demo_user.pk)
+        self.assertEqual(log.metadata["admin_username"], "admin")
+
+    def test_failed_impersonation_no_audit_log(self):
+        """Failed impersonation (real user) should NOT create audit log."""
+        from apps.audit.models import AuditLog
+
+        # Clear any existing logs
+        AuditLog.objects.using("audit").all().delete()
+
+        self.http.login(username="admin", password="adminpass")
+        self.http.get(f"/auth/users/{self.real_user.pk}/impersonate/")
+
+        # No audit log should be created for failed impersonation
+        log = AuditLog.objects.using("audit").filter(
+            resource_type="impersonation",
+        ).first()
+
+        self.assertIsNone(log)
+
+    def test_impersonation_updates_last_login(self):
+        """Impersonation should update the target user's last_login_at."""
+        self.demo_user.last_login_at = None
+        self.demo_user.save()
+
+        self.http.login(username="admin", password="adminpass")
+        self.http.get(f"/auth/users/{self.demo_user.pk}/impersonate/")
+
+        self.demo_user.refresh_from_db()
+        self.assertIsNotNone(self.demo_user.last_login_at)

@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
-from KoNote2.encryption import decrypt_field, encrypt_field
+from konote.encryption import decrypt_field, encrypt_field
 
 
 def generate_unique_slug():

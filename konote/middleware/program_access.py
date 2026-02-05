@@ -1,6 +1,7 @@
 """RBAC middleware enforcing program-scoped data access."""
 import re
 
+from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 
 
@@ -53,6 +54,19 @@ class ProgramAccessMiddleware:
                     )
                 return self.get_response(request)
 
+        # Executive role: redirect to dashboard instead of client pages
+        # Executives can see aggregate data only, not individual client records
+        if self._is_executive_only(request.user):
+            for pattern, _ in CLIENT_URL_PATTERNS:
+                if pattern.match(path):
+                    return redirect("clients:executive_dashboard")
+            for pattern in NOTE_URL_PATTERNS:
+                if pattern.match(path):
+                    return redirect("clients:executive_dashboard")
+            # Also redirect from client list
+            if path == "/clients/" or path == "/clients":
+                return redirect("clients:executive_dashboard")
+
         # Client-scoped routes — check program overlap (admins are NOT exempt)
         for pattern, id_param in CLIENT_URL_PATTERNS:
             match = pattern.match(path)
@@ -99,8 +113,23 @@ class ProgramAccessMiddleware:
 
         return self.get_response(request)
 
-    # Role hierarchy — higher number = more access
-    ROLE_RANK = {"receptionist": 1, "staff": 2, "program_manager": 3}
+    # Role hierarchy — higher number = more access (executive has highest rank but no client data access)
+    ROLE_RANK = {"receptionist": 1, "staff": 2, "program_manager": 3, "executive": 4}
+
+    def _is_executive_only(self, user):
+        """Check if user's only/highest role is executive (no client data access)."""
+        from apps.programs.models import UserProgramRole
+
+        roles = set(
+            UserProgramRole.objects.filter(user=user, status="active").values_list("role", flat=True)
+        )
+        if not roles:
+            return False
+        # Executive-only if they have executive role and no other roles that grant client access
+        if "executive" in roles:
+            client_access_roles = {"receptionist", "staff", "program_manager"}
+            return not bool(roles & client_access_roles)
+        return False
 
     def _user_can_access_client(self, user, client_id):
         """Check if user shares at least one program with the client."""

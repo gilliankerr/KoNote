@@ -7,8 +7,8 @@ msgstr ""
 "Project-Id-Version: KoNote2 Web 1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-01 00:00+0000\n"
-"PO-Revision-Date: 2024-01-01 00:00+0000\n"
-"Last-Translator: \n"
+"PO-Revision-Date: 2026-02-05 00:00+0000\n"
+"Last-Translator: Claude Code\n"
 "Language-Team: French\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -27,13 +27,13 @@ msgid "Admin"
 msgstr "Administration"
 
 msgid "Templates"
-msgstr "Modeles"
+msgstr "Modèles"
 
 msgid "Event Types"
-msgstr "Types d'evenements"
+msgstr "Types d'événements"
 
 msgid "Settings"
-msgstr "Parametres"
+msgstr "Paramètres"
 
 msgid "Invites"
 msgstr "Invitations"
@@ -42,7 +42,7 @@ msgid "Audit Log"
 msgstr "Journal d'audit"
 
 msgid "Sign Out"
-msgstr "Deconnexion"
+msgstr "Déconnexion"
 
 msgid "Select language"
 msgstr "Choisir la langue"
@@ -67,16 +67,10 @@ msgid "Sign in with Microsoft"
 msgstr "Se connecter avec Microsoft"
 
 msgid "Try the Demo"
-msgstr "Essayer la demo"
+msgstr "Essayer la démo"
 
 msgid "Sign in instantly as a demo user to explore the system"
-msgstr "Connectez-vous instantanement en tant qu'utilisateur demo pour explorer le systeme"
-
-msgid "Receptionist"
-msgstr "Receptionniste"
-
-msgid "Counsellor"
-msgstr "Conseiller"
+msgstr "Connectez-vous instantanément en tant qu'utilisateur démo pour explorer le système"
 
 msgid "Manager"
 msgstr "Gestionnaire"
@@ -88,9 +82,6 @@ msgstr "Administrateur"
 msgid "Home"
 msgstr "Accueil"
 
-msgid "Participant Outcome Management"
-msgstr "Gestion des resultats clients"
-
 msgid "Name or ID..."
 msgstr "Nom ou ID..."
 
@@ -101,7 +92,7 @@ msgid "Active Alerts"
 msgstr "Alertes actives"
 
 msgid "requiring action"
-msgstr "necessitant une action"
+msgstr "nécessitant une action"
 
 msgid "Needs Attention"
 msgstr "Attention requise"
@@ -113,37 +104,37 @@ msgid "Notes Today"
 msgstr "Notes aujourd'hui"
 
 msgid "recorded"
-msgstr "enregistrees"
+msgstr "enregistrées"
 
 msgid "Follow-ups Due"
-msgstr "Suivis a effectuer"
+msgstr "Suivis à effectuer"
 
 msgid "need your attention"
-msgstr "necessitent votre attention"
+msgstr "nécessitent votre attention"
 
 msgid "Follow up by"
 msgstr "Suivi avant le"
 
 msgid "(optional — adds to your home page reminders)"
-msgstr "(facultatif — ajoute a vos rappels sur la page d'accueil)"
+msgstr "(facultatif — ajoute à vos rappels sur la page d'accueil)"
 
 msgid "Priority Items"
-msgstr "Elements prioritaires"
+msgstr "Éléments prioritaires"
 
 msgid "Alerts"
 msgstr "Alertes"
 
 msgid "No Recent Notes"
-msgstr "Pas de notes recentes"
+msgstr "Pas de notes récentes"
 
 msgid "30+ days without notes"
 msgstr "Plus de 30 jours sans notes"
 
 msgid "All caught up! No items need attention."
-msgstr "Tout est a jour! Aucun element ne necessite d'attention."
+msgstr "Tout est à jour! Aucun élément ne nécessite d'attention."
 
 msgid "Recently Viewed"
-msgstr "Vus recemment"
+msgstr "Vus récemment"
 
 msgid "Quick links"
 msgstr "Liens rapides"
@@ -168,20 +159,20 @@ msgid "Inactive"
 msgstr "Inactif"
 
 msgid "Discharged"
-msgstr "Conge"
+msgstr "Congédié"
 
 msgid "Clear filters"
 msgstr "Effacer les filtres"
 
 #: templates/clients/form.html
 msgid "First Name"
-msgstr "Prenom"
+msgstr "Prénom"
 
 msgid "Last Name"
 msgstr "Nom de famille"
 
 msgid "Middle Name"
-msgstr "Deuxieme prenom"
+msgstr "Deuxième prénom"
 
 msgid "Date of Birth"
 msgstr "Date de naissance"
@@ -215,7 +206,7 @@ msgid "Info"
 msgstr "Info"
 
 msgid "Events"
-msgstr "Evenements"
+msgstr "Événements"
 
 msgid "Analysis"
 msgstr "Analyse"
@@ -225,7 +216,7 @@ msgid "Edit"
 msgstr "Modifier"
 
 msgid "Back to List"
-msgstr "Retour a la liste"
+msgstr "Retour à la liste"
 
 msgid "Export PDF"
 msgstr "Exporter en PDF"
@@ -241,91 +232,91 @@ msgid "Pagination"
 msgstr "Pagination"
 
 msgid "Previous"
-msgstr "Precedent"
+msgstr "Précédent"
 
 msgid "Next"
 msgstr "Suivant"
 
 msgid "Create the first one"
-msgstr "Creer le premier"
+msgstr "Créer le premier"
 
 #: templates/admin_settings/dashboard.html
 msgid "Manage your instance configuration."
-msgstr "Gerez la configuration de votre instance."
+msgstr "Gérez la configuration de votre instance."
 
 msgid "Terminology"
 msgstr "Terminologie"
 
 msgid "Customise the words used throughout the system (e.g. rename \"Client\" to \"Participant\")."
-msgstr "Personnalisez les mots utilises dans le systeme (par ex. renommer \"Client\" en \"Participant\")."
+msgstr "Personnalisez les mots utilisés dans le système (par ex. renommer « Client » en « Participant »)."
 
 msgid "Manage Terminology"
-msgstr "Gerer la terminologie"
+msgstr "Gérer la terminologie"
 
 msgid "Features"
-msgstr "Fonctionnalites"
+msgstr "Fonctionnalités"
 
 msgid "Turn modules on or off for your organisation."
-msgstr "Activez ou desactivez les modules pour votre organisation."
+msgstr "Activez ou désactivez les modules pour votre organisation."
 
 msgid "Manage Features"
-msgstr "Gerer les fonctionnalites"
+msgstr "Gérer les fonctionnalités"
 
 msgid "Instance Settings"
-msgstr "Parametres d'instance"
+msgstr "Paramètres d'instance"
 
 msgid "Branding, date format, and session timeout."
-msgstr "Image de marque, format de date et delai d'expiration de session."
+msgstr "Image de marque, format de date et délai d'expiration de session."
 
 msgid "Manage Settings"
-msgstr "Gerer les parametres"
+msgstr "Gérer les paramètres"
 
 msgid "Users"
 msgstr "Utilisateurs"
 
 msgid "Create, edit, and deactivate user accounts."
-msgstr "Creer, modifier et desactiver des comptes utilisateurs."
+msgstr "Créer, modifier et désactiver des comptes utilisateurs."
 
 msgid "Manage Users"
-msgstr "Gerer les utilisateurs"
+msgstr "Gérer les utilisateurs"
 
 #: templates/admin_settings/terminology.html
 msgid "Customise the words used throughout the system. Changes take effect immediately."
-msgstr "Personnalisez les mots utilises dans le systeme. Les modifications prennent effet immediatement."
+msgstr "Personnalisez les mots utilisés dans le système. Les modifications prennent effet immédiatement."
 
 msgid "Term"
 msgstr "Terme"
 
 msgid "Default"
-msgstr "Par defaut"
+msgstr "Par défaut"
 
 msgid "Your Label"
-msgstr "Votre libelle"
+msgstr "Votre libellé"
 
 msgid "Reset"
-msgstr "Reinitialiser"
+msgstr "Réinitialiser"
 
 msgid "Back"
 msgstr "Retour"
 
 #: templates/admin_settings/features.html
 msgid "Enable or disable modules for your organisation."
-msgstr "Activez ou desactivez les modules pour votre organisation."
+msgstr "Activez ou désactivez les modules pour votre organisation."
 
 msgid "Feature"
-msgstr "Fonctionnalite"
+msgstr "Fonctionnalité"
 
 msgid "Description"
 msgstr "Description"
 
 msgid "Enabled"
-msgstr "Active"
+msgstr "Activé"
 
 msgid "Disabled"
-msgstr "Desactive"
+msgstr "Désactivé"
 
 msgid "Disable"
-msgstr "Desactiver"
+msgstr "Désactiver"
 
 msgid "Enable"
 msgstr "Activer"
@@ -341,23 +332,23 @@ msgid "Document Storage"
 msgstr "Stockage de documents"
 
 msgid "Connect to an external document storage system (SharePoint or Google Drive) to show a \"Open Documents Folder\" button on client records."
-msgstr "Connectez-vous a un systeme de stockage de documents externe (SharePoint ou Google Drive) pour afficher un bouton \"Ouvrir le dossier de documents\" sur les dossiers clients."
+msgstr "Connectez-vous à un système de stockage de documents externe (SharePoint ou Google Drive) pour afficher un bouton « Ouvrir le dossier de documents » sur les dossiers clients."
 
 msgid "Test with sample Record ID: REC-2024-001"
 msgstr "Tester avec l'ID de dossier exemple : REC-2024-001"
 
 #: templates/auth_app/user_list.html
 msgid "Manage user accounts and roles."
-msgstr "Gerez les comptes utilisateurs et les roles."
+msgstr "Gérez les comptes utilisateurs et les rôles."
 
 msgid "New User"
 msgstr "Nouvel utilisateur"
 
 msgid "Role"
-msgstr "Role"
+msgstr "Rôle"
 
 msgid "Last Login"
-msgstr "Derniere connexion"
+msgstr "Dernière connexion"
 
 msgid "Staff"
 msgstr "Personnel"
@@ -366,27 +357,27 @@ msgid "Never"
 msgstr "Jamais"
 
 msgid "Deactivate"
-msgstr "Desactiver"
+msgstr "Désactiver"
 
 msgid "No users found."
-msgstr "Aucun utilisateur trouve."
+msgstr "Aucun utilisateur trouvé."
 
 msgid "Back to Settings"
-msgstr "Retour aux parametres"
+msgstr "Retour aux paramètres"
 
 #: templates/auth_app/user_form.html
 msgid "Create User"
-msgstr "Creer un utilisateur"
+msgstr "Créer un utilisateur"
 
 #: templates/auth_app/invite_list.html
 msgid "Manage invite links for new users"
-msgstr "Gerez les liens d'invitation pour les nouveaux utilisateurs"
+msgstr "Gérez les liens d'invitation pour les nouveaux utilisateurs"
 
 msgid "New Invite"
 msgstr "Nouvelle invitation"
 
 msgid "Created"
-msgstr "Cree"
+msgstr "Créé"
 
 msgid "Expires"
 msgstr "Expire"
@@ -398,7 +389,7 @@ msgid "by"
 msgstr "par"
 
 msgid "Expired"
-msgstr "Expire"
+msgstr "Expiré"
 
 msgid "Pending"
 msgstr "En attente"
@@ -407,14 +398,14 @@ msgid "Invite link"
 msgstr "Lien d'invitation"
 
 msgid "No invites yet. Create one to get started."
-msgstr "Aucune invitation pour le moment. Creez-en une pour commencer."
+msgstr "Aucune invitation pour le moment. Créez-en une pour commencer."
 
 #: templates/auth_app/invite_form.html
 msgid "Create Invite"
-msgstr "Creer une invitation"
+msgstr "Créer une invitation"
 
 msgid "Generate a link for a new user to create their account"
-msgstr "Generez un lien pour qu'un nouvel utilisateur cree son compte"
+msgstr "Générez un lien pour qu'un nouvel utilisateur crée son compte"
 
 msgid "Assign to Programs"
 msgstr "Assigner aux programmes"
@@ -424,10 +415,10 @@ msgstr "Le lien expire dans (jours)"
 
 #: templates/auth_app/invite_accept.html
 msgid "Create Your Account"
-msgstr "Creer votre compte"
+msgstr "Créer votre compte"
 
 msgid "Create your account"
-msgstr "Creer votre compte"
+msgstr "Créer votre compte"
 
 msgid "Please fix the errors below."
 msgstr "Veuillez corriger les erreurs ci-dessous."
@@ -445,20 +436,20 @@ msgid "Email (optional)"
 msgstr "Courriel (facultatif)"
 
 msgid "Minimum 8 characters."
-msgstr "Minimum 8 caracteres."
+msgstr "Minimum 8 caractères."
 
 msgid "Confirm Password"
 msgstr "Confirmer le mot de passe"
 
 msgid "Create Account"
-msgstr "Creer le compte"
+msgstr "Créer le compte"
 
 #: templates/auth_app/invite_expired.html
 msgid "Invite Unavailable"
 msgstr "Invitation non disponible"
 
 msgid "Go to Sign In"
-msgstr "Aller a la connexion"
+msgstr "Aller à la connexion"
 
 #: templates/notes/_tab_notes.html
 msgid "Filter notes"
@@ -474,7 +465,7 @@ msgid "Quick notes"
 msgstr "Notes rapides"
 
 msgid "Full notes"
-msgstr "Notes completes"
+msgstr "Notes complètes"
 
 msgid "Author"
 msgstr "Auteur"
@@ -486,7 +477,7 @@ msgid "My notes only"
 msgstr "Mes notes seulement"
 
 msgid "From date"
-msgstr "Date de debut"
+msgstr "Date de début"
 
 msgid "To date"
 msgstr "Date de fin"
@@ -498,10 +489,10 @@ msgid "Clear"
 msgstr "Effacer"
 
 msgid "Full"
-msgstr "Complete"
+msgstr "Complète"
 
 msgid "Cancelled"
-msgstr "Annulee"
+msgstr "Annulée"
 
 msgid "(unknown)"
 msgstr "(inconnu)"
@@ -510,35 +501,35 @@ msgid "Reason:"
 msgstr "Raison :"
 
 msgid "View details"
-msgstr "Voir les details"
+msgstr "Voir les détails"
 
 msgid "Notes pagination"
 msgstr "Pagination des notes"
 
 msgid "Add the first note"
-msgstr "Ajouter la premiere note"
+msgstr "Ajouter la première note"
 
 #: templates/notes/note_form.html templates/notes/quick_note_form.html
 msgid "I confirm verbal consent was obtained"
-msgstr "Je confirme que le consentement verbal a ete obtenu"
+msgstr "Je confirme que le consentement verbal a été obtenu"
 
 #: templates/notes/note_form.html templates/notes/quick_note_form.html
 #, python-format
 msgid "The %(client)s has given verbal consent to record notes about this session."
-msgstr "Le/La %(client)s a donne son consentement verbal pour enregistrer des notes sur cette session."
+msgstr "Le/La %(client)s a donné son consentement verbal pour enregistrer des notes sur cette session."
 
 #: templates/notes/note_form.html
 msgid "Template"
-msgstr "Modele"
+msgstr "Modèle"
 
 msgid "Session Date"
 msgstr "Date de session"
 
 msgid "Summary (optional)"
-msgstr "Resume (facultatif)"
+msgstr "Résumé (facultatif)"
 
 msgid "Create a plan"
-msgstr "Creer un plan"
+msgstr "Créer un plan"
 
 msgid "first."
 msgstr "d'abord."
@@ -548,7 +539,7 @@ msgid "Note content:"
 msgstr "Contenu de la note :"
 
 msgid "Summary:"
-msgstr "Resume :"
+msgstr "Résumé :"
 
 msgid "Cancel This Note"
 msgstr "Annuler cette note"
@@ -561,7 +552,7 @@ msgid "(unknown author)"
 msgstr "(auteur inconnu)"
 
 msgid "Template:"
-msgstr "Modele :"
+msgstr "Modèle :"
 
 msgid "Cancellation reason:"
 msgstr "Raison de l'annulation :"
@@ -570,17 +561,17 @@ msgid "Value"
 msgstr "Valeur"
 
 msgid "Summary"
-msgstr "Resume"
+msgstr "Résumé"
 
 msgid "Cancel this note"
 msgstr "Annuler cette note"
 
 msgid "Collapse"
-msgstr "Reduire"
+msgstr "Réduire"
 
 #: templates/events/_tab_events.html
 msgid "New Event"
-msgstr "Nouvel evenement"
+msgstr "Nouvel événement"
 
 msgid "New Alert"
 msgstr "Nouvelle alerte"
@@ -595,55 +586,55 @@ msgid "Cancel Alert"
 msgstr "Annuler l'alerte"
 
 msgid "cancelled alert"
-msgstr "alerte annulee"
+msgstr "alerte annulée"
 
 msgid "Timeline"
 msgstr "Chronologie"
 
 msgid "Event"
-msgstr "Evenement"
+msgstr "Événement"
 
 msgid "All day event"
-msgstr "Evenement de toute la journee"
+msgstr "Événement de toute la journée"
 
 msgid "All Day"
-msgstr "Toute la journee"
+msgstr "Toute la journée"
 
 msgid "Full Note"
-msgstr "Note complete"
+msgstr "Note complète"
 
 msgid "No events or notes recorded yet. Add events or progress notes to build a timeline."
-msgstr "Aucun evenement ou note enregistre pour le moment. Ajoutez des evenements ou des notes de suivi pour construire une chronologie."
+msgstr "Aucun événement ou note enregistré pour le moment. Ajoutez des événements ou des notes de suivi pour construire une chronologie."
 
 #: templates/events/event_form.html
 msgid "New"
 msgstr "Nouveau"
 
 msgid "Start Date & Time"
-msgstr "Date et heure de debut"
+msgstr "Date et heure de début"
 
 msgid "End Date & Time"
 msgstr "Date et heure de fin"
 
 msgid "Create Event"
-msgstr "Creer l'evenement"
+msgstr "Créer l'événement"
 
 #: templates/events/event_type_list.html
 msgid "Manage event categories for client timelines."
-msgstr "Gerez les categories d'evenements pour les chronologies des clients."
+msgstr "Gérez les catégories d'événements pour les chronologies des clients."
 
 msgid "New Event Type"
-msgstr "Nouveau type d'evenement"
+msgstr "Nouveau type d'événement"
 
 msgid "Archived"
-msgstr "Archive"
+msgstr "Archivé"
 
 msgid "No event types yet. Create one to get started."
-msgstr "Aucun type d'evenement pour le moment. Creez-en un pour commencer."
+msgstr "Aucun type d'événement pour le moment. Créez-en un pour commencer."
 
 #: templates/programs/list.html
 msgid "Assigned Staff"
-msgstr "Personnel assigne"
+msgstr "Personnel assigné"
 
 msgid "User"
 msgstr "Utilisateur"
@@ -652,33 +643,33 @@ msgid "Program Manager"
 msgstr "Gestionnaire de programme"
 
 msgid "Removed"
-msgstr "Supprime"
+msgstr "Supprimé"
 
 msgid "Remove"
 msgstr "Supprimer"
 
 msgid "No staff assigned yet."
-msgstr "Aucun personnel assigne pour le moment."
+msgstr "Aucun personnel assigné pour le moment."
 
 msgid "Add"
 msgstr "Ajouter"
 
 msgid "Select user"
-msgstr "Selectionner un utilisateur"
+msgstr "Sélectionner un utilisateur"
 
 msgid "Choose a user..."
 msgstr "Choisir un utilisateur..."
 
 msgid "Select role"
-msgstr "Selectionner un role"
+msgstr "Sélectionner un rôle"
 
 #: templates/programs/no_access.html
 msgid "If you need access, please contact your administrator."
-msgstr "Si vous avez besoin d'acces, veuillez contacter votre administrateur."
+msgstr "Si vous avez besoin d'accès, veuillez contacter votre administrateur."
 
 #: templates/plans/_tab_plan.html
 msgid "Apply Template"
-msgstr "Appliquer un modele"
+msgstr "Appliquer un modèle"
 
 msgid "Add section form"
 msgstr "Formulaire d'ajout de section"
@@ -687,17 +678,17 @@ msgid "Save"
 msgstr "Enregistrer"
 
 msgid "Use the button above to add one, or apply a template."
-msgstr "Utilisez le bouton ci-dessus pour en ajouter un, ou appliquez un modele."
+msgstr "Utilisez le bouton ci-dessus pour en ajouter un, ou appliquez un modèle."
 
 #: templates/plans/_section.html
 msgid "Completed"
-msgstr "Termine"
+msgstr "Terminé"
 
 msgid "Deactivated"
-msgstr "Desactive"
+msgstr "Désactivé"
 
 msgid "Change the status of this section? This may affect related targets."
-msgstr "Modifier le statut de cette section ? Cela peut affecter les cibles associees."
+msgstr "Modifier le statut de cette section? Cela peut affecter les cibles associées."
 
 msgid "Actions"
 msgstr "Actions"
@@ -707,39 +698,39 @@ msgid "None"
 msgstr "Aucun"
 
 msgid "Change the status of this target?"
-msgstr "Modifier le statut de cette cible ?"
+msgstr "Modifier le statut de cette cible?"
 
 msgid "History"
 msgstr "Historique"
 
 #: templates/plans/template_list.html
 msgid "Create Template"
-msgstr "Creer un modele"
+msgstr "Créer un modèle"
 
 msgid "templates"
-msgstr "modeles"
+msgstr "modèles"
 
 #: templates/plans/metric_library.html
 msgid "Library"
-msgstr "Bibliotheque"
+msgstr "Bibliothèque"
 
 msgid "Import from CSV"
 msgstr "Importer depuis CSV"
 
 msgid "Unit"
-msgstr "Unite"
+msgstr "Unité"
 
 msgid "Range"
 msgstr "Plage"
 
 msgid "to"
-msgstr "a"
+msgstr "à"
 
 msgid "Yes"
 msgstr "Oui"
 
 msgid "Custom"
-msgstr "Personnalise"
+msgstr "Personnalisé"
 
 #: templates/reports/_tab_analysis.html
 msgid "Export as PDF"
@@ -755,48 +746,48 @@ msgid "Date"
 msgstr "Date"
 
 msgid "No metric data recorded yet. Record metrics through progress notes to see charts here."
-msgstr "Aucune donnee de mesure enregistree pour le moment. Enregistrez des mesures via les notes de suivi pour voir les graphiques ici."
+msgstr "Aucune donnée de mesure enregistrée pour le moment. Enregistrez des mesures via les notes de suivi pour voir les graphiques ici."
 
 #: templates/reports/export_form.html
 msgid "Funder Report Export"
 msgstr "Exportation du rapport pour les bailleurs de fonds"
 
 msgid "Generate a report of aggregate metric data for a programme and date range."
-msgstr "Generez un rapport des donnees de mesure agregees pour un programme et une plage de dates."
+msgstr "Générez un rapport des données de mesure agrégées pour un programme et une plage de dates."
 
 msgid "No results"
-msgstr "Aucun resultat"
+msgstr "Aucun résultat"
 
 msgid "No data found."
-msgstr "Aucune donnee trouvee."
+msgstr "Aucune donnée trouvée."
 
 msgid "There are no metric values matching the selected programme, metrics, and date range. Try adjusting your filters."
-msgstr "Il n'y a aucune valeur de mesure correspondant au programme, aux mesures et a la plage de dates selectionnes. Essayez d'ajuster vos filtres."
+msgstr "Il n'y a aucune valeur de mesure correspondant au programme, aux mesures et à la plage de dates sélectionnés. Essayez d'ajuster vos filtres."
 
 msgid "Form errors"
 msgstr "Erreurs de formulaire"
 
 msgid "Select all"
-msgstr "Tout selectionner"
+msgstr "Tout sélectionner"
 
 msgid "Deselect all"
-msgstr "Tout deselectionner"
+msgstr "Tout désélectionner"
 
 msgid "Generate Report"
-msgstr "Generer le rapport"
+msgstr "Générer le rapport"
 
 msgid "Additional Options"
-msgstr "Options supplementaires"
+msgstr "Options supplémentaires"
 
 #: templates/audit/log_list.html
 msgid "Review all system activity. Use filters to narrow results."
-msgstr "Consultez toute l'activite du systeme. Utilisez les filtres pour affiner les resultats."
+msgstr "Consultez toute l'activité du système. Utilisez les filtres pour affiner les résultats."
 
 msgid "From"
 msgstr "De"
 
 msgid "To"
-msgstr "A"
+msgstr "À"
 
 msgid "Search by name"
 msgstr "Rechercher par nom"
@@ -829,26 +820,26 @@ msgid "Resource ID"
 msgstr "ID de ressource"
 
 msgid "No audit log entries found. Try adjusting your filters."
-msgstr "Aucune entree de journal d'audit trouvee. Essayez d'ajuster vos filtres."
+msgstr "Aucune entrée de journal d'audit trouvée. Essayez d'ajuster vos filtres."
 
 #: templates/403.html
 msgid "Access Denied"
-msgstr "Acces refuse"
+msgstr "Accès refusé"
 
 msgid "You don't have permission to access this page."
-msgstr "Vous n'avez pas la permission d'acceder a cette page."
+msgstr "Vous n'avez pas la permission d'accéder à cette page."
 
 msgid "What you can do"
 msgstr "Ce que vous pouvez faire"
 
 msgid "Check that you're signed in with the correct account"
-msgstr "Verifiez que vous etes connecte avec le bon compte"
+msgstr "Vérifiez que vous êtes connecté avec le bon compte"
 
 msgid "Contact your administrator if you believe you should have access"
-msgstr "Contactez votre administrateur si vous pensez devoir avoir acces"
+msgstr "Contactez votre administrateur si vous pensez devoir avoir accès"
 
 msgid "Return to a page you have access to using the links below"
-msgstr "Retournez a une page a laquelle vous avez acces en utilisant les liens ci-dessous"
+msgstr "Retournez à une page à laquelle vous avez accès en utilisant les liens ci-dessous"
 
 #: templates/clients/home.html
 #, python-format
@@ -868,10 +859,10 @@ msgid "All %(programs)s"
 msgstr "Tous les %(programs)s"
 
 msgid "Created after"
-msgstr "Cree apres"
+msgstr "Créé après"
 
 msgid "Created before"
-msgstr "Cree avant"
+msgstr "Créé avant"
 
 msgid "Search filters"
 msgstr "Filtres de recherche"
@@ -886,17 +877,17 @@ msgstr "sur %(total)s au total"
 
 #, python-format
 msgid "No recent %(clients)s yet. Start by searching above."
-msgstr "Aucun(e) %(clients)s recent(e). Commencez par faire une recherche ci-dessus."
+msgstr "Aucun(e) %(clients)s récent(e). Commencez par faire une recherche ci-dessus."
 
 #: templates/clients/_search_results.html
 #, python-format
 msgid "No %(clients)s match \"%(query)s\"."
-msgstr "Aucun(e) %(clients)s ne correspond a \"%(query)s\"."
+msgstr "Aucun(e) %(clients)s ne correspond à « %(query)s »."
 
 #: templates/notes/_tab_notes.html
 #, python-format
 msgid "Full %(note)s"
-msgstr "%(note)s complete"
+msgstr "%(note)s complète"
 
 #, python-format
 msgid "Page %(current)s of %(total)s"
@@ -904,7 +895,7 @@ msgstr "Page %(current)s sur %(total)s"
 
 #, python-format
 msgid "No %(notes)s recorded yet."
-msgstr "Aucune %(notes)s enregistree pour le moment."
+msgstr "Aucune %(notes)s enregistrée pour le moment."
 
 #: templates/base.html
 msgid "Toggle navigation menu"
@@ -917,7 +908,7 @@ msgid "Pending Submissions"
 msgstr "Soumissions en attente"
 
 msgid "Export Client Data"
-msgstr "Exporter les donnees clients"
+msgstr "Exporter les données clients"
 
 msgid "Dismiss"
 msgstr "Fermer"
@@ -927,14 +918,14 @@ msgid "Consent Required"
 msgstr "Consentement requis"
 
 msgid "Cannot create notes for this"
-msgstr "Impossible de creer des notes pour ce/cette"
+msgstr "Impossible de créer des notes pour ce/cette"
 
 #, python-format
 msgid "Privacy regulations (PIPEDA/PHIPA) require that consent be recorded before creating progress notes. Please record the %(client)s's consent on their profile before continuing."
-msgstr "Les reglements sur la vie privee (PIPEDA/LPRPS) exigent que le consentement soit enregistre avant de creer des notes de suivi. Veuillez enregistrer le consentement du/de la %(client)s dans son profil avant de continuer."
+msgstr "Les règlements sur la vie privée (PIPEDA/LPRPS) exigent que le consentement soit enregistré avant de créer des notes de suivi. Veuillez enregistrer le consentement du/de la %(client)s dans son profil avant de continuer."
 
 msgid "Go to"
-msgstr "Aller a"
+msgstr "Aller à"
 
 msgid "Profile"
 msgstr "Profil"
@@ -944,22 +935,22 @@ msgstr "Retour aux notes"
 
 #: templates/clients/_consent_display.html
 msgid "Privacy Consent"
-msgstr "Consentement a la vie privee"
+msgstr "Consentement à la vie privée"
 
 msgid "Update consent record"
-msgstr "Mettre a jour le consentement"
+msgstr "Mettre à jour le consentement"
 
 msgid "Record consent"
 msgstr "Enregistrer le consentement"
 
 msgid "Update"
-msgstr "Mettre a jour"
+msgstr "Mettre à jour"
 
 msgid "Record Consent"
 msgstr "Enregistrer le consentement"
 
 msgid "Consent recorded"
-msgstr "Consentement enregistre"
+msgstr "Consentement enregistré"
 
 msgid "Date recorded"
 msgstr "Date d'enregistrement"
@@ -968,17 +959,17 @@ msgid "No consent on file."
 msgstr "Aucun consentement au dossier."
 
 msgid "Consent must be recorded before progress notes can be created for this"
-msgstr "Le consentement doit etre enregistre avant de pouvoir creer des notes de suivi pour ce/cette"
+msgstr "Le consentement doit être enregistré avant de pouvoir créer des notes de suivi pour ce/cette"
 
 #: templates/clients/_consent_edit.html
 msgid "Record Privacy Consent"
-msgstr "Enregistrer le consentement a la vie privee"
+msgstr "Enregistrer le consentement à la vie privée"
 
 msgid "Record when and how the"
 msgstr "Enregistrez quand et comment le/la"
 
 msgid "provided consent for data collection and progress tracking."
-msgstr "a consenti a la collecte de donnees et au suivi des progres."
+msgstr "a consenti à la collecte de données et au suivi des progrès."
 
 msgid "Save Consent Record"
 msgstr "Enregistrer le consentement"
@@ -990,7 +981,7 @@ msgstr "Ajouter %(section)s"
 
 #, python-format
 msgid "Completed & deactivated %(sections)s (%(count)s)"
-msgstr "%(sections)s termines et desactives (%(count)s)"
+msgstr "%(sections)s terminés et désactivés (%(count)s)"
 
 #, python-format
 msgid "No %(sections)s yet."
@@ -998,7 +989,7 @@ msgstr "Aucune %(sections)s pour le moment."
 
 #: templates/registration/admin/link_list.html
 msgid "Create and manage self-service registration forms for programs."
-msgstr "Creer et gerer les formulaires d'inscription en libre-service pour les programmes."
+msgstr "Créer et gérer les formulaires d'inscription en libre-service pour les programmes."
 
 msgid "New Registration Link"
 msgstr "Nouveau lien d'inscription"
@@ -1013,7 +1004,7 @@ msgid "Open"
 msgstr "Ouvert"
 
 msgid "Closed"
-msgstr "Ferme"
+msgstr "Fermé"
 
 msgid "pending"
 msgstr "en attente"
@@ -1022,7 +1013,7 @@ msgid "View Form"
 msgstr "Voir le formulaire"
 
 msgid "Get Embed Code"
-msgstr "Obtenir le code d'integration"
+msgstr "Obtenir le code d'intégration"
 
 msgid "Copy Direct Link"
 msgstr "Copier le lien direct"
@@ -1037,24 +1028,24 @@ msgid "No registration links yet."
 msgstr "Aucun lien d'inscription pour le moment."
 
 msgid "Create your first registration link"
-msgstr "Creer votre premier lien d'inscription"
+msgstr "Créer votre premier lien d'inscription"
 
 #, python-format
 msgid "You've been invited as a <strong>%(role)s</strong>."
-msgstr "Vous avez ete invite(e) en tant que <strong>%(role)s</strong>."
+msgstr "Vous avez été invité(e) en tant que <strong>%(role)s</strong>."
 
 #, python-format
 msgid "Deactivate %(name)s?"
-msgstr "Desactiver %(name)s ?"
+msgstr "Désactiver %(name)s?"
 
 #: templates/plans/metric_library.html
 #, python-format
 msgid "Manage available %(metrics)s for outcome tracking."
-msgstr "Gerer les %(metrics)s disponibles pour le suivi des resultats."
+msgstr "Gérer les %(metrics)s disponibles pour le suivi des résultats."
 
 #, python-format
 msgid "Add Custom %(metric)s"
-msgstr "Ajouter %(metric)s personnalise"
+msgstr "Ajouter %(metric)s personnalisé"
 
 #, python-format
 msgid "Edit %(name)s"
@@ -1062,7 +1053,7 @@ msgstr "Modifier %(name)s"
 
 #, python-format
 msgid "No %(metrics)s defined yet."
-msgstr "Aucune %(metrics)s definie pour le moment."
+msgstr "Aucune %(metrics)s définie pour le moment."
 
 #: templates/reports/_tab_analysis.html
 #, python-format
@@ -1072,11 +1063,11 @@ msgstr "Graphique montrant %(metric)s au fil du temps pour %(target)s"
 #: templates/notes/note_form.html
 #, python-format
 msgid "This %(client)s requires a plan before notes can be recorded."
-msgstr "Ce/cette %(client)s necessite un plan avant de pouvoir enregistrer des notes."
+msgstr "Ce/cette %(client)s nécessite un plan avant de pouvoir enregistrer des notes."
 
 #, python-format
 msgid "Select a target to record progress for this %(client)s"
-msgstr "Selectionnez une cible pour enregistrer les progres de ce/cette %(client)s"
+msgstr "Sélectionnez une cible pour enregistrer les progrès de ce/cette %(client)s"
 
 #: templates/notes/quick_note_form.html
 #, python-format
@@ -1085,7 +1076,7 @@ msgstr "Ajouter une note rapide pour %(name)s"
 
 #, python-format
 msgid "If this %(client)s has a plan, you can record progress by adding a Full Note."
-msgstr "Si ce/cette %(client)s a un plan, vous pouvez enregistrer les progres en ajoutant une note complete."
+msgstr "Si ce/cette %(client)s a un plan, vous pouvez enregistrer les progrès en ajoutant une note complète."
 
 #: templates/notes/quick_note_form.html templates/notes/note_form.html
 #, python-format
@@ -1102,11 +1093,11 @@ msgstr "Enregistrer %(note)s"
 
 #, python-format
 msgid "Which %(targets)s did you work on?"
-msgstr "Sur quels/quelles %(targets)s avez-vous travaille ?"
+msgstr "Sur quels/quelles %(targets)s avez-vous travaillé?"
 
 #, python-format
 msgid "Tick the %(targets)s you want to record against. Only selected ones will appear below."
-msgstr "Cochez les %(targets)s pour lesquels vous souhaitez enregistrer des donnees. Seuls ceux selectionnes apparaitront ci-dessous."
+msgstr "Cochez les %(targets)s pour lesquels vous souhaitez enregistrer des données. Seuls ceux sélectionnés apparaîtront ci-dessous."
 
 #, python-format
 msgid "Notes for this %(target)s"
@@ -1114,14 +1105,14 @@ msgstr "Notes pour cette %(target)s"
 
 #, python-format
 msgid "No active %(targets)s found."
-msgstr "Aucune %(targets)s active trouvee."
+msgstr "Aucune %(targets)s active trouvée."
 
 #: templates/auth_app/invite_expired.html
 msgid "This invite link is no longer valid."
 msgstr "Ce lien d'invitation n'est plus valide."
 
 msgid "It may have expired or already been used."
-msgstr "Il a peut-etre expire ou a deja ete utilise."
+msgstr "Il a peut-être expiré ou a déjà été utilisé."
 
 #: templates/registration/admin/submission_list.html
 msgid "Review"
@@ -1151,7 +1142,7 @@ msgstr "Rejeter la soumission"
 
 #: templates/registration/admin/link_list.html (JavaScript)
 msgid "Link copied to clipboard!"
-msgstr "Lien copie dans le presse-papiers!"
+msgstr "Lien copié dans le presse-papiers!"
 
 msgid "Copy this link:"
 msgstr "Copiez ce lien :"
@@ -1170,29 +1161,29 @@ msgid "All"
 msgstr "Tous"
 
 msgid "Approved"
-msgstr "Approuve"
+msgstr "Approuvé"
 
 msgid "Rejected"
-msgstr "Rejete"
+msgstr "Rejeté"
 
 msgid "Waitlist"
 msgstr "Liste d'attente"
 
 msgid "Reference"
-msgstr "Reference"
+msgstr "Référence"
 
 msgid "Possible duplicate"
 msgstr "Possible doublon"
 
 #, python-format
 msgid "Approve registration for %(name)s?"
-msgstr "Approuver l'inscription de %(name)s ?"
+msgstr "Approuver l'inscription de %(name)s?"
 
 msgid "View"
 msgstr "Voir"
 
 msgid "Details"
-msgstr "Details"
+msgstr "Détails"
 
 #, python-format
 msgid "No %(status)s submissions."
@@ -1206,38 +1197,38 @@ msgstr "Retour aux liens d'inscription"
 
 #: apps/admin_settings/views.py
 msgid "Access denied. Admin privileges required."
-msgstr "Acces refuse. Privileges d'administrateur requis."
+msgstr "Accès refusé. Privilèges d'administrateur requis."
 
 msgid "Terminology updated."
-msgstr "Terminologie mise a jour."
+msgstr "Terminologie mise à jour."
 
 #, python-format
 msgid "Reset '%(term_key)s' to default."
-msgstr "Reinitialisation de '%(term_key)s' a la valeur par defaut."
+msgstr "Réinitialisation de « %(term_key)s » à la valeur par défaut."
 
 #, python-format
 msgid "Feature '%(feature)s' enabled."
-msgstr "Fonctionnalite '%(feature)s' activee."
+msgstr "Fonctionnalité « %(feature)s » activée."
 
 #, python-format
 msgid "Feature '%(feature)s' disabled."
-msgstr "Fonctionnalite '%(feature)s' desactivee."
+msgstr "Fonctionnalité « %(feature)s » désactivée."
 
 msgid "Settings updated."
-msgstr "Parametres mis a jour."
+msgstr "Paramètres mis à jour."
 
 #: apps/admin_settings/views.py - Feature descriptions
 msgid "Programs module"
 msgstr "Module Programmes"
 
 msgid "Custom client fields"
-msgstr "Champs clients personnalises"
+msgstr "Champs clients personnalisés"
 
 msgid "Metric alerts"
 msgstr "Alertes de mesures"
 
 msgid "Event tracking"
-msgstr "Suivi des evenements"
+msgstr "Suivi des événements"
 
 msgid "Funder report exports"
 msgstr "Exportations de rapports pour les bailleurs de fonds"
@@ -1247,40 +1238,40 @@ msgstr "Exiger le consentement du client avant les notes (PIPEDA/LPRPS)"
 
 #: apps/admin_settings/views.py - Diagnosis messages
 msgid "NO LIBRARY METRICS! Run: python manage.py seed"
-msgstr "AUCUNE MESURE DE BIBLIOTHEQUE! Executez : python manage.py seed"
+msgstr "AUCUNE MESURE DE BIBLIOTHÈQUE! Exécutez : python manage.py seed"
 
 msgid "NO METRICS LINKED TO TARGETS! Run: python manage.py seed"
-msgstr "AUCUNE MESURE LIEE AUX CIBLES! Executez : python manage.py seed"
+msgstr "AUCUNE MESURE LIÉE AUX CIBLES! Exécutez : python manage.py seed"
 
 msgid "No progress notes linked to targets. Full notes must record data against plan targets."
-msgstr "Aucune note de suivi liee aux cibles. Les notes completes doivent enregistrer des donnees par rapport aux cibles du plan."
+msgstr "Aucune note de suivi liée aux cibles. Les notes complètes doivent enregistrer des données par rapport aux cibles du plan."
 
 msgid "No metric values recorded. Enter values when creating full notes."
-msgstr "Aucune valeur de mesure enregistree. Entrez des valeurs lors de la creation de notes completes."
+msgstr "Aucune valeur de mesure enregistrée. Entrez des valeurs lors de la création de notes complètes."
 
 #, python-format
 msgid "BUG: %(count)s metric values exist but NO charts would display! Check chart simulation below."
-msgstr "BUG : %(count)s valeurs de mesures existent mais AUCUN graphique ne s'afficherait! Verifiez la simulation des graphiques ci-dessous."
+msgstr "BUG : %(count)s valeurs de mesures existent mais AUCUN graphique ne s'afficherait! Vérifiez la simulation des graphiques ci-dessous."
 
 #, python-format
 msgid "Data looks good! %(count)s charts should display."
-msgstr "Les donnees semblent bonnes! %(count)s graphiques devraient s'afficher."
+msgstr "Les données semblent bonnes! %(count)s graphiques devraient s'afficher."
 
 #: templates/admin_settings/diagnose_charts.html
 msgid "Chart Diagnostics"
 msgstr "Diagnostic des graphiques"
 
 msgid "This page helps diagnose why the Analysis tab might show no charts."
-msgstr "Cette page aide a diagnostiquer pourquoi l'onglet Analyse pourrait n'afficher aucun graphique."
+msgstr "Cette page aide à diagnostiquer pourquoi l'onglet Analyse pourrait n'afficher aucun graphique."
 
 msgid "System-wide"
-msgstr "A l'echelle du systeme"
+msgstr "À l'échelle du système"
 
 msgid "Library metrics"
-msgstr "Mesures de bibliotheque"
+msgstr "Mesures de bibliothèque"
 
 msgid "Missing! Run seed command."
-msgstr "Manquantes! Executez la commande seed."
+msgstr "Manquantes! Exécutez la commande seed."
 
 msgid "OK"
 msgstr "OK"
@@ -1289,37 +1280,37 @@ msgid "PlanTargetMetric links"
 msgstr "Liens PlanTargetMetric"
 
 msgid "None! Metrics not linked to targets."
-msgstr "Aucun! Mesures non liees aux cibles."
+msgstr "Aucun! Mesures non liées aux cibles."
 
 #, python-format
 msgid "Client: %(record_id)s"
 msgstr "Client : %(record_id)s"
 
 msgid "Check different client:"
-msgstr "Verifier un autre client :"
+msgstr "Vérifier un autre client :"
 
 msgid "e.g., DEMO-001"
 msgstr "par ex., DEMO-001"
 
 msgid "Check"
-msgstr "Verifier"
+msgstr "Vérifier"
 
 msgid "Active targets"
 msgstr "Cibles actives"
 
 #, python-format
 msgid "%(count)s metrics linked"
-msgstr "%(count)s mesures liees"
+msgstr "%(count)s mesures liées"
 
 msgid "ProgressNoteTarget entries"
-msgstr "Entrees ProgressNoteTarget"
+msgstr "Entrées ProgressNoteTarget"
 
 msgid "MetricValue entries"
-msgstr "Entrees MetricValue"
+msgstr "Entrées MetricValue"
 
 #, python-format
 msgid "Client \"%(record_id)s\" not found."
-msgstr "Client \"%(record_id)s\" non trouve."
+msgstr "Client « %(record_id)s » non trouvé."
 
 #, python-format
 msgid "Chart Simulation (%(count)s would display)"
@@ -1335,10 +1326,10 @@ msgid "Metric"
 msgstr "Mesure"
 
 msgid "Values Found"
-msgstr "Valeurs trouvees"
+msgstr "Valeurs trouvées"
 
 msgid "Numeric Values"
-msgstr "Valeurs numeriques"
+msgstr "Valeurs numériques"
 
 msgid "Would Show Chart?"
 msgstr "Afficherait un graphique?"
@@ -1350,44 +1341,44 @@ msgid "NO"
 msgstr "NON"
 
 msgid "No target/metric combinations found for this client."
-msgstr "Aucune combinaison cible/mesure trouvee pour ce client."
+msgstr "Aucune combinaison cible/mesure trouvée pour ce client."
 
 msgid "How Charts Work"
 msgstr "Comment fonctionnent les graphiques"
 
 msgid "must be seeded (run"
-msgstr "doivent etre initialisees (executez"
+msgstr "doivent être initialisées (exécutez"
 
 msgid "Targets"
 msgstr "Cibles"
 
 msgid "must have metrics assigned (in the Plan tab)"
-msgstr "doivent avoir des mesures assignees (dans l'onglet Plan)"
+msgstr "doivent avoir des mesures assignées (dans l'onglet Plan)"
 
 msgid "must be created (not quick notes)"
-msgstr "doivent etre creees (pas des notes rapides)"
+msgstr "doivent être créées (pas des notes rapides)"
 
 msgid "Metric values"
 msgstr "Valeurs de mesures"
 
 msgid "must be recorded when creating full notes"
-msgstr "doivent etre enregistrees lors de la creation de notes completes"
+msgstr "doivent être enregistrées lors de la création de notes complètes"
 
 msgid "Back to Admin Settings"
-msgstr "Retour aux parametres d'administration"
+msgstr "Retour aux paramètres d'administration"
 
 #: templates/admin_settings/terminology.html
 msgid "English"
 msgstr "Anglais"
 
 msgid "Default:"
-msgstr "Par defaut :"
+msgstr "Par défaut :"
 
 msgid "English term for"
 msgstr "Terme anglais pour"
 
 msgid "French term for"
-msgstr "Terme francais pour"
+msgstr "Terme français pour"
 
 msgid "Leave blank to use English"
 msgstr "Laissez vide pour utiliser l'anglais"
@@ -1395,7 +1386,7 @@ msgstr "Laissez vide pour utiliser l'anglais"
 #: templates/auth_app/invite_list.html
 #, python-format
 msgid "Used by %(name)s"
-msgstr "Utilise par %(name)s"
+msgstr "Utilisé par %(name)s"
 
 #: templates/clients/form.html
 #, python-format
@@ -1408,7 +1399,7 @@ msgstr "Modifier %(first)s %(last)s"
 
 #, python-format
 msgid "Create %(client)s"
-msgstr "Creer %(client)s"
+msgstr "Créer %(client)s"
 
 #: templates/clients/_client_layout.html
 #, python-format
@@ -1418,11 +1409,11 @@ msgstr "Ouvre dans %(provider)s"
 #: templates/clients/list.html
 #, python-format
 msgid "All %(client)s files you have access to."
-msgstr "Tous les dossiers %(client)s auxquels vous avez acces."
+msgstr "Tous les dossiers %(client)s auxquels vous avez accès."
 
 #, python-format
 msgid "No %(clients)s match the selected filters."
-msgstr "Aucun(e) %(clients)s ne correspond aux filtres selectionnes."
+msgstr "Aucun(e) %(clients)s ne correspond aux filtres sélectionnés."
 
 #, python-format
 msgid "No %(client)s files yet."
@@ -1435,11 +1426,11 @@ msgstr "Voir tous les %(clients)s"
 #: templates/programs/list.html
 #, python-format
 msgid "Manage organisational %(programs)s."
-msgstr "Gerer les %(programs)s de l'organisation."
+msgstr "Gérer les %(programs)s de l'organisation."
 
 #, python-format
 msgid "Your assigned %(programs)s."
-msgstr "Vos %(programs)s assignes."
+msgstr "Vos %(programs)s assignés."
 
 #, python-format
 msgid "New %(program)s"
@@ -1457,7 +1448,7 @@ msgstr "Modifier %(program)s"
 #: templates/programs/form.html
 #, python-format
 msgid "Create %(program)s"
-msgstr "Creer %(program)s"
+msgstr "Créer %(program)s"
 
 #: templates/programs/no_access.html
 #, python-format
@@ -1476,7 +1467,7 @@ msgstr "Retirer %(name)s de ce programme?"
 #: templates/plans/template_list.html
 #, python-format
 msgid "Reusable structures that can be applied to %(clients)s."
-msgstr "Structures reutilisables pouvant etre appliquees aux %(clients)s."
+msgstr "Structures réutilisables pouvant être appliquées aux %(clients)s."
 
 #, python-format
 msgid "Change status of %(name)s"
@@ -1494,7 +1485,7 @@ msgstr "Ajouter %(target)s"
 #: templates/plans/_target.html
 #, python-format
 msgid "Manage metrics for %(name)s"
-msgstr "Gerer les mesures pour %(name)s"
+msgstr "Gérer les mesures pour %(name)s"
 
 #, python-format
 msgid "View history of %(name)s"
@@ -1507,10 +1498,10 @@ msgstr "Attribuer %(metrics)s"
 
 #, python-format
 msgid "No enabled %(metrics)s available."
-msgstr "Aucune %(metrics)s activee disponible."
+msgstr "Aucune %(metrics)s activée disponible."
 
 msgid "An administrator can add them in the <a href=\"{% url 'plans:metric_library' %}\">metric library</a>."
-msgstr "Un administrateur peut les ajouter dans la <a href=\"{% url 'plans:metric_library' %}\">bibliotheque de mesures</a>."
+msgstr "Un administrateur peut les ajouter dans la <a href=\"{% url 'plans:metric_library' %}\">bibliothèque de mesures</a>."
 
 #, python-format
 msgid "Save %(metrics)s"
@@ -1526,32 +1517,32 @@ msgid "Back to %(plan)s"
 msgstr "Retour au %(plan)s"
 
 msgid "Revision history"
-msgstr "Historique des revisions"
+msgstr "Historique des révisions"
 
 msgid "Reason"
 msgstr "Raison"
 
 msgid "Changed by"
-msgstr "Modifie par"
+msgstr "Modifié par"
 
 msgid "Current values:"
 msgstr "Valeurs actuelles :"
 
 #, python-format
 msgid "No revision history for this %(target)s."
-msgstr "Aucun historique de revision pour cette %(target)s."
+msgstr "Aucun historique de révision pour cette %(target)s."
 
 #: templates/notes/admin/template_form.html
 #, python-format
 msgid "Edit %(note)s Template"
-msgstr "Modifier le modele %(note)s"
+msgstr "Modifier le modèle %(note)s"
 
 #, python-format
 msgid "New %(note)s Template"
-msgstr "Nouveau modele %(note)s"
+msgstr "Nouveau modèle %(note)s"
 
 msgid "Template Details"
-msgstr "Details du modele"
+msgstr "Détails du modèle"
 
 msgid "Sections"
 msgstr "Sections"
@@ -1567,7 +1558,7 @@ msgid "Remove this section"
 msgstr "Supprimer cette section"
 
 msgid "Save Template"
-msgstr "Enregistrer le modele"
+msgstr "Enregistrer le modèle"
 
 #: templates/notes/cancel_form.html
 #, python-format
@@ -1582,7 +1573,7 @@ msgstr "Nouvelle alerte pour %(first)s %(last)s"
 #: templates/events/event_form.html
 #, python-format
 msgid "Event for %(first)s %(last)s"
-msgstr "Evenement pour %(first)s %(last)s"
+msgstr "Événement pour %(first)s %(last)s"
 
 #: templates/registration/public_form.html
 #, python-format
@@ -1594,13 +1585,13 @@ msgid "Registration closes %(deadline)s"
 msgstr "Les inscriptions ferment le %(deadline)s"
 
 msgid "Registration Closed"
-msgstr "Inscriptions fermees"
+msgstr "Inscriptions fermées"
 
 msgid "The registration deadline has passed. Thank you for your interest."
-msgstr "La date limite d'inscription est passee. Merci de votre interet."
+msgstr "La date limite d'inscription est passée. Merci de votre intérêt."
 
 msgid "This registration has reached capacity. Thank you for your interest."
-msgstr "Cette inscription a atteint sa capacite maximale. Merci de votre interet."
+msgstr "Cette inscription a atteint sa capacité maximale. Merci de votre intérêt."
 
 msgid "Registration is not currently available. Please check back later."
 msgstr "Les inscriptions ne sont pas disponibles actuellement. Veuillez revenir plus tard."
@@ -1609,7 +1600,7 @@ msgid "Too Many Submissions"
 msgstr "Trop de soumissions"
 
 msgid "You have submitted too many registrations recently. Please wait an hour and try again."
-msgstr "Vous avez soumis trop d'inscriptions recemment. Veuillez attendre une heure et reessayer."
+msgstr "Vous avez soumis trop d'inscriptions récemment. Veuillez attendre une heure et réessayer."
 
 msgid "Your Information"
 msgstr "Vos informations"
@@ -1618,27 +1609,27 @@ msgid "Email Address"
 msgstr "Adresse courriel"
 
 msgid "Phone Number"
-msgstr "Numero de telephone"
+msgstr "Numéro de téléphone"
 
 msgid "I consent to my information being collected and stored for this registration."
-msgstr "Je consens a ce que mes informations soient collectees et stockees pour cette inscription."
+msgstr "Je consens à ce que mes informations soient collectées et stockées pour cette inscription."
 
 msgid "Submit Registration"
 msgstr "Soumettre l'inscription"
 
 #: templates/registration/closed.html
 msgid "The registration deadline has passed."
-msgstr "La date limite d'inscription est passee."
+msgstr "La date limite d'inscription est passée."
 
 #, python-format
 msgid "Registration closed on %(deadline)s at %(time)s."
-msgstr "Les inscriptions ont ferme le %(deadline)s a %(time)s."
+msgstr "Les inscriptions ont fermé le %(deadline)s à %(time)s."
 
 msgid "This registration has reached capacity."
-msgstr "Cette inscription a atteint sa capacite maximale."
+msgstr "Cette inscription a atteint sa capacité maximale."
 
 msgid "All available spots have been filled."
-msgstr "Toutes les places disponibles ont ete remplies."
+msgstr "Toutes les places disponibles ont été remplies."
 
 msgid "Registration is not currently available."
 msgstr "Les inscriptions ne sont pas disponibles actuellement."
@@ -1647,49 +1638,49 @@ msgid "Please check back later or contact us for more information."
 msgstr "Veuillez revenir plus tard ou nous contacter pour plus d'informations."
 
 msgid "Thank you for your interest."
-msgstr "Merci de votre interet."
+msgstr "Merci de votre intérêt."
 
 #: templates/registration/submitted.html
 msgid "Registration Submitted"
 msgstr "Inscription soumise"
 
 msgid "You're Registered!"
-msgstr "Vous etes inscrit(e)!"
+msgstr "Vous êtes inscrit(e)!"
 
 msgid "Your registration has been confirmed."
-msgstr "Votre inscription a ete confirmee."
+msgstr "Votre inscription a été confirmée."
 
 msgid "Thank You!"
 msgstr "Merci!"
 
 msgid "Your registration has been submitted for review."
-msgstr "Votre inscription a ete soumise pour examen."
+msgstr "Votre inscription a été soumise pour examen."
 
 msgid "Your reference number"
-msgstr "Votre numero de reference"
+msgstr "Votre numéro de référence"
 
 msgid "Please save this number for your records."
-msgstr "Veuillez conserver ce numero pour vos dossiers."
+msgstr "Veuillez conserver ce numéro pour vos dossiers."
 
 #, python-format
 msgid "You have been registered for <strong>%(program)s</strong>."
-msgstr "Vous avez ete inscrit(e) a <strong>%(program)s</strong>."
+msgstr "Vous avez été inscrit(e) à <strong>%(program)s</strong>."
 
 msgid "We look forward to seeing you!"
 msgstr "Au plaisir de vous voir!"
 
 msgid "We will review your registration and contact you at the email address you provided."
-msgstr "Nous examinerons votre inscription et vous contacterons a l'adresse courriel fournie."
+msgstr "Nous examinerons votre inscription et vous contacterons à l'adresse courriel fournie."
 
 msgid "This usually takes 1-2 business days."
-msgstr "Cela prend generalement 1-2 jours ouvrables."
+msgstr "Cela prend généralement 1-2 jours ouvrables."
 
 #: templates/registration/admin/link_form.html
 msgid "Edit Registration Link"
 msgstr "Modifier le lien d'inscription"
 
 msgid "Create a shareable link for self-service program registration."
-msgstr "Creer un lien partageable pour l'inscription en libre-service au programme."
+msgstr "Créer un lien partageable pour l'inscription en libre-service au programme."
 
 msgid "Registration URL:"
 msgstr "URL d'inscription :"
@@ -1698,40 +1689,40 @@ msgid "Copy"
 msgstr "Copier"
 
 msgid "Custom Field Groups"
-msgstr "Groupes de champs personnalises"
+msgstr "Groupes de champs personnalisés"
 
 msgid "Select which custom field groups to include on the registration form."
-msgstr "Selectionnez les groupes de champs personnalises a inclure dans le formulaire d'inscription."
+msgstr "Sélectionnez les groupes de champs personnalisés à inclure dans le formulaire d'inscription."
 
 msgid "Uncheck to temporarily disable this registration link."
-msgstr "Decochez pour desactiver temporairement ce lien d'inscription."
+msgstr "Décochez pour désactiver temporairement ce lien d'inscription."
 
 msgid "Create Link"
-msgstr "Creer le lien"
+msgstr "Créer le lien"
 
 #: templates/registration/admin/link_confirm_delete.html
 #, python-format
 msgid "Are you sure you want to delete \"%(title)s\"?"
-msgstr "Etes-vous sur de vouloir supprimer \"%(title)s\"?"
+msgstr "Êtes-vous sûr de vouloir supprimer « %(title)s »?"
 
 #: templates/reports/cmt_export_form.html
 msgid "Funder Report Template"
-msgstr "Modele de rapport pour les bailleurs de fonds"
+msgstr "Modèle de rapport pour les bailleurs de fonds"
 
 msgid "Generate a standardised funder report with service statistics, demographics, and outcomes."
-msgstr "Generez un rapport standardise pour les bailleurs de fonds avec les statistiques de service, les donnees demographiques et les resultats."
+msgstr "Générez un rapport standardisé pour les bailleurs de fonds avec les statistiques de service, les données démographiques et les résultats."
 
 msgid "Draft Template Notice"
-msgstr "Avis de modele provisoire"
+msgstr "Avis de modèle provisoire"
 
 msgid "⚠️ Draft Template — Customise for Your Funder"
-msgstr "⚠️ Modele provisoire — Personnalisez pour votre bailleur de fonds"
+msgstr "⚠️ Modèle provisoire — Personnalisez pour votre bailleur de fonds"
 
 msgid "This is a generic funder report template. Before submitting to your funder, verify it matches their specific reporting requirements. Different funders (United Way chapters, government agencies, foundations) may require different formats, fields, or calculations."
-msgstr "Ceci est un modele de rapport generique pour les bailleurs de fonds. Avant de soumettre a votre bailleur, verifiez qu'il correspond a leurs exigences specifiques. Differents bailleurs (chapitres Centraide, agences gouvernementales, fondations) peuvent exiger des formats, champs ou calculs differents."
+msgstr "Ceci est un modèle de rapport générique pour les bailleurs de fonds. Avant de soumettre à votre bailleur, vérifiez qu'il correspond à leurs exigences spécifiques. Différents bailleurs (chapitres Centraide, agences gouvernementales, fondations) peuvent exiger des formats, champs ou calculs différents."
 
 msgid "About Funder Reports"
-msgstr "A propos des rapports pour les bailleurs de fonds"
+msgstr "À propos des rapports pour les bailleurs de fonds"
 
 msgid "What's included in this report?"
 msgstr "Qu'est-ce qui est inclus dans ce rapport?"
@@ -1743,28 +1734,28 @@ msgid "Service statistics (total individuals served, new clients, total contacts
 msgstr "Statistiques de service (total des personnes servies, nouveaux clients, total des contacts)"
 
 msgid "Age demographics using common nonprofit categories"
-msgstr "Donnees demographiques par age selon les categories courantes des OBNL"
+msgstr "Données démographiques par âge selon les catégories courantes des OBNL"
 
 msgid "Outcome achievement rates for all metrics with defined targets"
-msgstr "Taux d'atteinte des resultats pour toutes les mesures avec des cibles definies"
+msgstr "Taux d'atteinte des résultats pour toutes les mesures avec des cibles définies"
 
 msgid "Generate Funder Report"
-msgstr "Generer le rapport pour les bailleurs de fonds"
+msgstr "Générer le rapport pour les bailleurs de fonds"
 
 msgid "About This Report Template"
-msgstr "A propos de ce modele de rapport"
+msgstr "À propos de ce modèle de rapport"
 
 msgid "This is a draft funder report template based on common Canadian nonprofit reporting requirements. It includes service statistics, demographics, and outcome achievement rates that many funders request."
-msgstr "Ceci est un modele de rapport provisoire base sur les exigences courantes de rapportage des OBNL canadiens. Il comprend les statistiques de service, les donnees demographiques et les taux d'atteinte des resultats demandes par de nombreux bailleurs de fonds."
+msgstr "Ceci est un modèle de rapport provisoire basé sur les exigences courantes de rapportage des OBNL canadiens. Il comprend les statistiques de service, les données démographiques et les taux d'atteinte des résultats demandés par de nombreux bailleurs de fonds."
 
 msgid "<strong>Important:</strong> Your funder may require different formats, additional fields, or specific calculations. Always verify this template matches your funder's actual reporting template before submission. You may need to adjust or supplement this data."
-msgstr "<strong>Important :</strong> Votre bailleur de fonds peut exiger des formats differents, des champs supplementaires ou des calculs specifiques. Verifiez toujours que ce modele correspond au modele de rapport reel de votre bailleur avant de soumettre. Vous devrez peut-etre ajuster ou completer ces donnees."
+msgstr "<strong>Important :</strong> Votre bailleur de fonds peut exiger des formats différents, des champs supplémentaires ou des calculs spécifiques. Vérifiez toujours que ce modèle correspond au modèle de rapport réel de votre bailleur avant de soumettre. Vous devrez peut-être ajuster ou compléter ces données."
 
 msgid "Default Age Categories"
-msgstr "Categories d'age par defaut"
+msgstr "Catégories d'âge par défaut"
 
 msgid "This template uses these common age groupings (adjust if your funder requires different categories):"
-msgstr "Ce modele utilise ces regroupements d'age courants (ajustez si votre bailleur de fonds exige des categories differentes) :"
+msgstr "Ce modèle utilise ces regroupements d'âge courants (ajustez si votre bailleur de fonds exige des catégories différentes) :"
 
 msgid "Child (0-12)"
 msgstr "Enfant (0-12 ans)"
@@ -1779,52 +1770,52 @@ msgid "Adult (25-64)"
 msgstr "Adulte (25-64 ans)"
 
 msgid "Senior (65+)"
-msgstr "Aine(e) (65 ans et plus)"
+msgstr "Aîné(e) (65 ans et plus)"
 
 msgid "Data Sources"
-msgstr "Sources de donnees"
+msgstr "Sources de données"
 
 msgid "Organisation name: From your Instance Settings"
-msgstr "Nom de l'organisation : A partir de vos parametres d'instance"
+msgstr "Nom de l'organisation : À partir de vos paramètres d'instance"
 
 msgid "Service statistics: Based on progress notes recorded in the period"
-msgstr "Statistiques de service : Basees sur les notes de suivi enregistrees dans la periode"
+msgstr "Statistiques de service : Basées sur les notes de suivi enregistrées dans la période"
 
 msgid "Demographics: Calculated from client birth dates"
-msgstr "Donnees demographiques : Calculees a partir des dates de naissance des clients"
+msgstr "Données démographiques : Calculées à partir des dates de naissance des clients"
 
 msgid "Outcomes: Based on metric targets defined in your outcome metrics"
-msgstr "Resultats : Bases sur les cibles definies dans vos mesures de resultats"
+msgstr "Résultats : Basés sur les cibles définies dans vos mesures de résultats"
 
 #: templates/reports/client_data_export_form.html
 msgid "Client Data Export"
-msgstr "Exportation des donnees clients"
+msgstr "Exportation des données clients"
 
 msgid "Export all client data as a CSV file for data portability, backup, or migration to another system."
-msgstr "Exportez toutes les donnees clients sous forme de fichier CSV pour la portabilite des donnees, la sauvegarde ou la migration vers un autre systeme."
+msgstr "Exportez toutes les données clients sous forme de fichier CSV pour la portabilité des données, la sauvegarde ou la migration vers un autre système."
 
 msgid "Data privacy notice"
-msgstr "Avis de confidentialite des donnees"
+msgstr "Avis de confidentialité des données"
 
 msgid "Data Privacy Notice"
-msgstr "Avis de confidentialite des donnees"
+msgstr "Avis de confidentialité des données"
 
 msgid "This export will include personally identifiable information (PII) such as names and birth dates. Handle the exported file according to your organisation's data protection policies."
-msgstr "Cette exportation inclura des renseignements personnels identifiables (RPI) tels que les noms et les dates de naissance. Manipulez le fichier exporte conformement aux politiques de protection des donnees de votre organisation."
+msgstr "Cette exportation inclura des renseignements personnels identifiables (RPI) tels que les noms et les dates de naissance. Manipulez le fichier exporté conformément aux politiques de protection des données de votre organisation."
 
 msgid "There are no clients matching the selected filters. Try adjusting your filters or leave them blank to export all clients."
-msgstr "Aucun client ne correspond aux filtres selectionnes. Essayez d'ajuster vos filtres ou laissez-les vides pour exporter tous les clients."
+msgstr "Aucun client ne correspond aux filtres sélectionnés. Essayez d'ajuster vos filtres ou laissez-les vides pour exporter tous les clients."
 
 msgid "Include in export"
 msgstr "Inclure dans l'exportation"
 
 #: templates/clients/custom_fields_admin.html
 msgid "Custom Fields"
-msgstr "Champs personnalises"
+msgstr "Champs personnalisés"
 
 #, python-format
 msgid "Define additional fields for %(client)s files."
-msgstr "Definissez des champs supplementaires pour les dossiers %(client)s."
+msgstr "Définissez des champs supplémentaires pour les dossiers %(client)s."
 
 msgid "New Group"
 msgstr "Nouveau groupe"
@@ -1845,11 +1836,11 @@ msgid "No fields in this group yet."
 msgstr "Aucun champ dans ce groupe pour le moment."
 
 msgid "No custom field groups defined yet."
-msgstr "Aucun groupe de champs personnalises defini pour le moment."
+msgstr "Aucun groupe de champs personnalisés défini pour le moment."
 
 #: templates/events/event_type_form.html
 msgid "Create Event Type"
-msgstr "Creer un type d'evenement"
+msgstr "Créer un type d'événement"
 
 #: templates/events/alert_cancel_form.html
 #, python-format
@@ -1857,7 +1848,7 @@ msgid "For %(first)s %(last)s"
 msgstr "Pour %(first)s %(last)s"
 
 msgid "alert to cancel"
-msgstr "alerte a annuler"
+msgstr "alerte à annuler"
 
 #: templates/plans/metric_form.html
 #, python-format
@@ -1866,23 +1857,23 @@ msgstr "Modifier %(metric)s"
 
 #, python-format
 msgid "Create %(metric)s"
-msgstr "Creer %(metric)s"
+msgstr "Créer %(metric)s"
 
 msgid "Update metric definition."
-msgstr "Mettre a jour la definition de la mesure."
+msgstr "Mettre à jour la définition de la mesure."
 
 msgid "Add a custom metric to the library."
-msgstr "Ajouter une mesure personnalisee a la bibliotheque."
+msgstr "Ajouter une mesure personnalisée à la bibliothèque."
 
 #: templates/notes/admin/template_list.html
 msgid "Define the structure for full progress notes."
-msgstr "Definissez la structure des notes de suivi completes."
+msgstr "Définissez la structure des notes de suivi complètes."
 
 msgid "New Template"
-msgstr "Nouveau modele"
+msgstr "Nouveau modèle"
 
 msgid "No templates created yet."
-msgstr "Aucun modele cree pour le moment."
+msgstr "Aucun modèle créé pour le moment."
 
 #: templates/plans/metric_import.html
 #, python-format
@@ -1891,32 +1882,32 @@ msgstr "Importer %(metrics)s"
 
 #, python-format
 msgid "Upload a CSV file to add multiple %(metrics)s at once."
-msgstr "Telechargez un fichier CSV pour ajouter plusieurs %(metrics)s a la fois."
+msgstr "Téléchargez un fichier CSV pour ajouter plusieurs %(metrics)s à la fois."
 
 msgid "Import errors"
 msgstr "Erreurs d'importation"
 
 msgid "Errors found in CSV:"
-msgstr "Erreurs trouvees dans le CSV :"
+msgstr "Erreurs trouvées dans le CSV :"
 
 msgid "Please fix these errors and upload the file again."
-msgstr "Veuillez corriger ces erreurs et telecharger le fichier a nouveau."
+msgstr "Veuillez corriger ces erreurs et télécharger le fichier à nouveau."
 
 msgid "Preview"
-msgstr "Apercu"
+msgstr "Aperçu"
 
 #, python-format
 msgid "Preview: %(count)s %(metrics)s ready to import"
-msgstr "Apercu : %(count)s %(metrics)s prets a importer"
+msgstr "Aperçu : %(count)s %(metrics)s prêts à importer"
 
 msgid "Metrics to import"
-msgstr "Mesures a importer"
+msgstr "Mesures à importer"
 
 msgid "Definition"
-msgstr "Definition"
+msgstr "Définition"
 
 msgid "Category"
-msgstr "Categorie"
+msgstr "Catégorie"
 
 #, python-format
 msgid "Import %(count)s %(metrics)s"
@@ -1926,7 +1917,7 @@ msgid "Start Over"
 msgstr "Recommencer"
 
 msgid "Upload and Preview"
-msgstr "Telecharger et previsualiser"
+msgstr "Télécharger et prévisualiser"
 
 msgid "CSV Format Instructions"
 msgstr "Instructions de format CSV"
@@ -1938,10 +1929,10 @@ msgid "Column"
 msgstr "Colonne"
 
 msgid "Name of the metric (e.g., \"PHQ-9 (Depression)\")"
-msgstr "Nom de la mesure (par ex., \"PHQ-9 (Depression)\")"
+msgstr "Nom de la mesure (par ex., « PHQ-9 (Dépression) »)"
 
 msgid "Description of what this metric measures and how to score it"
-msgstr "Description de ce que cette mesure evalue et comment la noter"
+msgstr "Description de ce que cette mesure évalue et comment la noter"
 
 msgid "One of: "
 msgstr "Un de : "
@@ -1953,14 +1944,14 @@ msgid "Maximum valid value (number)"
 msgstr "Valeur maximale valide (nombre)"
 
 msgid "Unit of measurement (e.g., \"score\", \"days\", \"%\")"
-msgstr "Unite de mesure (par ex., \"score\", \"jours\", \"%\")"
+msgstr "Unité de mesure (par ex., « score », « jours », « % »)"
 
 msgid "Example CSV:"
 msgstr "Exemple de CSV :"
 
 #: templates/plans/template_detail.html
 msgid "Edit Template"
-msgstr "Modifier le modele"
+msgstr "Modifier le modèle"
 
 msgid "Status:"
 msgstr "Statut :"
@@ -1988,11 +1979,11 @@ msgstr "Modifier %(target)s"
 
 #, python-format
 msgid "Apply a %(plan)s Template"
-msgstr "Appliquer un modele de %(plan)s"
+msgstr "Appliquer un modèle de %(plan)s"
 
 #, python-format
 msgid "Choose a template to add %(sections)s and %(targets)s to this %(client)s's %(plan)s."
-msgstr "Choisissez un modele pour ajouter des %(sections)s et des %(targets)s au %(plan)s de ce/cette %(client)s."
+msgstr "Choisissez un modèle pour ajouter des %(sections)s et des %(targets)s au %(plan)s de ce/cette %(client)s."
 
 msgid "Important information"
 msgstr "Information importante"
@@ -2002,22 +1993,22 @@ msgstr "Note :"
 
 #, python-format
 msgid "Applying a template will <em>add</em> %(sections)s and %(targets)s to the existing %(plan)s. It will not overwrite or remove anything already there."
-msgstr "L'application d'un modele <em>ajoutera</em> des %(sections)s et des %(targets)s au %(plan)s existant. Cela ne remplacera ni ne supprimera rien de ce qui existe deja."
+msgstr "L'application d'un modèle <em>ajoutera</em> des %(sections)s et des %(targets)s au %(plan)s existant. Cela ne remplacera ni ne supprimera rien de ce qui existe déjà."
 
 msgid "with"
 msgstr "avec"
 
 msgid "Preview contents"
-msgstr "Previsualiser le contenu"
+msgstr "Prévisualiser le contenu"
 
 msgid "Apply This Template"
-msgstr "Appliquer ce modele"
+msgstr "Appliquer ce modèle"
 
 msgid "No active templates available."
-msgstr "Aucun modele actif disponible."
+msgstr "Aucun modèle actif disponible."
 
 msgid "Create one first."
-msgstr "Creez-en un d'abord."
+msgstr "Créez-en un d'abord."
 
 #: templates/plans/template_section_delete_confirm.html templates/plans/template_target_delete_confirm.html
 msgid "Confirmation"
@@ -2029,10 +2020,10 @@ msgstr "Supprimer %(section)s"
 
 #, python-format
 msgid "Are you sure you want to delete the %(section)s <strong>%(name)s</strong> and all its %(targets)s?"
-msgstr "Etes-vous sur de vouloir supprimer %(section)s <strong>%(name)s</strong> et toutes ses %(targets)s?"
+msgstr "Êtes-vous sûr de vouloir supprimer %(section)s <strong>%(name)s</strong> et toutes ses %(targets)s?"
 
 msgid "This action cannot be undone."
-msgstr "Cette action ne peut pas etre annulee."
+msgstr "Cette action ne peut pas être annulée."
 
 #, python-format
 msgid "Delete %(target)s"
@@ -2040,50 +2031,50 @@ msgstr "Supprimer %(target)s"
 
 #, python-format
 msgid "Are you sure you want to delete the %(target)s <strong>%(name)s</strong> from %(section)s <strong>%(section_name)s</strong>?"
-msgstr "Etes-vous sur de vouloir supprimer %(target)s <strong>%(name)s</strong> de %(section)s <strong>%(section_name)s</strong>?"
+msgstr "Êtes-vous sûr de vouloir supprimer %(target)s <strong>%(name)s</strong> de %(section)s <strong>%(section_name)s</strong>?"
 
 #: templates/reports/pdf_unavailable.html
 msgid "PDF Generation Unavailable"
-msgstr "Generation de PDF non disponible"
+msgstr "Génération de PDF non disponible"
 
 msgid "This feature requires additional software that is not currently installed."
-msgstr "Cette fonctionnalite necessite un logiciel supplementaire qui n'est pas actuellement installe."
+msgstr "Cette fonctionnalité nécessite un logiciel supplémentaire qui n'est pas actuellement installé."
 
 msgid "PDF unavailable notice"
-msgstr "Avis de non-disponibilite du PDF"
+msgstr "Avis de non-disponibilité du PDF"
 
 msgid "What happened?"
-msgstr "Que s'est-il passe?"
+msgstr "Que s'est-il passé?"
 
 msgid "PDF report generation requires <strong>WeasyPrint</strong> and its native GTK libraries. These are not installed on this server."
-msgstr "La generation de rapports PDF necessite <strong>WeasyPrint</strong> et ses bibliotheques GTK natives. Celles-ci ne sont pas installees sur ce serveur."
+msgstr "La génération de rapports PDF nécessite <strong>WeasyPrint</strong> et ses bibliothèques GTK natives. Celles-ci ne sont pas installées sur ce serveur."
 
 msgid "Technical details"
-msgstr "Details techniques"
+msgstr "Détails techniques"
 
 msgid "Alternative options"
 msgstr "Options alternatives"
 
 msgid "What can I do instead?"
-msgstr "Que puis-je faire a la place?"
+msgstr "Que puis-je faire à la place?"
 
 msgid "Print to PDF:"
 msgstr "Imprimer en PDF :"
 
 msgid "View the report in your browser and use your browser's \"Print to PDF\" feature (Ctrl+P or Cmd+P)"
-msgstr "Consultez le rapport dans votre navigateur et utilisez la fonction \"Imprimer en PDF\" de votre navigateur (Ctrl+P ou Cmd+P)"
+msgstr "Consultez le rapport dans votre navigateur et utilisez la fonction « Imprimer en PDF » de votre navigateur (Ctrl+P ou Cmd+P)"
 
 msgid "Export to CSV:"
 msgstr "Exporter en CSV :"
 
 msgid "If available, use the CSV export option for data you can open in Excel"
-msgstr "Si disponible, utilisez l'option d'exportation CSV pour des donnees que vous pouvez ouvrir dans Excel"
+msgstr "Si disponible, utilisez l'option d'exportation CSV pour des données que vous pouvez ouvrir dans Excel"
 
 msgid "Contact your administrator:"
 msgstr "Contactez votre administrateur :"
 
 msgid "If PDF exports are required, ask your system administrator to install the WeasyPrint dependencies"
-msgstr "Si les exportations PDF sont requises, demandez a votre administrateur systeme d'installer les dependances WeasyPrint"
+msgstr "Si les exportations PDF sont requises, demandez à votre administrateur système d'installer les dépendances WeasyPrint"
 
 msgid "Administrator instructions"
 msgstr "Instructions pour l'administrateur"
@@ -2092,7 +2083,7 @@ msgid "For Administrators"
 msgstr "Pour les administrateurs"
 
 msgid "To enable PDF generation, install WeasyPrint and its dependencies:"
-msgstr "Pour activer la generation de PDF, installez WeasyPrint et ses dependances :"
+msgstr "Pour activer la génération de PDF, installez WeasyPrint et ses dépendances :"
 
 msgid "Install GTK3 runtime from"
 msgstr "Installez le runtime GTK3 depuis"
@@ -2104,4 +2095,23 @@ msgid "WeasyPrint documentation"
 msgstr "la documentation WeasyPrint"
 
 msgid "After installing dependencies, restart the application."
-msgstr "Apres avoir installe les dependances, redemarrez l'application."
+msgstr "Après avoir installé les dépendances, redémarrez l'application."
+
+#: templates/clients/home.html
+msgid "Dashboard"
+msgstr "Tableau de bord"
+
+msgid "Plan Templates"
+msgstr "Modèles de plan"
+
+msgid "Note Templates"
+msgstr "Modèles de note"
+
+msgid "Front Desk"
+msgstr "Réception"
+
+msgid "Direct Service"
+msgstr "Service direct"
+
+msgid "Executive"
+msgstr "Direction"

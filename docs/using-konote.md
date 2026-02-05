@@ -2,7 +2,7 @@
 
 Welcome to KoNote2! This guide covers the everyday tasks you'll do as a staff member: finding clients, writing notes, and tracking progress.
 
-> **Who is this for?** Case managers, counsellors, support workers, and other front-line staff who work directly with clients.
+> **Who is this for?** Case managers, direct service staff, support workers, and other front-line staff who work directly with clients.
 >
 > **What you need:** Your login credentials (provided by your supervisor or admin).
 

@@ -1,10 +1,10 @@
 """Role-based access decorators for views."""
 from functools import wraps
 
-from django.http import HttpResponseForbidden
+from django.template.response import TemplateResponse
 
-# Higher number = more access
-ROLE_RANK = {"receptionist": 1, "staff": 2, "program_manager": 3}
+# Higher number = more access (executive has highest rank but no client data access)
+ROLE_RANK = {"receptionist": 1, "staff": 2, "program_manager": 3, "executive": 4}
 
 
 def _get_user_highest_role(user):
@@ -35,9 +35,12 @@ def minimum_role(min_role):
             if user_role is None:
                 user_role = _get_user_highest_role(request.user)
             if user_role is None or ROLE_RANK.get(user_role, 0) < min_rank:
-                return HttpResponseForbidden(
-                    "Access denied. You do not have the required role for this action."
+                message = "Access denied. You do not have the required role for this action."
+                response = TemplateResponse(
+                    request, "403.html", {"exception": message}, status=403,
                 )
+                response.render()
+                return response
             return view_func(request, *args, **kwargs)
         return wrapper
     return decorator

@@ -10,12 +10,23 @@
 </hgroup>
 
 <article class="pico-background-yellow-50" aria-label="{% trans 'Draft Template Notice' %}" role="alert" style="border-left: 4px solid var(--pico-color-yellow-500); padding: 1rem; margin-bottom: 1.5rem;">
-    <strong>{% trans "⚠️ Draft Template — Customise for Your Funder" %}</strong>
+    <strong><span aria-hidden="true">⚠️</span> {% trans "Draft Template — Customise for Your Funder" %}</strong>
     <p style="margin-bottom: 0;">
         {% blocktrans %}
         This is a generic funder report template. Before submitting to your funder, verify it matches
         their specific reporting requirements. Different funders (United Way chapters, government agencies,
         foundations) may require different formats, fields, or calculations.
+        {% endblocktrans %}
+    </p>
+</article>
+
+<article aria-label="{% trans 'Data Contents' %}" style="margin-bottom: 1.5rem;">
+    <strong><span aria-hidden="true">📊</span> {% trans "Aggregate Data Export" %}</strong>
+    <p style="margin-bottom: 0;">
+        {% blocktrans %}
+        This report contains <strong>aggregate statistics only</strong> — counts and percentages grouped by category,
+        including <strong>total individuals served</strong>.
+        It does <strong>not</strong> include individual client names, birth dates, or other personally identifiable information (PII).
         {% endblocktrans %}
     </p>
 </article>
@@ -71,6 +82,34 @@
             {{ radio.choice_label }}
         </label>
         {% endfor %}
+    </fieldset>
+
+    {# Recipient tracking for audit purposes #}
+    <fieldset>
+        <legend>{% trans "Export Recipient" %}</legend>
+        <p class="helper-text" style="margin-bottom: 1rem; color: var(--pico-muted-color);">
+            {% trans "For audit purposes, please indicate who will receive this exported data." %}
+        </p>
+        <label for="{{ form.recipient.id_for_label }}">
+            {{ form.recipient.label }}
+            {{ form.recipient }}
+            {% if form.recipient.help_text %}
+            <small>{{ form.recipient.help_text }}</small>
+            {% endif %}
+            {% if form.recipient.errors %}
+            <small class="error" role="alert">{{ form.recipient.errors.0 }}</small>
+            {% endif %}
+        </label>
+        <label for="{{ form.recipient_detail.id_for_label }}" id="recipient-detail-wrapper">
+            {{ form.recipient_detail.label }}
+            {{ form.recipient_detail }}
+            {% if form.recipient_detail.help_text %}
+            <small>{{ form.recipient_detail.help_text }}</small>
+            {% endif %}
+            {% if form.recipient_detail.errors %}
+            <small class="error" role="alert">{{ form.recipient_detail.errors.0 }}</small>
+            {% endif %}
+        </label>
     </fieldset>
 
     <button type="submit">{% trans "Generate Funder Report" %}</button>

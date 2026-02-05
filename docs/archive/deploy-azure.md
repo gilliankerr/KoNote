@@ -313,7 +313,7 @@ Before setting environment variables, collect these values:
 | `FIELD_ENCRYPTION_KEY` | (generated in Step 4a) | Your secure location |
 | `DATABASE_URL` | `postgresql://KoNote2:<PASSWORD>@<SERVER_NAME>.postgres.database.azure.com:5432/KoNote2` | From Step 2 (main DB) |
 | `AUDIT_DATABASE_URL` | `postgresql://audit_writer:<AUDIT_PASSWORD>@<SERVER_NAME_AUDIT>.postgres.database.azure.com:5432/KoNote2_audit` | From Step 2 (audit DB) |
-| `DJANGO_SETTINGS_MODULE` | `KoNote2.settings.production` | Fixed |
+| `DJANGO_SETTINGS_MODULE` | `konote.settings.production` | Fixed |
 | `AUTH_MODE` | `azure` (for Azure AD) or `local` | Your choice |
 | `AZURE_CLIENT_ID` | (if using Azure AD) | Step 8 |
 | `AZURE_CLIENT_SECRET` | (if using Azure AD) | Step 8 |
@@ -352,7 +352,7 @@ az containerapp update \
   --name KoNote2-web \
   --resource-group KoNote2-prod \
   --set-env-vars \
-    DJANGO_SETTINGS_MODULE=KoNote2.settings.production \
+    DJANGO_SETTINGS_MODULE=konote.settings.production \
     DATABASE_URL="postgresql://KoNote2:PASSWORD@KoNote2-db-xyz123.postgres.database.azure.com:5432/KoNote2" \
     AUDIT_DATABASE_URL="postgresql://audit_writer:AUDIT_PASSWORD@KoNote2-audit-db-xyz123.postgres.database.azure.com:5432/KoNote2_audit" \
     AUTH_MODE=local \

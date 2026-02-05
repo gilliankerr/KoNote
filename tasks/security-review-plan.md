@@ -71,11 +71,11 @@ Run this security review when any of the following change:
 
 | File | What to Check |
 |------|---------------|
-| `KoNote2/encryption.py` | Algorithm strength, error handling, key loading |
+| `konote/encryption.py` | Algorithm strength, error handling, key loading |
 | `apps/clients/models.py` | All PII uses `_*_encrypted` pattern |
 | `apps/auth_app/models.py` | User email encryption |
 | `apps/clients/forms.py` | No raw PII leakage in validation errors |
-| `KoNote2/settings/*.py` | TLS/HSTS configuration |
+| `konote/settings/*.py` | TLS/HSTS configuration |
 
 ### Checklist
 
@@ -113,7 +113,7 @@ Run this security review when any of the following change:
 
 | File | What to Check |
 |------|---------------|
-| `KoNote2/middleware/program_access.py` | All client routes protected |
+| `konote/middleware/program_access.py` | All client routes protected |
 | `apps/clients/views.py` | Program scoping enforced |
 | `apps/notes/views.py` | Client access validation |
 | `apps/programs/models.py` | Role definitions |
@@ -128,8 +128,8 @@ Run this security review when any of the following change:
 - [ ] No direct object access (e.g., `/clients/<id>`) without permission check
 
 **Role Hierarchy (5 points)**
-- [ ] Role hierarchy enforced: receptionist < staff < program_manager
-- [ ] Receptionist role has appropriately limited data access
+- [ ] Role hierarchy enforced: front_desk < staff < program_manager
+- [ ] Front Desk role has appropriately limited data access
 - [ ] Staff cannot access program_manager-only functions
 - [ ] Role stored in request context for view-level checks
 
@@ -141,7 +141,7 @@ Run this security review when any of the following change:
 
 **Attack Scenario Testing (5 points)**
 - [ ] **IDOR test**: User A cannot access `/clients/X` where X is in User B's program only
-- [ ] **Vertical escalation test**: Receptionist cannot access staff-only features
+- [ ] **Vertical escalation test**: Front Desk cannot access staff-only features
 - [ ] **Direct URL test**: Knowing a client ID doesn't grant access
 - [ ] **API endpoint test**: All endpoints (not just UI) enforce RBAC
 
@@ -154,7 +154,7 @@ Run this security review when any of the following change:
 | File | What to Check |
 |------|---------------|
 | `apps/auth_app/views.py` | Login logic, rate limiting, error messages |
-| `KoNote2/settings/base.py` | Session and password configuration |
+| `konote/settings/base.py` | Session and password configuration |
 | Azure AD configuration | Token validation (if using SSO) |
 
 ### Checklist
@@ -193,9 +193,9 @@ Run this security review when any of the following change:
 | File | What to Check |
 |------|---------------|
 | `apps/audit/models.py` | Fields captured, immutability |
-| `KoNote2/middleware/audit.py` | Coverage of operations |
+| `konote/middleware/audit.py` | Coverage of operations |
 | `apps/audit/management/commands/lockdown_audit_db.py` | DB permissions |
-| `KoNote2/db_router.py` | Database routing |
+| `konote/db_router.py` | Database routing |
 
 ### Checklist
 
@@ -321,7 +321,7 @@ python manage.py check --deploy
 ```
 
 ### Manual Testing Setup
-1. Create test users with each role (admin, program_manager, staff, receptionist)
+1. Create test users with each role (admin, program_manager, staff, front_desk)
 2. Create test clients enrolled in specific programs
 3. Test access from users NOT in those programs
 

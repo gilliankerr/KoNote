@@ -143,7 +143,7 @@ class Command(BaseCommand):
         # ENC002: Encryption round-trip works
         if key:
             try:
-                from KoNote2.encryption import decrypt_field, encrypt_field
+                from konote.encryption import decrypt_field, encrypt_field
                 test_value = "security_audit_test_string"
                 encrypted = encrypt_field(test_value)
                 decrypted = decrypt_field(encrypted)
@@ -504,8 +504,8 @@ class Command(BaseCommand):
         # CFG006: Security middleware in chain
         middleware = getattr(settings, "MIDDLEWARE", [])
         required = [
-            "KoNote2.middleware.program_access.ProgramAccessMiddleware",
-            "KoNote2.middleware.audit.AuditMiddleware",
+            "konote.middleware.program_access.ProgramAccessMiddleware",
+            "konote.middleware.audit.AuditMiddleware",
         ]
         missing = [m for m in required if m not in middleware]
         if missing:

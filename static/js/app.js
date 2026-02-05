@@ -146,6 +146,17 @@ document.body.addEventListener("htmx:sendError", function () {
     showToast("Could not connect to the server. Check your internet connection.", true);
 });
 
+// Keyboard activation for role="button" elements (WCAG 2.1.1 — Enter/Space triggers click)
+document.addEventListener("keydown", function (e) {
+    if ((e.key === "Enter" || e.key === " ") &&
+        e.target.getAttribute("role") === "button" &&
+        e.target.tagName !== "BUTTON" &&
+        e.target.tagName !== "A") {
+        e.preventDefault();
+        e.target.click();
+    }
+});
+
 // --- Select All / Deselect All for metric checkboxes (export form) ---
 document.addEventListener("click", function (event) {
     var target = event.target;

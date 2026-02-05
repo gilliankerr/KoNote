@@ -2,13 +2,19 @@
 set -e
 
 echo "Running migrations..."
-python manage.py migrate --noinput 2>&1 || echo "Migration failed, continuing..."
+python manage.py migrate --noinput
+echo "Migrations complete."
 
 echo "Running audit migrations..."
-python manage.py migrate --database=audit --noinput 2>&1 || echo "Audit migration failed, continuing..."
+python manage.py migrate --database=audit --noinput
+echo "Audit migrations complete."
 
+# Seed runs all sub-commands in the right order:
+# metrics, features, settings, event types, note templates, intake fields,
+# demo data (if DEMO_MODE), and demo client field values
+echo ""
 echo "Seeding data..."
-python manage.py seed 2>&1 || echo "Seed failed, continuing..."
+python manage.py seed 2>&1 || echo "WARNING: Seed failed (see error above). App will start but may be missing data."
 
 # Security check before starting the application
 # Set KONOTE_MODE=demo to allow startup with security warnings (for evaluation)

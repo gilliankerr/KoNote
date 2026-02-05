@@ -1,7 +1,39 @@
 """Client file and custom field models."""
 from django.db import models
 
-from KoNote2.encryption import decrypt_field, encrypt_field
+from konote.encryption import decrypt_field, encrypt_field
+
+
+class ClientFileQuerySet(models.QuerySet):
+    """Custom queryset for ClientFile with demo/real filtering."""
+
+    def real(self):
+        """Return only real (non-demo) clients."""
+        return self.filter(is_demo=False)
+
+    def demo(self):
+        """Return only demo clients."""
+        return self.filter(is_demo=True)
+
+
+class ClientFileManager(models.Manager):
+    """
+    Custom manager for ClientFile that enforces demo data separation.
+
+    Security requirement: Views should use .real() or .demo() to explicitly
+    filter by demo status. Using .all() without filtering is discouraged.
+    """
+
+    def get_queryset(self):
+        return ClientFileQuerySet(self.model, using=self._db)
+
+    def real(self):
+        """Return only real (non-demo) clients."""
+        return self.get_queryset().real()
+
+    def demo(self):
+        """Return only demo clients."""
+        return self.get_queryset().demo()
 
 
 class ClientFile(models.Model):
@@ -26,12 +58,21 @@ class ClientFile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Demo data separation
+    is_demo = models.BooleanField(
+        default=False,
+        help_text="Demo clients are only visible to demo users. Set at creation, never changed.",
+    )
+
     # GDPR readiness
     consent_given_at = models.DateTimeField(null=True, blank=True)
     consent_type = models.CharField(max_length=50, default="", blank=True)
     retention_expires = models.DateField(null=True, blank=True)
     erasure_requested = models.BooleanField(default=False)
     erasure_completed_at = models.DateTimeField(null=True, blank=True)
+
+    # Custom manager for demo data separation
+    objects = ClientFileManager()
 
     class Meta:
         app_label = "clients"
@@ -143,7 +184,7 @@ class CustomFieldDefinition(models.Model):
             ("view", "View only"),
             ("edit", "View and edit"),
         ],
-        help_text="What access receptionists have to this field.",
+        help_text="What access front desk staff have to this field.",
     )
     options_json = models.JSONField(default=list, blank=True, help_text="Options for select fields.")
     sort_order = models.IntegerField(default=0)

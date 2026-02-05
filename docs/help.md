@@ -301,7 +301,7 @@ Your access depends on your assigned role:
 
 | Role | What You Can Do |
 |------|-----------------|
-| **Receptionist** | View limited client info, update contact details |
+| **Front Desk** | View limited client info, update contact details |
 | **Staff** | Full client access, write notes, record events |
 | **Program Manager** | All staff abilities plus edit plans, manage team |
 | **Administrator** | System settings, user management, all configuration |

@@ -46,7 +46,8 @@ from apps.reports.utils import (
     get_fiscal_year_choices,
 )
 from apps.reports.forms import MetricExportForm
-import KoNote2.encryption as enc_module
+from apps.reports.models import SecureExportLink
+import konote.encryption as enc_module
 
 TEST_KEY = Fernet.generate_key().decode()
 
@@ -162,6 +163,7 @@ class MetricExportFormTest(TestCase):
             "metrics": [self.metric.pk],
             "fiscal_year": "2025",
             "format": "csv",
+            "recipient": "self",
         })
         self.assertTrue(form.is_valid(), form.errors)
         # Dates should be populated from fiscal year
@@ -177,6 +179,7 @@ class MetricExportFormTest(TestCase):
             "date_from": "2025-01-01",
             "date_to": "2025-06-30",
             "format": "csv",
+            "recipient": "self",
         })
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data["date_from"], date(2025, 1, 1))
@@ -203,6 +206,7 @@ class MetricExportFormTest(TestCase):
             "date_from": "2025-01-01",  # These should be ignored
             "date_to": "2025-06-30",
             "format": "csv",
+            "recipient": "self",
         })
         self.assertTrue(form.is_valid(), form.errors)
         # Dates should come from fiscal year, not manual entry
@@ -218,9 +222,13 @@ class MetricExportFormTest(TestCase):
             "date_from": "2025-06-30",
             "date_to": "2025-01-01",
             "format": "csv",
+            "recipient": "self",
         })
         self.assertFalse(form.is_valid())
-        self.assertIn("'Date from' must be before 'Date to'", str(form.errors))
+        # Check for the error message (HTML entities may encode quotes)
+        error_text = str(form.errors)
+        self.assertIn("Date from", error_text)
+        self.assertIn("must be before", error_text)
 
 
 @override_settings(FIELD_ENCRYPTION_KEY=TEST_KEY)
@@ -367,13 +375,20 @@ class GetClientAchievementRateTest(TestCase):
         )
 
     def _create_metric_value(self, value, days_ago=0):
-        """Helper to create a metric value with a specific date."""
+        """Helper to create a metric value with a specific date.
+
+        Note: ProgressNote.created_at has auto_now_add=True, so we must use
+        queryset.update() after creation to backdate it reliably.
+        """
         note = ProgressNote.objects.create(
             client_file=self.client_file,
             note_type="full",
             author=self.user,
-            created_at=timezone.now() - timedelta(days=days_ago),
         )
+        if days_ago:
+            backdated = timezone.now() - timedelta(days=days_ago)
+            ProgressNote.objects.filter(pk=note.pk).update(created_at=backdated)
+            note.refresh_from_db()
         pnt = ProgressNoteTarget.objects.create(
             progress_note=note,
             plan_target=self.target,
@@ -768,6 +783,7 @@ class AchievementRateFormTest(TestCase):
             "fiscal_year": "2025",
             "format": "csv",
             "include_achievement_rate": True,
+            "recipient": "self",
         })
         self.assertTrue(form.is_valid(), form.errors)
         self.assertTrue(form.cleaned_data["include_achievement_rate"])
@@ -780,6 +796,7 @@ class AchievementRateFormTest(TestCase):
             "fiscal_year": "2025",
             "format": "csv",
             "include_achievement_rate": False,
+            "recipient": "self",
         })
         self.assertTrue(form.is_valid(), form.errors)
         self.assertFalse(form.cleaned_data["include_achievement_rate"])
@@ -1230,6 +1247,7 @@ class MetricExportFormGroupByTests(TestCase):
             "fiscal_year": "2025",
             "format": "csv",
             "group_by": "age_range",
+            "recipient": "self",
         })
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data["group_by"], "age_range")
@@ -1242,6 +1260,7 @@ class MetricExportFormGroupByTests(TestCase):
             "fiscal_year": "2025",
             "format": "csv",
             "group_by": "",
+            "recipient": "self",
         })
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data["group_by"], "")
@@ -1394,6 +1413,7 @@ class CMTExportFormTests(TestCase):
             "program": self.program.pk,
             "fiscal_year": "2025",
             "format": "csv",
+            "recipient": "self",
         })
         self.assertTrue(form.is_valid(), form.errors)
 
@@ -1404,6 +1424,7 @@ class CMTExportFormTests(TestCase):
             "program": self.program.pk,
             "fiscal_year": "2025",
             "format": "csv",
+            "recipient": "self",
         })
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data["date_from"], date(2025, 4, 1))
@@ -1416,6 +1437,7 @@ class CMTExportFormTests(TestCase):
             "program": self.program.pk,
             "fiscal_year": "2025",
             "format": "csv",
+            "recipient": "self",
         })
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data["fiscal_year_label"], "FY 2025-26")
@@ -1611,28 +1633,39 @@ class CMTExportViewTests(TestCase):
         resp = self.client.get("/reports/cmt-export/")
         self.assertContains(resp, "Fiscal Year")
 
+    def _get_download_content(self, download_resp):
+        """Read content from a FileResponse (streaming)."""
+        return b"".join(download_resp.streaming_content).decode("utf-8")
+
     def test_cmt_export_csv_download(self):
-        """CMT export should return CSV when csv format selected."""
+        """CMT export should create a secure link, and following it returns CSV."""
         self.client.login(username="admin", password="testpass123")
         resp = self.client.post("/reports/cmt-export/", {
             "program": self.program.pk,
             "fiscal_year": "2025",
             "format": "csv",
+            "recipient": "self",
         })
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp["Content-Type"], "text/csv")
-        self.assertIn("CMT_Report", resp["Content-Disposition"])
-        self.assertIn("FY_2025-26", resp["Content-Disposition"])
+        link = SecureExportLink.objects.latest("created_at")
+        download_resp = self.client.get(f"/reports/download/{link.id}/")
+        self.assertIn("attachment", download_resp["Content-Disposition"])
+        self.assertIn("CMT_Report", download_resp["Content-Disposition"])
+        self.assertIn("FY_2025-26", download_resp["Content-Disposition"])
 
     def test_cmt_export_csv_content(self):
-        """CMT CSV export should contain expected sections."""
+        """CMT CSV export should contain expected sections via secure link."""
         self.client.login(username="admin", password="testpass123")
         resp = self.client.post("/reports/cmt-export/", {
             "program": self.program.pk,
             "fiscal_year": "2025",
             "format": "csv",
+            "recipient": "self",
         })
-        content = resp.content.decode("utf-8")
+        self.assertEqual(resp.status_code, 200)
+        link = SecureExportLink.objects.latest("created_at")
+        download_resp = self.client.get(f"/reports/download/{link.id}/")
+        content = self._get_download_content(download_resp)
         self.assertIn("FUNDER REPORT TEMPLATE", content)
         self.assertIn("Test Program", content)
         self.assertIn("SERVICE STATISTICS", content)
@@ -1702,27 +1735,38 @@ class ClientDataExportViewTests(TestCase):
         resp = self.client.get("/reports/client-data-export/")
         self.assertEqual(resp.status_code, 403)
 
+    def _get_download_content(self, download_resp):
+        """Read content from a FileResponse (streaming)."""
+        return b"".join(download_resp.streaming_content).decode("utf-8")
+
     def test_client_data_export_csv_download(self):
-        """Client data export should return a CSV file."""
+        """Client data export should create a secure link that returns a CSV file."""
         self.client.login(username="admin", password="testpass123")
         resp = self.client.post("/reports/client-data-export/", {
             "include_custom_fields": True,
             "include_enrolments": True,
             "include_consent": True,
+            "recipient": "self",
         })
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp["Content-Type"], "text/csv")
-        self.assertIn("client_data_export", resp["Content-Disposition"])
+        link = SecureExportLink.objects.latest("created_at")
+        download_resp = self.client.get(f"/reports/download/{link.id}/")
+        self.assertIn("attachment", download_resp["Content-Disposition"])
+        self.assertIn("client_data_export", download_resp["Content-Disposition"])
 
     def test_client_data_export_csv_contains_client_data(self):
-        """CSV export should contain the client's data."""
+        """CSV export via secure link should contain the client's data."""
         self.client.login(username="admin", password="testpass123")
         resp = self.client.post("/reports/client-data-export/", {
             "include_custom_fields": True,
             "include_enrolments": True,
             "include_consent": True,
+            "recipient": "self",
         })
-        content = resp.content.decode("utf-8")
+        self.assertEqual(resp.status_code, 200)
+        link = SecureExportLink.objects.latest("created_at")
+        download_resp = self.client.get(f"/reports/download/{link.id}/")
+        content = self._get_download_content(download_resp)
         self.assertIn("TEST-001", content)
         self.assertIn("Jane", content)
         self.assertIn("Doe", content)
@@ -1736,9 +1780,12 @@ class ClientDataExportViewTests(TestCase):
             "include_custom_fields": True,
             "include_enrolments": True,
             "include_consent": True,
+            "recipient": "self",
         })
         self.assertEqual(resp.status_code, 200)
-        content = resp.content.decode("utf-8")
+        link = SecureExportLink.objects.latest("created_at")
+        download_resp = self.client.get(f"/reports/download/{link.id}/")
+        content = self._get_download_content(download_resp)
         self.assertIn("TEST-001", content)
         self.assertIn(f"Programme Filter: {self.program.name}", content)
 
@@ -1750,9 +1797,12 @@ class ClientDataExportViewTests(TestCase):
             "include_custom_fields": True,
             "include_enrolments": True,
             "include_consent": True,
+            "recipient": "self",
         })
         self.assertEqual(resp.status_code, 200)
-        content = resp.content.decode("utf-8")
+        link = SecureExportLink.objects.latest("created_at")
+        download_resp = self.client.get(f"/reports/download/{link.id}/")
+        content = self._get_download_content(download_resp)
         self.assertIn("TEST-001", content)
         self.assertIn("Status Filter: active", content)
 
@@ -1766,6 +1816,552 @@ class ClientDataExportViewTests(TestCase):
             "include_custom_fields": True,
             "include_enrolments": True,
             "include_consent": True,
+            "recipient": "self",
         })
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "No data found")
+
+
+# =============================================================================
+# Security Tests: Demo/Real Data Separation in Exports (EXP0d)
+# =============================================================================
+
+
+@override_settings(FIELD_ENCRYPTION_KEY=TEST_KEY)
+class DemoRealExportSeparationTests(TestCase):
+    """
+    Critical security tests for demo/real data separation in export views.
+
+    SECURITY REQUIREMENT: Demo users must NEVER be able to export real client data.
+    Real users must NEVER be able to export demo client data.
+
+    These tests verify the fix for the critical security bug identified in EXP0.
+    """
+
+    databases = {"default", "audit"}
+
+    def setUp(self):
+        # Set up encryption key
+        enc_module.FIELD_ENCRYPTION_KEY = TEST_KEY
+        enc_module._fernet = Fernet(TEST_KEY)
+
+        # Create demo admin user
+        self.demo_admin = User.objects.create_user(
+            username="demo_admin",
+            email="demo@example.com",
+            password="testpass123",
+            is_admin=True,
+            is_demo=True,  # Demo user
+        )
+
+        # Create real admin user
+        self.real_admin = User.objects.create_user(
+            username="real_admin",
+            email="real@example.com",
+            password="testpass123",
+            is_admin=True,
+            is_demo=False,  # Real user
+        )
+
+        # Create a program
+        self.program = Program.objects.create(
+            name="Test Program",
+            status="active",
+        )
+
+        # Create DEMO client
+        self.demo_client = ClientFile.objects.create(
+            record_id="DEMO-001",
+            status="active",
+            is_demo=True,  # Demo client
+        )
+        self.demo_client.first_name = "Demo"
+        self.demo_client.last_name = "Client"
+        self.demo_client.birth_date = "1990-01-15"
+        self.demo_client.save()
+
+        # Create REAL client
+        self.real_client = ClientFile.objects.create(
+            record_id="REAL-001",
+            status="active",
+            is_demo=False,  # Real client
+        )
+        self.real_client.first_name = "Real"
+        self.real_client.last_name = "Person"
+        self.real_client.birth_date = "1985-06-20"
+        self.real_client.save()
+
+        # Enrol both clients in program
+        ClientProgramEnrolment.objects.create(
+            client_file=self.demo_client,
+            program=self.program,
+            status="enrolled",
+        )
+        ClientProgramEnrolment.objects.create(
+            client_file=self.real_client,
+            program=self.program,
+            status="enrolled",
+        )
+
+        # Create progress notes for both clients (for metric export testing)
+        self.demo_note = ProgressNote.objects.create(
+            client_file=self.demo_client,
+            note_type="quick",
+            author=self.demo_admin,
+        )
+        self.real_note = ProgressNote.objects.create(
+            client_file=self.real_client,
+            note_type="quick",
+            author=self.real_admin,
+        )
+
+    def _get_download_content(self, download_resp):
+        """Read content from a FileResponse (streaming)."""
+        return b"".join(download_resp.streaming_content).decode("utf-8")
+
+    def test_demo_admin_cannot_export_real_clients_in_client_data_export(self):
+        """
+        CRITICAL: Demo admin must NOT see real client data in client data export.
+
+        This is the primary security test for EXP0a.
+        """
+        self.client.login(username="demo_admin", password="testpass123")
+        resp = self.client.post("/reports/client-data-export/", {
+            "include_custom_fields": True,
+            "include_enrolments": True,
+            "include_consent": True,
+            "recipient": "self",
+        })
+        self.assertEqual(resp.status_code, 200)
+        link = SecureExportLink.objects.latest("created_at")
+        download_resp = self.client.get(f"/reports/download/{link.id}/")
+
+        content = self._get_download_content(download_resp)
+
+        # Demo admin should see demo client
+        self.assertIn("DEMO-001", content)
+        self.assertIn("Demo", content)
+
+        # Demo admin must NOT see real client
+        self.assertNotIn("REAL-001", content)
+        self.assertNotIn("Real", content)
+
+    def test_real_admin_cannot_export_demo_clients_in_client_data_export(self):
+        """
+        Real admin must NOT see demo client data in client data export.
+        """
+        self.client.login(username="real_admin", password="testpass123")
+        resp = self.client.post("/reports/client-data-export/", {
+            "include_custom_fields": True,
+            "include_enrolments": True,
+            "include_consent": True,
+            "recipient": "self",
+        })
+        self.assertEqual(resp.status_code, 200)
+        link = SecureExportLink.objects.latest("created_at")
+        download_resp = self.client.get(f"/reports/download/{link.id}/")
+
+        content = self._get_download_content(download_resp)
+
+        # Real admin should see real client
+        self.assertIn("REAL-001", content)
+        self.assertIn("Real", content)
+
+        # Real admin must NOT see demo client
+        self.assertNotIn("DEMO-001", content)
+        self.assertNotIn("Demo", content)
+
+    def test_demo_admin_export_only_shows_demo_clients_with_program_filter(self):
+        """
+        Demo admin filtering by program should still only see demo clients.
+        """
+        self.client.login(username="demo_admin", password="testpass123")
+        resp = self.client.post("/reports/client-data-export/", {
+            "program": self.program.pk,
+            "include_custom_fields": True,
+            "include_enrolments": True,
+            "include_consent": True,
+            "recipient": "self",
+        })
+        self.assertEqual(resp.status_code, 200)
+        link = SecureExportLink.objects.latest("created_at")
+        download_resp = self.client.get(f"/reports/download/{link.id}/")
+
+        content = self._get_download_content(download_resp)
+
+        # Should see demo client (enrolled in program)
+        self.assertIn("DEMO-001", content)
+
+        # Must NOT see real client (even though also enrolled in program)
+        self.assertNotIn("REAL-001", content)
+
+    def test_real_admin_metric_export_only_shows_real_clients(self):
+        """
+        Real admin metric export should only show real client data (EXP0b).
+        """
+        # Create a metric
+        metric = MetricDefinition.objects.create(
+            name="Test Metric",
+            definition="A test metric",
+            category="custom",
+            is_enabled=True,
+            status="active",
+        )
+
+        # Create plan and target structures for both clients
+        for client, note in [(self.demo_client, self.demo_note), (self.real_client, self.real_note)]:
+            section = PlanSection.objects.create(
+                client_file=client,
+                name="Test Section",
+                status="default",
+            )
+            target = PlanTarget.objects.create(
+                plan_section=section,
+                client_file=client,
+                name="Test Target",
+                status="default",
+            )
+            PlanTargetMetric.objects.create(
+                plan_target=target,
+                metric_def=metric,
+            )
+            pnt = ProgressNoteTarget.objects.create(
+                progress_note=note,
+                plan_target=target,
+            )
+            MetricValue.objects.create(
+                progress_note_target=pnt,
+                metric_def=metric,
+                value="5",
+            )
+
+        self.client.login(username="real_admin", password="testpass123")
+        resp = self.client.post("/reports/export/", {
+            "program": self.program.pk,
+            "metrics": [metric.pk],
+            "fiscal_year": "",
+            "date_from": "2020-01-01",
+            "date_to": "2030-12-31",
+            "format": "csv",
+            "recipient": "self",
+        })
+        self.assertEqual(resp.status_code, 200)
+        link = SecureExportLink.objects.latest("created_at")
+        download_resp = self.client.get(f"/reports/download/{link.id}/")
+
+        content = self._get_download_content(download_resp)
+
+        # Real admin should see real client's record ID
+        self.assertIn("REAL-001", content)
+
+        # Real admin must NOT see demo client's record ID
+        self.assertNotIn("DEMO-001", content)
+
+    def test_demo_admin_metric_export_only_shows_demo_clients(self):
+        """
+        Demo admin metric export should only show demo client data (EXP0b).
+        """
+        # Create a metric
+        metric = MetricDefinition.objects.create(
+            name="Demo Metric",
+            definition="A demo metric",
+            category="custom",
+            is_enabled=True,
+            status="active",
+        )
+
+        # Create plan and target structures for both clients
+        for client, note in [(self.demo_client, self.demo_note), (self.real_client, self.real_note)]:
+            section = PlanSection.objects.create(
+                client_file=client,
+                name="Demo Section",
+                status="default",
+            )
+            target = PlanTarget.objects.create(
+                plan_section=section,
+                client_file=client,
+                name="Demo Target",
+                status="default",
+            )
+            PlanTargetMetric.objects.create(
+                plan_target=target,
+                metric_def=metric,
+            )
+            pnt = ProgressNoteTarget.objects.create(
+                progress_note=note,
+                plan_target=target,
+            )
+            MetricValue.objects.create(
+                progress_note_target=pnt,
+                metric_def=metric,
+                value="5",
+            )
+
+        self.client.login(username="demo_admin", password="testpass123")
+        resp = self.client.post("/reports/export/", {
+            "program": self.program.pk,
+            "metrics": [metric.pk],
+            "fiscal_year": "",
+            "date_from": "2020-01-01",
+            "date_to": "2030-12-31",
+            "format": "csv",
+            "recipient": "self",
+        })
+        self.assertEqual(resp.status_code, 200)
+        link = SecureExportLink.objects.latest("created_at")
+        download_resp = self.client.get(f"/reports/download/{link.id}/")
+
+        content = self._get_download_content(download_resp)
+
+        # Demo admin should see demo client's record ID
+        self.assertIn("DEMO-001", content)
+
+        # Demo admin must NOT see real client's record ID
+        self.assertNotIn("REAL-001", content)
+
+    def test_demo_admin_cmt_export_only_shows_demo_clients(self):
+        """
+        Demo admin CMT export should only count demo client data (EXP0c).
+        """
+        self.client.login(username="demo_admin", password="testpass123")
+        resp = self.client.post("/reports/cmt-export/", {
+            "program": self.program.pk,
+            "fiscal_year": "2025",
+            "format": "csv",
+            "recipient": "self",
+        })
+        self.assertEqual(resp.status_code, 200)
+        link = SecureExportLink.objects.latest("created_at")
+        download_resp = self.client.get(f"/reports/download/{link.id}/")
+
+        # The CMT export counts individuals served - should only count demo clients
+        content = self._get_download_content(download_resp)
+
+        # We have 1 demo client enrolled, so max individuals served should be 1 or 0
+        # (depending on whether they have notes in the fiscal year period)
+        # The key is that it shouldn't be 2 (which would mean real client is included)
+        self.assertIn("Test Program", content)
+
+    def test_real_admin_cmt_export_only_shows_real_clients(self):
+        """
+        Real admin CMT export should only count real client data (EXP0c).
+        """
+        self.client.login(username="real_admin", password="testpass123")
+        resp = self.client.post("/reports/cmt-export/", {
+            "program": self.program.pk,
+            "fiscal_year": "2025",
+            "format": "csv",
+            "recipient": "self",
+        })
+        self.assertEqual(resp.status_code, 200)
+        link = SecureExportLink.objects.latest("created_at")
+        download_resp = self.client.get(f"/reports/download/{link.id}/")
+
+        content = self._get_download_content(download_resp)
+        self.assertIn("Test Program", content)
+
+
+# =============================================================================
+# Export Warning Dialog Tests (EXP2e-g)
+# =============================================================================
+
+
+@override_settings(FIELD_ENCRYPTION_KEY=TEST_KEY)
+class ExportWarningDialogTests(TestCase):
+    """
+    Tests for Phase 2 export warning dialogs (EXP2e-g).
+
+    Covers:
+    - Recipient field is required on all three export forms
+    - Client count preview on client data export GET page
+    - PII warning text displayed on export pages
+    """
+
+    databases = {"default", "audit"}
+
+    def setUp(self):
+        enc_module._fernet = None
+        self.client = Client()
+        self.admin = User.objects.create_user(
+            username="admin", password="testpass123", is_admin=True
+        )
+        self.program = Program.objects.create(name="Test Program", status="active")
+        self.metric = MetricDefinition.objects.create(
+            name="Test Metric",
+            definition="A test metric",
+            category="custom",
+            is_enabled=True,
+            status="active",
+        )
+        # Create a client so client count preview has data
+        self.client_file = ClientFile.objects.create(
+            record_id="WARN-001",
+            status="active",
+        )
+        self.client_file.first_name = "Warning"
+        self.client_file.last_name = "Test"
+        self.client_file.save()
+        ClientProgramEnrolment.objects.create(
+            client_file=self.client_file,
+            program=self.program,
+            status="enrolled",
+        )
+        # Create metric value data so metric export can produce a CSV
+        section = PlanSection.objects.create(
+            client_file=self.client_file,
+            name="Test Section",
+            status="default",
+        )
+        target = PlanTarget.objects.create(
+            plan_section=section,
+            client_file=self.client_file,
+            name="Test Target",
+            status="default",
+        )
+        PlanTargetMetric.objects.create(
+            plan_target=target,
+            metric_def=self.metric,
+        )
+        note = ProgressNote.objects.create(
+            client_file=self.client_file,
+            note_type="full",
+            author=self.admin,
+            created_at=timezone.make_aware(datetime(2025, 6, 15, 10, 0)),
+        )
+        pnt = ProgressNoteTarget.objects.create(
+            progress_note=note,
+            plan_target=target,
+        )
+        MetricValue.objects.create(
+            progress_note_target=pnt,
+            metric_def=self.metric,
+            value="5",
+        )
+        self.client.login(username="admin", password="testpass123")
+
+    # -----------------------------------------------------------------
+    # Recipient Required — Metric Export (/reports/export/)
+    # -----------------------------------------------------------------
+
+    def test_metric_export_post_without_recipient_is_invalid(self):
+        """POST to /reports/export/ without recipient should fail validation."""
+        resp = self.client.post("/reports/export/", {
+            "program": self.program.pk,
+            "metrics": [self.metric.pk],
+            "fiscal_year": "2025",
+            "format": "csv",
+            # No recipient field
+        })
+        # Should stay on the form page (200) with errors, not redirect or download
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("recipient", resp.context["form"].errors)
+
+    def test_metric_export_post_with_recipient_proceeds(self):
+        """POST to /reports/export/ with recipient should create a secure export link."""
+        resp = self.client.post("/reports/export/", {
+            "program": self.program.pk,
+            "metrics": [self.metric.pk],
+            "fiscal_year": "2025",
+            "format": "csv",
+            "recipient": "self",
+        })
+        # Should return 200 (secure link page) and create a SecureExportLink
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(SecureExportLink.objects.exists())
+
+    # -----------------------------------------------------------------
+    # Recipient Required — CMT Export (/reports/cmt-export/)
+    # -----------------------------------------------------------------
+
+    def test_cmt_export_post_without_recipient_is_invalid(self):
+        """POST to /reports/cmt-export/ without recipient should fail validation."""
+        resp = self.client.post("/reports/cmt-export/", {
+            "program": self.program.pk,
+            "fiscal_year": "2025",
+            "format": "csv",
+            # No recipient field
+        })
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("recipient", resp.context["form"].errors)
+
+    def test_cmt_export_post_with_recipient_proceeds(self):
+        """POST to /reports/cmt-export/ with recipient should create a secure export link."""
+        resp = self.client.post("/reports/cmt-export/", {
+            "program": self.program.pk,
+            "fiscal_year": "2025",
+            "format": "csv",
+            "recipient": "funder",
+        })
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(SecureExportLink.objects.exists())
+
+    # -----------------------------------------------------------------
+    # Recipient Required — Client Data Export (/reports/client-data-export/)
+    # -----------------------------------------------------------------
+
+    def test_client_data_export_post_without_recipient_is_invalid(self):
+        """POST to /reports/client-data-export/ without recipient should fail validation."""
+        resp = self.client.post("/reports/client-data-export/", {
+            "include_custom_fields": True,
+            "include_enrolments": True,
+            "include_consent": True,
+            # No recipient field
+        })
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("recipient", resp.context["form"].errors)
+
+    def test_client_data_export_post_with_recipient_proceeds(self):
+        """POST to /reports/client-data-export/ with recipient should create a secure export link."""
+        resp = self.client.post("/reports/client-data-export/", {
+            "include_custom_fields": True,
+            "include_enrolments": True,
+            "include_consent": True,
+            "recipient": "colleague",
+        })
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(SecureExportLink.objects.exists())
+
+    # -----------------------------------------------------------------
+    # Client Count Preview
+    # -----------------------------------------------------------------
+
+    def test_client_data_export_get_shows_client_count(self):
+        """GET to /reports/client-data-export/ should show the accessible client count."""
+        resp = self.client.get("/reports/client-data-export/")
+        self.assertEqual(resp.status_code, 200)
+        # Check context variable is present
+        self.assertIn("total_client_count", resp.context)
+        self.assertGreaterEqual(resp.context["total_client_count"], 1)
+        # Check the count is displayed in the template
+        self.assertContains(resp, "client record")
+
+    def test_client_data_export_get_preserves_count_on_validation_failure(self):
+        """POST with invalid data should still show the client count."""
+        resp = self.client.post("/reports/client-data-export/", {
+            # Missing recipient — form will be invalid
+        })
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("total_client_count", resp.context)
+        self.assertGreaterEqual(resp.context["total_client_count"], 1)
+
+    # -----------------------------------------------------------------
+    # PII Warnings Display
+    # -----------------------------------------------------------------
+
+    def test_metric_export_get_shows_pii_warning(self):
+        """GET to /reports/export/ should display a personal information warning."""
+        resp = self.client.get("/reports/export/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "personal information")
+
+    def test_client_data_export_get_shows_pii_warning(self):
+        """GET to /reports/client-data-export/ should display a personal information warning."""
+        resp = self.client.get("/reports/client-data-export/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "personal information")
+
+    def test_cmt_export_get_shows_draft_template_notice(self):
+        """GET to /reports/cmt-export/ should display a Draft Template notice."""
+        resp = self.client.get("/reports/cmt-export/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Draft Template")

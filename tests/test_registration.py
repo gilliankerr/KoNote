@@ -7,7 +7,7 @@ from cryptography.fernet import Fernet
 from apps.auth_app.models import User
 from apps.programs.models import Program
 from apps.registration.models import RegistrationLink, RegistrationSubmission
-import KoNote2.encryption as enc_module
+import konote.encryption as enc_module
 
 
 TEST_KEY = Fernet.generate_key().decode()

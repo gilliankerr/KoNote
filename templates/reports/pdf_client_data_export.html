@@ -1,0 +1,207 @@
+{% extends "reports/pdf_base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Client Data Export" %} — {{ client.first_name }} {{ client.last_name }}{% endblock %}
+
+{% block content %}
+<!-- Cover Page -->
+<div class="pdf-cover">
+    <h1>{% trans "Client Data Export" %}</h1>
+    <div class="subtitle">{{ client.first_name }} {{ client.last_name }}</div>
+    <div class="meta">
+        {% if client.record_id %}{% trans "Record ID" %}: {{ client.record_id }}<br>{% endif %}
+        {% blocktrans with date=generated_at|date:"Y-m-d" by=generated_by %}Generated {{ date }} by {{ by }}{% endblocktrans %}
+    </div>
+    <div class="meta" style="margin-top: 0.5cm;">
+        <em>{% trans "Generated under PIPEDA data portability provisions" %}</em>
+    </div>
+</div>
+
+<!-- Client Information -->
+<h2>{% trans "Client Information" %}</h2>
+<dl>
+    <dt>{% trans "Name" %}</dt>
+    <dd>{{ client.first_name }} {{ client.last_name }}{% if client.middle_name %} ({{ client.middle_name }}){% endif %}</dd>
+    {% if client.record_id %}
+    <dt>{% trans "Record ID" %}</dt>
+    <dd>{{ client.record_id }}</dd>
+    {% endif %}
+    {% if client.birth_date %}
+    <dt>{% trans "Date of Birth" %}</dt>
+    <dd>{{ client.birth_date }}</dd>
+    {% endif %}
+    <dt>{% trans "Status" %}</dt>
+    <dd>
+        {% if client.status == "active" %}
+            <span class="badge badge-success">{% trans "Active" %}</span>
+        {% elif client.status == "inactive" %}
+            <span class="badge badge-warning">{% trans "Inactive" %}</span>
+        {% else %}
+            <span class="badge badge-neutral">{% trans "Discharged" %}</span>
+        {% endif %}
+    </dd>
+    <dt>{% trans "Created" %}</dt>
+    <dd>{{ client.created_at|date:"Y-m-d" }}</dd>
+    <dt>{% trans "Last Updated" %}</dt>
+    <dd>{{ client.updated_at|date:"Y-m-d" }}</dd>
+</dl>
+
+<!-- Consent Information -->
+{% if client.consent_given_at %}
+<h3>{% trans "Privacy Consent" %}</h3>
+<dl>
+    <dt>{% trans "Consent Given" %}</dt>
+    <dd>{{ client.consent_given_at|date:"Y-m-d" }}</dd>
+    {% if client.consent_type %}
+    <dt>{% trans "Consent Type" %}</dt>
+    <dd>{{ client.consent_type }}</dd>
+    {% endif %}
+    {% if client.retention_expires %}
+    <dt>{% trans "Retention Expires" %}</dt>
+    <dd>{{ client.retention_expires|date:"Y-m-d" }}</dd>
+    {% endif %}
+</dl>
+{% endif %}
+
+<!-- Programme Enrolments -->
+{% if enrolments %}
+<h2>{% trans "Programme Enrolments" %}</h2>
+<table>
+    <thead>
+        <tr>
+            <th>{% trans "Programme" %}</th>
+            <th>{% trans "Status" %}</th>
+            <th>{% trans "Enrolled" %}</th>
+            <th>{% trans "Unenrolled" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for e in enrolments %}
+        <tr>
+            <td>{{ e.program.name }}</td>
+            <td>{{ e.get_status_display }}</td>
+            <td>{{ e.enrolled_at|date:"Y-m-d" }}</td>
+            <td>{% if e.unenrolled_at %}{{ e.unenrolled_at|date:"Y-m-d" }}{% else %}—{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<!-- Custom Fields -->
+{% if custom_fields %}
+<h2>{% trans "Custom Fields" %}</h2>
+<dl>
+    {% for field in custom_fields %}
+    <dt>{{ field.name }}</dt>
+    <dd>{{ field.value|default:"—" }}</dd>
+    {% endfor %}
+</dl>
+{% endif %}
+
+<!-- Plan Sections & Targets -->
+{% if include_plans and sections %}
+<div class="page-break"></div>
+<h2>{% trans "Plan Sections and Targets" %}</h2>
+{% for section in sections %}
+<div class="avoid-break">
+    <h3>{{ section.name }}</h3>
+    {% for target in section.targets.all %}
+    <div style="margin-left: 0.5cm; margin-bottom: 0.3cm;">
+        <strong>{{ target.name }}</strong>
+        {% if target.description %}<br><span style="color: #718096;">{{ target.description }}</span>{% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}
+{% endif %}
+
+<!-- Metric Progress -->
+{% if include_metrics and metric_tables %}
+<div class="page-break"></div>
+<h2>{% trans "Metric Progress" %}</h2>
+{% for table in metric_tables %}
+<div class="avoid-break">
+    <h3>{{ table.target_name }} — {{ table.metric_name }}</h3>
+    {% if table.unit %}
+    <div class="metric-summary">
+        {% trans "Unit" %}: {{ table.unit }}
+        {% if table.min_value != None %} · {% trans "Min" %}: {{ table.min_value }}{% endif %}
+        {% if table.max_value != None %} · {% trans "Max" %}: {{ table.max_value }}{% endif %}
+        · {{ table.rows|length }} {% trans "measurements" %}
+    </div>
+    {% endif %}
+    <table>
+        <thead>
+            <tr>
+                <th>{% trans "Date" %}</th>
+                <th>{% trans "Value" %}</th>
+                <th>{% trans "Author" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in table.rows %}
+            <tr>
+                <td>{{ row.date }}</td>
+                <td>{{ row.value }}</td>
+                <td>{{ row.author }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endfor %}
+{% endif %}
+
+<!-- Progress Notes -->
+{% if include_notes and notes %}
+<div class="page-break"></div>
+<h2>{% trans "Progress Notes" %}</h2>
+{% for note in notes %}
+<div class="timeline-item avoid-break">
+    <div class="date">
+        {{ note.effective_date|date:"Y-m-d" }} — {{ note.author.display_name }}
+        <span class="badge {% if note.note_type == 'quick' %}badge-neutral{% else %}badge-success{% endif %}">
+            {{ note.get_note_type_display }}
+        </span>
+    </div>
+    <div class="content">
+        {% if note.notes_text %}{{ note.notes_text }}{% endif %}
+        {% if note.summary %}{{ note.summary }}{% endif %}
+        {% if note.participant_reflection %}
+        <br><em>{% trans "Participant's words" %}: {{ note.participant_reflection }}</em>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+<!-- Events -->
+{% if include_events and events %}
+<h2>{% trans "Events" %}</h2>
+{% for event in events %}
+<div class="timeline-item avoid-break">
+    <div class="date">
+        {{ event.start_timestamp|date:"Y-m-d" }}
+        {% if event.event_type %}— {{ event.event_type.name }}{% endif %}
+    </div>
+    <div class="content">
+        {% if event.title %}<strong>{{ event.title }}</strong><br>{% endif %}
+        {% if event.description %}{{ event.description }}{% endif %}
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+<!-- Footer -->
+<div class="page-break"></div>
+<h2>{% trans "Data Export Notice" %}</h2>
+<p>
+    {% trans "This document contains all personal information held in KoNote2 for the above-named individual. This export was generated in accordance with PIPEDA data portability requirements." %}
+</p>
+<p>
+    {% blocktrans with date=generated_at|date:"Y-m-d H:i" by=generated_by %}
+    Exported on {{ date }} by {{ by }}.
+    {% endblocktrans %}
+</p>
+{% endblock %}

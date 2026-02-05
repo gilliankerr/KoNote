@@ -3,6 +3,7 @@ Base Django settings for KoNote2 Web.
 Shared across all environments.
 """
 import os
+import tempfile
 from pathlib import Path
 
 import dj_database_url
@@ -62,19 +63,19 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "KoNote2.middleware.safe_locale.SafeLocaleMiddleware",
+    "konote.middleware.safe_locale.SafeLocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "KoNote2.middleware.program_access.ProgramAccessMiddleware",
-    "KoNote2.middleware.terminology.TerminologyMiddleware",
-    "KoNote2.middleware.audit.AuditMiddleware",
+    "konote.middleware.program_access.ProgramAccessMiddleware",
+    "konote.middleware.terminology.TerminologyMiddleware",
+    "konote.middleware.audit.AuditMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "csp.middleware.CSPMiddleware",
 ]
 
-ROOT_URLCONF = "KoNote2.urls"
+ROOT_URLCONF = "konote.urls"
 
 TEMPLATES = [
     {
@@ -88,18 +89,18 @@ TEMPLATES = [
                 "django.template.context_processors.i18n",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "KoNote2.context_processors.terminology",
-                "KoNote2.context_processors.features",
-                "KoNote2.context_processors.instance_settings",
-                "KoNote2.context_processors.user_roles",
-                "KoNote2.context_processors.document_storage",
-                "KoNote2.context_processors.pending_submissions",
+                "konote.context_processors.terminology",
+                "konote.context_processors.features",
+                "konote.context_processors.instance_settings",
+                "konote.context_processors.user_roles",
+                "konote.context_processors.document_storage",
+                "konote.context_processors.pending_submissions",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = "KoNote2.wsgi.application"
+WSGI_APPLICATION = "konote.wsgi.application"
 
 # Custom user model
 AUTH_USER_MODEL = "auth_app.User"
@@ -117,7 +118,7 @@ DATABASES = {
     ) | {"OPTIONS": {"connect_timeout": 10}},
 }
 
-DATABASE_ROUTERS = ["KoNote2.db_router.AuditRouter"]
+DATABASE_ROUTERS = ["konote.db_router.AuditRouter"]
 
 # Password hashing — Argon2 first
 PASSWORD_HASHERS = [
@@ -188,10 +189,16 @@ LANGUAGES = [
     ("fr", "Français"),
 ]
 
-# Where to find translation files
+# Tell Django where to find our translation files
 LOCALE_PATHS = [
     BASE_DIR / "locale",
 ]
+
+# Persist language cookie for 1 year so users don't re-select each browser session
+LANGUAGE_COOKIE_AGE = 365 * 24 * 60 * 60
+LANGUAGE_COOKIE_SECURE = True
+LANGUAGE_COOKIE_HTTPONLY = True
+LANGUAGE_COOKIE_SAMESITE = "Lax"
 
 # Static files
 STATIC_URL = "static/"
@@ -212,6 +219,32 @@ LOGOUT_REDIRECT_URL = "/auth/login/"
 
 # PII encryption key (Fernet) — required; no fallback
 FIELD_ENCRYPTION_KEY = require_env("FIELD_ENCRYPTION_KEY")
+
+# Secure export file storage — outside web root, ephemeral on Railway
+# Files are temporary (24hr links) so ephemeral /tmp storage is acceptable
+SECURE_EXPORT_DIR = os.environ.get(
+    "SECURE_EXPORT_DIR",
+    os.path.join(tempfile.gettempdir(), "konote_exports"),
+)
+
+# Secure export link expiry (hours)
+SECURE_EXPORT_LINK_EXPIRY_HOURS = int(os.environ.get("SECURE_EXPORT_LINK_EXPIRY_HOURS", "24"))
+
+# Elevated export delay (minutes) — exports with 100+ clients or notes
+# During this delay, admins are notified and can revoke the export
+ELEVATED_EXPORT_DELAY_MINUTES = int(os.environ.get("ELEVATED_EXPORT_DELAY_MINUTES", "10"))
+
+# Email — console backend for development, SMTP for production
+# Set EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend in production
+EMAIL_BACKEND = os.environ.get(
+    "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
+)
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True").lower() == "true"
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "KoNote2 <noreply@konote2.app>")
 
 # Azure AD / Entra ID settings
 AZURE_CLIENT_ID = os.environ.get("AZURE_CLIENT_ID", "")

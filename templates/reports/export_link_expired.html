@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Export Link Unavailable" %} — {{ site.product_name|default:"KoNote2" }}{% endblock %}
+
+{% block content %}
+<hgroup>
+    <h1>{% trans "Export Link Unavailable" %}</h1>
+    <p>{% trans "This download link can no longer be used." %}</p>
+</hgroup>
+
+{# Reason-specific messaging #}
+{% if reason == "expired" %}
+<article aria-label="{% trans 'Link expired' %}" role="alert" style="border-left: 4px solid var(--pico-color-yellow-500); padding: 1rem; margin-bottom: 1.5rem;">
+    <strong><span aria-hidden="true">&#x23F0;</span> {% trans "This link has expired" %}</strong>
+    <p style="margin-bottom: 0;">
+        {% blocktrans %}
+        Export download links are only valid for a limited time. This link has passed
+        its expiry date and can no longer be used to download the file.
+        {% endblocktrans %}
+    </p>
+</article>
+
+{% elif reason == "revoked" %}
+<article aria-label="{% trans 'Link revoked' %}" role="alert" style="border-left: 4px solid var(--pico-color-red-500); padding: 1rem; margin-bottom: 1.5rem;">
+    <strong><span aria-hidden="true">&#x1F6AB;</span> {% trans "This link has been revoked" %}</strong>
+    <p style="margin-bottom: 0;">
+        {% blocktrans %}
+        An administrator has revoked this download link. It is no longer valid and
+        cannot be used to access the exported data. If you believe this was done in
+        error, please contact your organisation's administrator.
+        {% endblocktrans %}
+    </p>
+</article>
+
+{% else %}
+{# reason == "missing" — file deleted from server (e.g., Railway restart) #}
+<article aria-label="{% trans 'File unavailable' %}" role="alert" style="border-left: 4px solid var(--pico-color-yellow-500); padding: 1rem; margin-bottom: 1.5rem;">
+    <strong><span aria-hidden="true">&#x1F4C1;</span> {% trans "Export file no longer available" %}</strong>
+    <p style="margin-bottom: 0;">
+        {% blocktrans %}
+        The export file is no longer available on the server. This can happen after
+        a system update or server restart. The download link was valid, but the
+        temporary file has been removed. Please create a new export.
+        {% endblocktrans %}
+    </p>
+</article>
+{% endif %}
+
+{# What to do next #}
+<article aria-label="{% trans 'Next steps' %}" style="margin-bottom: 1.5rem;">
+    <strong><span aria-hidden="true">&#x1F4A1;</span> {% trans "What to do next" %}</strong>
+    <p style="margin-bottom: 0;">
+        {% blocktrans %}
+        If you still need this data, you can create a new export from the Reports page.
+        Each new export will generate a fresh, time-limited download link. For security,
+        expired and revoked links cannot be reactivated.
+        {% endblocktrans %}
+    </p>
+</article>
+
+<a href="{% url 'reports:export_form' %}" role="button" class="secondary">
+    <span aria-hidden="true">&larr;</span> {% trans "Back to Reports" %}
+</a>
+{% endblock %}

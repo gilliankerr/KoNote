@@ -2,75 +2,113 @@
 
 ## Flagged
 
-- [ ] Choose Canadian hosting provider for pilot deployment — See `tasks/canadian-hosting-research.md`, `tasks/azure-deployment-guide.md` (HOST1)
+_Nothing flagged._
 
 ## Active Work
 
-_No active work. Ready for pilot testing._
+### Finish French Experience (v1.0 Requirement)
 
-## Roadmap — Prioritized Extensions
+French-speaking users must feel first-class. See `tasks/multilingual-strategy.md`. System UI, bilingual login, and language switcher are done (Phases 1A–1C).
 
-Based on usability review and expert panel analysis. See `tasks/usability-review-results.md` for full rationale.
+**Terminology + UX Audit**
+- [ ] Complete French defaults for all 24 terminology terms (I18N3)
+- [ ] Audit empty states, errors, dates, placeholders for French (I18N4a)
+- [ ] Test complete user journey in French (I18N4b)
 
-### Phase A: Market Access (High Priority)
+**Canadian Localization**
+- [ ] Postal code accepts both "A1A 1A1" and "A1A1A1" — normalize on save (I18N5)
+- [ ] Address labels use "Province or Territory" not "State" (I18N5a)
+- [ ] Phone fields accept multiple Canadian formats (I18N5b)
+- [ ] Verify date/currency formatting respects language locale (I18N5c)
 
-_All Phase A tasks complete._
+**i18n Reliability Hardening** — See `tasks/i18n-reliability-plan.md`
 
-### Phase B: Funder Reporting (High Priority)
+_Immediate — DONE:_
+- [x] Add `*.mo` to railway.json watchPatterns — 2026-02-05 (I18N-R1)
+- [x] Fix SafeLocaleMiddleware canary — now tests "Funder Report Export" — 2026-02-05 (I18N-R2)
 
-- [x] Report aggregation functions — count, avg, min, max by grouping — (RPT3)
-- [x] Demographic grouping in reports — age range, gender, geography — (RPT4)
-- [x] Outcome achievement rate calculation — % clients meeting target — (RPT5)
-- [x] Funder Report Template — draft export for funders (customise per funder) — (RPT6)
-- [x] Fiscal year date range filter — April-March for Canadian nonprofits — (RPT7)
+_Short-term:_
+- [ ] Create `check_translations` management command — verify French at startup/CI (I18N-R3)
+- [ ] Add git pre-commit hook — block commits where .po is newer than .mo (I18N-R4)
 
-### Phase C: Documentation for Open-Source Adoption (High Priority)
+_Medium-term:_
+- [ ] Build template string extraction script — detect untranslated `{% trans %}` strings (I18N-R5)
+- [ ] Create `update_translations` wrapper — extract, validate, compile, commit in one step (I18N-R6)
 
-See `tasks/documentation-improvement-plan.md` for full rationale.
+### Individual Client Export — PIPEDA Data Portability
 
-- [x] Create getting-started.md — complete local dev setup guide — (DOC8)
-- [x] Create security-operations.md — security tests, audit logs, key rotation — (DOC9)
-- [x] Enhance README Quick Start — add key generation commands — (DOC10)
-- [x] Add inline comments to .env.example — explain each variable — (DOC11)
+Clients have a legal right to their own data under PIPEDA. Higher priority than elevated export controls.
 
-**Phase C.2: Non-Developer Accessibility** — See `tasks/documentation-expert-review.md`
+- [ ] Create single-client export view (EXP2x)
+- [ ] Include all client data: info, notes, plans, metrics (EXP2y)
+- [ ] Generate PDF format option (EXP2z)
+- [ ] Add export button to client detail page (EXP2aa)
 
-- [x] Add "What You'll Need" pre-flight checklist to getting-started.md — (DOC12)
-- [x] Add "What just happened?" explanations after key generation steps — (DOC13)
-- [x] Add expected output examples showing what success looks like — (DOC14)
-- [x] Add glossary section: terminal, repository, migration, container — (DOC15)
-- [x] Create "Before You Enter Real Data" checkpoint document — (DOC16)
-- [x] Fix placeholders to obviously fake values like REPLACE_THIS — (DOC17)
+### Export Documentation + Cleanup
 
-### Phase E: Self-Service Registration (Medium Priority)
+- [ ] Document SecureExportLink lifecycle — how links are created, expire, get cleaned up (DOC-EXP1)
+- [ ] Create export runbook — troubleshooting, cron setup, common issues (DOC-EXP2)
+- [ ] Fix `{% trans %}` with HTML in `pdf_unavailable.html` (I18N-EXP2)
+- [ ] Wrap `ExportRecipientMixin` strings in `gettext_lazy()` for French (I18N-EXP3)
+- [ ] Extract `<strong>` from `{% blocktrans %}` in export/CMT templates (I18N-EXP4)
 
-Public sign-up forms for programs — parents register kids for sports, adults sign up for classes. See `tasks/self-service-registration-design.md` for full design.
+## Coming Up
 
-- [x] RegistrationLink model — shareable form config per program — (REG1)
-- [x] Public registration form view — mobile-friendly, no login required — (REG2)
-- [x] RegistrationSubmission model — pending entries awaiting review — (REG3)
-- [x] Submission review UI — approve/reject/merge duplicates — (REG4)
-- [x] Auto-approve option — skip staff review for low-risk programs — (REG5)
-- [x] Duplicate detection — match by email/phone, flag for merge — (REG6)
-- [x] Capacity limits and deadlines — close registration when full or past date — (REG7)
-- [x] Iframe embed support — agencies can embed form on their own website — (REG8)
+### Export Monitoring
 
-### Phase F: Staff Productivity (Medium Priority)
+Weekly accountability reports for admins. Requires working email configuration.
 
-See `tasks/note-follow-ups-design.md` for full design and rationale.
+- [ ] Create weekly export summary email command (EXP2u)
+- [ ] Document cron/scheduled task setup in runbook (EXP2w)
 
-- [x] Note follow-up dates — optional follow-up date on notes, shows on home page — (FU1)
+### Pre-Launch Checklist
 
-### Planned Extensions (Build When Requested)
+- [ ] Verify email is configured — needed for export notifications and password resets (OPS3)
+- [ ] Run full integration test pass — every role, every workflow (TEST3)
+- [ ] Test backup restore from a real database dump (OPS4)
+- [ ] Verify Railway deployment end-to-end with production-like config (OPS5)
 
-These features are designed but deferred until agencies request them. See expert panel rationale in `tasks/field-data-decision.md`.
+## Roadmap — Future Extensions
 
-- [ ] Field data collection integrations — KoBoToolbox, Forms, or other tools — (FIELD1)
-- [ ] CSV bulk client import — simpler alternative to tool-specific integrations — (IMP1)
+### Phase G: Agency Content Translation
+
+Build when agencies have custom programs/metrics they need in multiple languages. See `tasks/multilingual-strategy.md`.
+
+**G.1: Translation Infrastructure**
+- [ ] Create TranslatableMixin with `translations` JSONField (I18N10)
+- [ ] Add mixin to Program, MetricDefinition, PlanTemplate (I18N11)
+- [ ] Create Settings → Translations admin page (I18N12)
+- [ ] Update templates to display translated content (I18N13)
+
+**G.2: AI Translation Integration**
+- [ ] Create Settings → Integrations page for API keys (I18N14)
+- [ ] Add "Suggest translation" button with AI (I18N15)
+
+**G.3: Self-Service Languages**
+- [ ] Create Settings → Languages management page (I18N16)
+- [ ] Extend translation command for any target language (I18N17)
+
+### Bulk Import
+
+Build after secure export is stable. See `tasks/secure-export-import-plan.md` for design.
+
+- [ ] Create ImportBatch model for tracking (IMP1a)
+- [ ] Add import_batch FK to ClientFile model (IMP1b)
+- [ ] Create CSV upload form with validation (IMP1c)
+- [ ] Implement formula injection sanitisation (IMP1d)
+- [ ] Implement duplicate detection (IMP1e)
+- [ ] Create preview page showing what will be created (IMP1f)
+- [ ] Implement batch import with transaction wrapping (IMP1g)
+- [ ] Create rollback functionality — creations only, not updates (IMP1h)
+- [ ] Add audit logging for imports (IMP1i)
+- [ ] Create import history page for admins (IMP1j)
+- [ ] Document import validation rules (DOC-IMP1)
+
+### Other Planned Extensions
+
+- [ ] Field data collection integrations — KoBoToolbox, Forms, or other tools (FIELD1)
 
 ### Explicitly Out of Scope
-
-These features are intentionally excluded. See technical documentation for rationale.
 
 - ~~Calendar/scheduling~~ → Recommend Calendly, Google Calendar, Microsoft Bookings
 - ~~Full document storage~~ → Recommend Google Drive, SharePoint, Dropbox
@@ -79,22 +117,47 @@ These features are intentionally excluded. See technical documentation for ratio
 
 ## Parking Lot
 
-- [ ] Progress note encryption — encrypt clinical content (CLOUD Act protection) — (SEC1)
-- [ ] First-run setup wizard — Claude skill + import command — See `tasks/setup-wizard-design.md` (SETUP1)
-- [ ] Bulk operations for discharge, assign, export — (UX17)
+### Deployment Workflow Enhancements
+
+- [ ] Create Demo Account Directory page in admin settings (DEMO9)
+- [ ] Add `is_demo_context` to audit log entries (DEMO12)
+
+See [deployment workflow design](docs/plans/2026-02-05-deployment-workflow-design.md) for full details.
+
+### Privacy & Security
+
+- [ ] First-run setup wizard — guided initial configuration (SETUP1)
+- [ ] GDPR right to erasure UI — note: audit logs must be retained by design (GDPR1)
+- [ ] Encrypted search optimisation (search hash field) for 2000+ client lists (PERF1)
+- [ ] Bulk operations for discharge, assign (UX17)
 
 ## Recently Done
 
-- [x] Azure deployment guide — step-by-step for Canadian hosting — See `tasks/azure-deployment-guide.md` — 2026-02-04 (DOC20)
-- [x] Move old docs to archive folder — 2026-02-03 (DOC19)
-- [x] Create "Quick Start for Staff" training doc — 2026-02-03 (DOC18)
-- [x] Fix test suite configuration error — 2026-02-03 (TEST2)
-- [x] PIPEDA/PHIPA consent workflow — block note entry until client consent recorded — 2026-02-03 (PRIV1)
-- [x] Note follow-up dates on home page — 2026-02-03 (FU1)
-- [x] Add backup automation examples to docs — 2026-02-03 (OPS1)
-- [x] Add client search filters (program, status, date) — 2026-02-03 (UX19)
-- [x] Note auto-save / draft recovery — 2026-02-03 (UX21)
-- [x] Mobile responsiveness pass — 2026-02-03 (UI1)
-- [x] Add CSV export for all client data — 2026-02-03 (EXP1)
+- [x] i18n reliability flags — watchPatterns for .mo files, canary tests project string — 2026-02-05 (I18N-R1, I18N-R2)
+- [x] Phase 4: Elevated export controls — is_elevated flag, 10-min delay, admin email notifications, pending revocation — 2026-02-05 (EXP2q-t)
+- [x] Fix French translations not loading — add missing LOCALE_PATHS + fix EN/FR switcher styling — 2026-02-05 (I18N-FIX1)
+- [x] Export permission alignment — PM scoped exports, creator downloads, 35 tests, role matrix docs — 2026-02-05 (PERM1-10)
+- [x] Secure export foundation complete — security bug fix, audit logging, warnings, secure links, revocation — 2026-02-05 (EXP0a-p)
+- [x] Multilingual Phases 1A–1C — 636 French translations, bilingual login, [EN|FR] toggle — 2026-02-05 (I18N1-2b)
+- [x] Harden seed system — remove fragile guard, deduplicate data, add warnings — 2026-02-05 (SEED1)
+- [x] Progress note encryption + MFA documentation — 2026-02-05 (SEC1, SEC2)
+- [x] Deployment Workflow Phase 1 — demo/real data separation — 2026-02-05 (DEMO1-8)
 
 _Older completed tasks moved to [tasks/ARCHIVE.md](tasks/ARCHIVE.md)._
+
+---
+
+## What's Been Built (Reference)
+
+For detailed history, see `tasks/ARCHIVE.md`. Summary of completed work:
+
+| Area | What's Done |
+|------|-------------|
+| **Core app (Phases 1–8)** | Clients, plans, notes, events, charts, admin, security, UX |
+| **Secure export** | Bug fix, audit logging, warnings, secure links, permission alignment |
+| **French** | 636 system strings translated, bilingual login, language switcher |
+| **Reporting** | Funder reports, aggregation, demographics, fiscal year, PDF exports |
+| **Documentation** | Getting started, security ops, deployment guides (Azure, Railway, Elest.io) |
+| **Registration** | Self-service public forms with duplicate detection and capacity limits |
+| **Accessibility** | WCAG 2.2 AA — semantic HTML, colour contrast, aria attributes |
+| **Roadmap A–F** | Market access, funder reporting, docs, registration, staff productivity — all complete |

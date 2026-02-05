@@ -22,13 +22,13 @@ You are conducting a **security review** for KoNote2 Web, a Django-based nonprof
 
 **Critical — Read These First:**
 ```
-KoNote2/encryption.py
+konote/encryption.py
 apps/clients/models.py
-KoNote2/middleware/program_access.py
+konote/middleware/program_access.py
 apps/auth_app/views.py
 apps/audit/models.py
-KoNote2/middleware/audit.py
-KoNote2/settings/base.py
+konote/middleware/audit.py
+konote/settings/base.py
 ```
 
 **High Priority:**
@@ -38,7 +38,7 @@ apps/clients/views.py
 apps/notes/views.py
 apps/clients/forms.py
 apps/programs/models.py
-KoNote2/db_router.py
+konote/db_router.py
 ```
 
 **Medium Priority:**
@@ -83,7 +83,7 @@ Score each section based on the checklist in `tasks/security-review-plan.md`:
 Don't just review code — consider these attack vectors:
 
 1. **IDOR:** Can user in Program A access client in Program B?
-2. **Vertical escalation:** Can receptionist access staff features?
+2. **Vertical escalation:** Can front desk user access staff features?
 3. **Authentication bypass:** Session fixation, cookie tampering?
 4. **Encryption oracle:** Does `[decryption error]` leak information?
 5. **Audit bypass:** Can any action avoid logging?

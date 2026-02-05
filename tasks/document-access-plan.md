@@ -2,7 +2,7 @@
 
 **Status:** Draft for review
 **Created:** 2026-02-03
-**Purpose:** Enable counsellors to access client documents stored in external systems (SharePoint, Google Drive) from within KoNote2
+**Purpose:** Enable staff to access client documents stored in external systems (SharePoint, Google Drive) from within KoNote2
 
 ---
 
@@ -249,7 +249,7 @@ URL Template:
 ### Context Processor
 
 ```python
-# KoNote2/context_processors.py
+# konote/context_processors.py
 
 def document_storage(request):
     settings = get_cached_settings()

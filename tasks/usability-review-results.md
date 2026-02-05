@@ -37,8 +37,8 @@ Organizations can disable modules they don't use:
 Four clear roles map to common nonprofit structures:
 | Role | Typical Staff | Access |
 |------|--------------|--------|
-| Receptionist | Front desk, intake staff | View client info (read-only) |
-| Counsellor/Staff | Case workers, counsellors | Create/edit clients, notes, plans |
+| Front Desk | Front desk, intake staff | View client info (read-only) |
+| Direct Service | Case workers, direct service staff | Create/edit clients, notes, plans |
 | Program Manager | Team leads, supervisors | All above + manage program staff |
 | Admin | ED, operations manager | System settings only (no client data) |
 

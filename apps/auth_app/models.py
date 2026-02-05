@@ -6,7 +6,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 from django.utils import timezone
 
-from KoNote2.encryption import decrypt_field, encrypt_field
+from konote.encryption import decrypt_field, encrypt_field
 
 
 class UserManager(BaseUserManager):
@@ -34,9 +34,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     Roles:
         is_admin = True → system configuration (programs, users, settings) — no client data
-        UserProgramRole with role='program_manager' → all data in assigned programs
-        UserProgramRole with role='staff' → full client records in assigned programs
-        UserProgramRole with role='receptionist' → limited client info in assigned programs
+        UserProgramRole with role='program_manager' → Program Manager: all data in assigned programs
+        UserProgramRole with role='staff' → Direct Service: full client records in assigned programs
+        UserProgramRole with role='receptionist' → Front Desk: limited client info in assigned programs
     """
 
     # Identity
@@ -52,11 +52,21 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_admin = models.BooleanField(default=False, help_text="Full instance access.")
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False, help_text="Django admin access (rarely used).")
+    is_demo = models.BooleanField(
+        default=False,
+        help_text="Demo users see demo data only. Set at creation, never changed.",
+    )
 
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_login_at = models.DateTimeField(null=True, blank=True)
+
+    # Language preference (synced on login for multi-device roaming)
+    preferred_language = models.CharField(
+        max_length=10, default="", blank=True,
+        help_text="Stored on login. Empty = use cookie/session preference.",
+    )
 
     # GDPR readiness
     consent_given_at = models.DateTimeField(null=True, blank=True)
@@ -96,9 +106,10 @@ class Invite(models.Model):
     """
 
     ROLE_CHOICES = [
-        ("receptionist", "Receptionist"),
-        ("staff", "Counsellor"),
+        ("receptionist", "Front Desk"),
+        ("staff", "Direct Service"),
         ("program_manager", "Program Manager"),
+        ("executive", "Executive"),
         ("admin", "Administrator"),
     ]
 

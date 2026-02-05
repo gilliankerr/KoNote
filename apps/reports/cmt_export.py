@@ -176,6 +176,7 @@ def generate_cmt_data(
     date_from: date,
     date_to: date,
     fiscal_year_label: str | None = None,
+    user=None,
 ) -> dict[str, Any]:
     """
     Build the complete CMT data structure for a programme.
@@ -192,6 +193,8 @@ def generate_cmt_data(
         date_to: End of reporting period.
         fiscal_year_label: Optional label like "FY 2025-26". If not provided,
                           will be calculated from date_from.
+        user: Optional user for demo/real filtering. If provided, only clients
+              matching the user's demo status will be included.
 
     Returns:
         Dict with CMT report data structure ready for rendering.
@@ -217,6 +220,15 @@ def generate_cmt_data(
             status="enrolled",
         ).values_list("client_file_id", flat=True)
     )
+
+    # Security: Filter by user's demo status if user is provided
+    # Demo users can only see demo clients; real users only real clients
+    if user is not None:
+        if user.is_demo:
+            accessible_ids = set(ClientFile.objects.demo().values_list("pk", flat=True))
+        else:
+            accessible_ids = set(ClientFile.objects.real().values_list("pk", flat=True))
+        enrolled_client_ids = [cid for cid in enrolled_client_ids if cid in accessible_ids]
 
     # Count unique clients with activity in the period
     total_individuals_served = count_clients_by_program(

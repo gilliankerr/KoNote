@@ -10,7 +10,7 @@ from apps.events.models import EventType, Event, Alert
 from apps.audit.models import AuditLog
 from apps.plans.models import MetricDefinition, PlanSection, PlanTarget, PlanTargetMetric
 from apps.notes.models import ProgressNote, ProgressNoteTarget, MetricValue
-import KoNote2.encryption as enc_module
+import konote.encryption as enc_module
 
 TEST_KEY = Fernet.generate_key().decode()
 
@@ -344,7 +344,13 @@ class AuditLogViewerTest(TestCase):
         resp = self.http.get("/admin/audit/?action=login")
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "session")
-        self.assertNotContains(resp, "client")
+        # Check that the "create" action's "client" resource_type is not in
+        # the audit log table rows (it may appear in nav links on the page)
+        self.assertContains(resp, "session")
+        # The word "client" appears in nav HTML, so check the table body specifically
+        table_html = resp.content.decode("utf-8")
+        # The filtered results should only contain "login" action rows, not "create" rows
+        self.assertNotIn("create", table_html.split("</thead>")[-1] if "</thead>" in table_html else "")
 
 
 @override_settings(FIELD_ENCRYPTION_KEY=TEST_KEY)

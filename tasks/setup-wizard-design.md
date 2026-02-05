@@ -12,6 +12,19 @@ A consultant-assisted setup workflow that uses Claude to analyze agency document
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
+│  PHASE 0: Hosting Selection (Claude-Assisted)               │
+│                                                             │
+│  Questions:                                                 │
+│    • Does your funder require SOC 2 compliance?             │
+│    • Do you have staff comfortable with command line?       │
+│    • What's your monthly hosting budget?                    │
+│    • Do you need to demonstrate government references?      │
+│                                                             │
+│  Output: Recommended hosting provider + deployment guide    │
+│  Reference: tasks/canadian-hosting-research.md              │
+└─────────────────────────────────────────────────────────────┘
+                           ↓
+┌─────────────────────────────────────────────────────────────┐
 │  PHASE 1: Document Analysis (Claude Skill)                  │
 │                                                             │
 │  Inputs:                                                    │
@@ -68,6 +81,62 @@ A consultant-assisted setup workflow that uses Claude to analyze agency document
 - **User accounts** — Agency creates staff accounts through the existing User Management UI
 - **Custom metrics** — Created through a separate evaluation framework workflow
 - **Client data import** — Handled separately via CSV import (IMP1)
+
+---
+
+## Phase 0: Hosting Selection Guide
+
+Before deploying KoNote2, help the organisation choose the right hosting provider. See [canadian-hosting-research.md](canadian-hosting-research.md) for detailed research.
+
+### Decision Questions
+
+| Question | If Yes → | If No → |
+|----------|----------|---------|
+| Does your funder require SOC 2 compliance? | Canadian Web Hosting or WHC | Any option works |
+| Do you need to show government/university references? | CanSpace VPS | Any option works |
+| Are you comfortable with occasional command-line tasks? | VPS options are fine | FullHost PaaS (dashboard only) |
+| Is budget the top priority? | WHC ($18.50/mo) | FullHost ($23/mo) or CanSpace ($55/mo) |
+| Do you use Microsoft 365? | Azure AD SSO for MFA (free) | Consider TOTP if MFA needed |
+
+### Security Context
+
+**Current encryption status:** Client names and birth dates are encrypted. Progress notes are NOT encrypted at the application level (planned — see SEC1).
+
+**MFA options:**
+- **Azure AD SSO** (recommended): Free MFA through Microsoft 365 — agency configures in Azure Entra ID
+- **Local auth**: No built-in MFA yet — use for small agencies without M365, or enable TOTP when implemented (SEC2)
+
+See [mfa-implementation.md](mfa-implementation.md) for details.
+
+### Quick Recommendation Matrix
+
+| Situation | Provider | Monthly Cost | Management |
+|-----------|----------|--------------|------------|
+| **Simplest option** — no command line, web dashboard | FullHost Cloud PaaS | ~$23 CAD | Dashboard |
+| **Compliance-focused** — SOC 2, government references | CanSpace VPS | ~$55 CAD | SSH (Claude guides) |
+| **Budget-conscious** — some terminal comfort | WHC VPS | ~$19 CAD | SSH (Claude guides) |
+| **Strict compliance** — 13-year SOC 2 track record | Canadian Web Hosting | Contact | SSH (Claude guides) |
+
+### What Each Choice Means
+
+**FullHost Cloud PaaS (Recommended for most)**
+- One-click deploy using existing manifest
+- All management through web dashboard
+- No command line needed
+- Slightly higher cost, but simplest to maintain
+
+**VPS Options (CanSpace, WHC, Canadian Web Hosting)**
+- More control, lower cost
+- Requires occasional SSH commands (Claude provides exact commands)
+- Weekly backup downloads, monthly updates (~15 min/week)
+- Better compliance story for some funders
+
+### Deployment Guides
+
+Each hosting option has (or will have) a deployment guide:
+- [Azure Deployment Guide](azure-deployment-guide.md) — For agencies already using Azure
+- FullHost deployment — Built into the platform (one-click)
+- VPS deployment — Generic guide works for all VPS providers
 
 ---
 

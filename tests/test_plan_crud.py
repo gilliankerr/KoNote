@@ -13,7 +13,7 @@ from apps.plans.models import (
     PlanTargetRevision,
 )
 from apps.programs.models import Program, UserProgramRole
-import KoNote2.encryption as enc_module
+import konote.encryption as enc_module
 
 
 TEST_KEY = Fernet.generate_key().decode()
@@ -35,7 +35,7 @@ class PlanCRUDBaseTest(TestCase):
             username="manager", password="pass", display_name="Manager"
         )
         self.counsellor = User.objects.create_user(
-            username="counsellor", password="pass", display_name="Counsellor"
+            username="counsellor", password="pass", display_name="Direct Service"
         )
         self.other_manager = User.objects.create_user(
             username="other_mgr", password="pass", display_name="Other Manager"

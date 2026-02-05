@@ -30,6 +30,18 @@
     font-weight: 600;
 }
 
+/* ---- Demo mode banner ---- */
+.demo-banner {
+    background-color: #fef3c7; /* amber-100 */
+    border-bottom: 2px solid #f59e0b; /* amber-500 */
+    color: #92400e; /* amber-800 */
+    padding: 0.5rem 1rem;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
 /* ---- Branded focus style ---- */
 :focus-visible {
     outline: 2px solid var(--kn-primary);
@@ -433,52 +445,96 @@ body > nav a.nav-active {
     text-decoration: underline;
 }
 
-/* ---- Compact note rows ---- */
-.note-row {
-    padding: var(--kn-space-base);
-    border-bottom: 1px solid var(--kn-border-light);
-    transition: background var(--kn-transition);
+/* ---- Note cards ---- */
+.note-card {
+    padding: var(--kn-space-base) var(--kn-space-lg);
+    margin-bottom: var(--kn-space-sm);
+    border: 1px solid var(--kn-border-light);
+    border-radius: var(--kn-radius-card, 8px);
+    border-left: 4px solid var(--kn-primary);
+    background: var(--pico-background-color);
+    cursor: pointer;
+    transition: box-shadow var(--kn-transition), border-color var(--kn-transition);
 }
-.note-row:hover,
-.note-row:focus-within {
-    background: var(--kn-primary-subtle);
+.note-card:hover,
+.note-card:focus-within {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-color: var(--kn-primary);
 }
-.note-row:last-child {
-    border-bottom: none;
+.note-card:focus {
+    outline: 2px solid var(--kn-primary);
+    outline-offset: 2px;
 }
-.note-row-header {
+.note-card--cancelled {
+    opacity: 0.65;
+    border-left-color: var(--kn-danger-fg, #c0392b);
+}
+/* When collapsed back via HTMX, the inner wrapper is clickable */
+.note-card-inner {
+    cursor: pointer;
+}
+.note-card-header {
     display: flex;
     align-items: center;
     gap: var(--kn-space-sm);
     flex-wrap: wrap;
-    margin-bottom: var(--kn-space-xs);
-    font-size: 0.8125rem;
+    margin-bottom: 4px;
 }
-.note-row-header strong {
+.note-card-date {
+    font-weight: 600;
+    font-size: 0.9375rem;
     font-variant-numeric: tabular-nums;
+    color: var(--kn-text-primary, var(--pico-color));
 }
-.note-row-header .note-author {
-    color: var(--kn-text-secondary);
+.note-card-ago {
+    font-size: 0.8125rem;
+    color: var(--kn-text-muted, #888);
 }
-.note-row-text {
-    font-size: 0.875rem;
+.note-card-author {
+    font-size: 0.8125rem;
     color: var(--kn-text-secondary);
+    margin-bottom: var(--kn-space-xs);
+}
+.note-card-preview {
+    font-size: 0.9rem;
+    color: var(--kn-text-primary, var(--pico-color));
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    margin: 0;
+    margin: 0 0 var(--kn-space-sm) 0;
     line-height: 1.5;
 }
-.note-row-footer {
-    margin-top: var(--kn-space-sm);
-}
-.note-row-footer a {
+.note-card-reason {
     font-size: 0.8125rem;
-    color: var(--kn-primary);
+    color: var(--kn-text-muted, #888);
+    margin: 0 0 var(--kn-space-sm) 0;
+}
+.note-card-meta {
+    display: flex;
+    gap: var(--kn-space-sm);
+    flex-wrap: wrap;
+}
+.note-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--kn-neutral-bg, #eee);
+    color: var(--kn-neutral-fg, #555);
+}
+.note-chip--followup {
+    background: var(--kn-warning-bg);
+    color: var(--kn-warning-fg);
+}
+.note-chip--done {
+    background: var(--kn-success-bg);
+    color: var(--kn-success-fg);
 }
 
-/* ---- Filter bar (collapsible, open by default) ---- */
+/* ---- Filter bar (collapsed by default, opens when filters active) ---- */
 details.filter-bar,
 details.search-filters-panel {
     background: var(--kn-primary-subtle);
@@ -624,6 +680,90 @@ details.search-filters-panel[open] summary {
     font-size: 0.9rem;
     margin-top: -1rem;
     margin-bottom: 1.5rem;
+}
+
+/* Bilingual tagline on first visit (no language cookie) */
+.login-tagline-bilingual {
+    text-align: center;
+    color: var(--kn-text-muted);
+    font-size: 0.9rem;
+    margin-top: -1rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+.login-tagline-bilingual span {
+    font-style: italic;
+    opacity: 0.85;
+}
+
+/* Language chooser — two equal-prominence buttons on first visit */
+.lang-chooser {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+.lang-chooser form {
+    margin: 0;
+}
+.lang-chooser-btn {
+    padding: 0.5rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: 2px solid var(--kn-primary);
+    background: transparent;
+    color: var(--kn-primary);
+    border-radius: var(--kn-radius-card, 8px);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.lang-chooser-btn:hover,
+.lang-chooser-btn:focus-visible {
+    background: var(--kn-primary);
+    color: #fff;
+}
+
+/* Compact [EN | FR] toggle — login page and navbar */
+.lang-switcher {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+}
+.lang-switcher strong {
+    color: var(--kn-primary);
+    font-weight: 700;
+}
+.lang-divider {
+    color: var(--kn-text-muted);
+    user-select: none;
+}
+.lang-switcher-form {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    /* Prevent Pico CSS from expanding the form to full width */
+    width: auto;
+}
+.lang-switcher-link {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font-size: inherit;
+    color: var(--kn-text-muted);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    /* Prevent Pico CSS from expanding the button to full width */
+    width: auto;
+    display: inline;
+}
+.lang-switcher-link:hover,
+.lang-switcher-link:focus-visible {
+    color: var(--kn-primary);
 }
 
 /* Secondary buttons — ensure text is readable on dark gray background */
@@ -774,7 +914,7 @@ label.checkbox-item input[type="checkbox"] {
     font-weight: 500;
 }
 
-/* ---- Quick info row (receptionist high-frequency data) ---- */
+/* ---- Quick info row (front desk high-frequency data) ---- */
 .quick-info-section {
     margin-bottom: var(--kn-space-base);
 }
@@ -816,7 +956,7 @@ label.checkbox-item input[type="checkbox"] {
     }
 }
 
-/* ---- Compact info grid (receptionist view) ---- */
+/* ---- Compact info grid (front desk view) ---- */
 .info-grid-compact {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -997,6 +1137,9 @@ article[aria-label="notification"].fading-out {
     article[aria-label="notification"].fading-out {
         animation: none;
         opacity: 0;
+    }
+    .note-card {
+        transition: none;
     }
 }
 
@@ -1362,9 +1505,12 @@ article[aria-label="notification"].fading-out {
     }
 }
 
-/* ---- Note rows mobile ---- */
+/* ---- Note cards mobile ---- */
 @media (max-width: 480px) {
-    .note-row-header {
+    .note-card {
+        padding: var(--kn-space-sm) var(--kn-space-base);
+    }
+    .note-card-header {
         flex-direction: column;
         align-items: flex-start;
         gap: var(--kn-space-xs);

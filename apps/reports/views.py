@@ -1,16 +1,26 @@
-"""Report views — aggregate metric CSV export, CMT export, and client analysis charts."""
+"""Report views — aggregate metric CSV export, CMT export, client analysis charts, and secure links."""
 import csv
+import io
 import json
-from datetime import datetime, time
+import logging
+import os
+import uuid
+from datetime import datetime, time, timedelta
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseForbidden
+from django.core.mail import send_mail
+from django.db.models import F, Q
+from django.http import FileResponse, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
-from django.db.models import Q
+from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils import timezone
 
 from apps.audit.models import AuditLog
+from apps.auth_app.models import User
 from apps.clients.models import ClientFile, ClientProgramEnrolment
+from apps.clients.views import get_client_queryset
 from apps.notes.models import MetricValue, ProgressNote
 from apps.plans.models import PlanTarget, PlanTargetMetric
 from apps.programs.models import UserProgramRole
@@ -18,6 +28,127 @@ from .achievements import get_achievement_summary, format_achievement_summary
 from .cmt_export import generate_cmt_data, generate_cmt_csv_rows
 from .demographics import aggregate_by_demographic, get_age_range, parse_grouping_choice
 from .forms import CMTExportForm, ClientDataExportForm, MetricExportForm
+from .models import SecureExportLink
+from .utils import can_create_export, get_manageable_programs
+
+logger = logging.getLogger(__name__)
+
+
+def _get_client_ip(request):
+    """
+    Extract client IP address from request, handling reverse proxies.
+    """
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    if x_forwarded_for:
+        return x_forwarded_for.split(",")[0].strip()
+    return request.META.get("REMOTE_ADDR", "")
+
+
+def _notify_admins_elevated_export(link, request):
+    """
+    Send email notification to all active admins about an elevated export.
+
+    Elevated exports (100+ clients or includes notes) have a delay before
+    download is available. This notification gives admins time to review
+    and revoke if needed.
+
+    Fails gracefully — logs a warning if email sending fails but does not
+    block the export creation.
+    """
+    admins = User.objects.filter(is_admin=True, is_active=True)
+    admin_emails = [u.email for u in admins if u.email]
+    if not admin_emails:
+        logger.warning("No admin email addresses found for elevated export notification (link %s)", link.id)
+        return
+
+    manage_url = request.build_absolute_uri(
+        reverse("reports:manage_export_links")
+    )
+
+    context = {
+        "link": link,
+        "creator_name": link.created_by.display_name,
+        "creator_email": link.created_by.email or "no email on file",
+        "manage_url": manage_url,
+        "available_at": link.available_at,
+        "delay_minutes": getattr(settings, "ELEVATED_EXPORT_DELAY_MINUTES", 10),
+    }
+
+    subject = f"Elevated Export Alert — {link.client_count} clients"
+    text_body = render_to_string("reports/email/elevated_export_alert.txt", context)
+    html_body = render_to_string("reports/email/elevated_export_alert.html", context)
+
+    try:
+        send_mail(
+            subject=subject,
+            message=text_body,
+            html_message=html_body,
+            from_email=None,  # Uses DEFAULT_FROM_EMAIL
+            recipient_list=admin_emails,
+        )
+        SecureExportLink.objects.filter(pk=link.pk).update(
+            admin_notified_at=timezone.now()
+        )
+    except Exception:
+        logger.warning(
+            "Failed to send elevated export notification for link %s",
+            link.id,
+            exc_info=True,
+        )
+
+
+def _save_export_and_create_link(request, content, filename, export_type,
+                                  client_count, includes_notes, recipient,
+                                  filters_dict=None):
+    """
+    Save export content to a temp file and create a SecureExportLink.
+
+    Args:
+        request: The HTTP request (for user info).
+        content: File content — str for CSV, bytes for PDF.
+        filename: Display filename for downloads (e.g., "export_2026-02-05.csv").
+        export_type: One of "client_data", "metrics", "cmt".
+        client_count: Number of clients in the export.
+        includes_notes: Whether clinical note content is included.
+        recipient: Who is receiving the data (from ExportRecipientMixin).
+        filters_dict: Optional dict of filter parameters for audit.
+
+    Returns:
+        SecureExportLink instance.
+    """
+    export_dir = settings.SECURE_EXPORT_DIR
+    os.makedirs(export_dir, exist_ok=True)
+
+    link_id = uuid.uuid4()
+    safe_filename = f"{link_id}_{filename}"
+    file_path = os.path.join(export_dir, safe_filename)
+
+    # Write content to file
+    mode = "wb" if isinstance(content, bytes) else "w"
+    encoding = None if isinstance(content, bytes) else "utf-8"
+    with open(file_path, mode, encoding=encoding) as f:
+        f.write(content)
+
+    expiry_hours = getattr(settings, "SECURE_EXPORT_LINK_EXPIRY_HOURS", 24)
+    is_elevated = client_count >= 100 or includes_notes
+    link = SecureExportLink.objects.create(
+        id=link_id,
+        created_by=request.user,
+        expires_at=timezone.now() + timedelta(hours=expiry_hours),
+        export_type=export_type,
+        filters_json=json.dumps(filters_dict or {}),
+        client_count=client_count,
+        includes_notes=includes_notes,
+        recipient=recipient,
+        filename=filename,
+        file_path=file_path,
+        is_elevated=is_elevated,
+    )
+
+    if is_elevated:
+        _notify_admins_elevated_export(link, request)
+
+    return link
 
 
 def _build_demographic_map(metric_values, grouping_type, grouping_field, as_of_date):
@@ -108,15 +239,17 @@ def export_form(request):
     """
     GET  — display the export filter form.
     POST — validate, query metric values, and return a CSV download.
+
+    Access: admin (any program) or program_manager (their programs only).
     """
-    if not request.user.is_admin:
+    if not can_create_export(request.user, "metrics"):
         return HttpResponseForbidden("You do not have permission to access this page.")
 
     if request.method != "POST":
-        form = MetricExportForm()
+        form = MetricExportForm(user=request.user)
         return render(request, "reports/export_form.html", {"form": form})
 
-    form = MetricExportForm(request.POST)
+    form = MetricExportForm(request.POST, user=request.user)
     if not form.is_valid():
         return render(request, "reports/export_form.html", {"form": form})
 
@@ -130,9 +263,12 @@ def export_form(request):
     # Parse the grouping choice
     grouping_type, grouping_field = parse_grouping_choice(group_by_value)
 
-    # Find clients enrolled in the selected programme
+    # Find clients matching user's demo status enrolled in the selected programme
+    # Security: Demo users can only export demo clients; real users only real clients
+    accessible_client_ids = get_client_queryset(request.user).values_list("pk", flat=True)
     client_ids = ClientProgramEnrolment.objects.filter(
         program=program, status="enrolled",
+        client_file_id__in=accessible_client_ids,
     ).values_list("client_file_id", flat=True)
 
     # Build date-aware boundaries
@@ -215,85 +351,110 @@ def export_form(request):
         )
 
     export_format = form.cleaned_data["format"]
+    recipient = form.get_recipient_display()
+
+    filters_dict = {
+        "program": program.name,
+        "metrics": [m.name for m in selected_metrics],
+        "date_from": str(date_from),
+        "date_to": str(date_to),
+    }
+    if grouping_type != "none":
+        filters_dict["grouped_by"] = grouping_label
 
     if export_format == "pdf":
         from .pdf_views import generate_funder_pdf
-        return generate_funder_pdf(
+        pdf_response = generate_funder_pdf(
             request, program, selected_metrics,
             date_from, date_to, rows, unique_clients,
             grouping_type=grouping_type,
             grouping_label=grouping_label,
             achievement_summary=achievement_summary,
         )
+        safe_name = program.name.replace(" ", "_").replace("/", "-")
+        filename = f"funder_report_{safe_name}_{date_from}_{date_to}.pdf"
+        content = pdf_response.content
+    else:
+        # Build CSV in memory buffer (not directly into HttpResponse)
+        csv_buffer = io.StringIO()
+        writer = csv.writer(csv_buffer)
+        # Summary header rows (prefixed with # so spreadsheet apps treat them as comments)
+        writer.writerow([f"# Programme: {program.name}"])
+        writer.writerow([f"# Date Range: {date_from} to {date_to}"])
+        writer.writerow([f"# Total Clients: {len(unique_clients)}"])
+        writer.writerow([f"# Total Data Points: {len(rows)}"])
+        if grouping_type != "none":
+            writer.writerow([f"# Grouped By: {grouping_label}"])
 
-    # Build CSV response
-    response = HttpResponse(content_type="text/csv")
-    filename = f"metric_export_{program.name.replace(' ', '_')}_{date_from}_{date_to}.csv"
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
-
-    writer = csv.writer(response)
-    # Summary header rows (prefixed with # so spreadsheet apps treat them as comments)
-    writer.writerow([f"# Programme: {program.name}"])
-    writer.writerow([f"# Date Range: {date_from} to {date_to}"])
-    writer.writerow([f"# Total Clients: {len(unique_clients)}"])
-    writer.writerow([f"# Total Data Points: {len(rows)}"])
-    if grouping_type != "none":
-        writer.writerow([f"# Grouped By: {grouping_label}"])
-
-    # Achievement rate summary if requested
-    if achievement_summary:
-        writer.writerow([])  # blank separator
-        writer.writerow(["# ===== ACHIEVEMENT RATE SUMMARY ====="])
-        if achievement_summary["total_clients"] > 0:
-            writer.writerow([
-                f"# Overall: {achievement_summary['clients_met_any_target']} of "
-                f"{achievement_summary['total_clients']} clients "
-                f"({achievement_summary['overall_rate']}%) met at least one target"
-            ])
-        else:
-            writer.writerow(["# No client data available for achievement calculation"])
-
-        for metric in achievement_summary.get("by_metric", []):
-            if metric["has_target"]:
+        # Achievement rate summary if requested
+        if achievement_summary:
+            writer.writerow([])  # blank separator
+            writer.writerow(["# ===== ACHIEVEMENT RATE SUMMARY ====="])
+            if achievement_summary["total_clients"] > 0:
                 writer.writerow([
-                    f"# {metric['metric_name']}: {metric['clients_met_target']} of "
-                    f"{metric['total_clients']} clients ({metric['achievement_rate']}%) "
-                    f"met target of {metric['target_value']}"
+                    f"# Overall: {achievement_summary['clients_met_any_target']} of "
+                    f"{achievement_summary['total_clients']} clients "
+                    f"({achievement_summary['overall_rate']}%) met at least one target"
+                ])
+            else:
+                writer.writerow(["# No client data available for achievement calculation"])
+
+            for metric in achievement_summary.get("by_metric", []):
+                if metric["has_target"]:
+                    writer.writerow([
+                        f"# {metric['metric_name']}: {metric['clients_met_target']} of "
+                        f"{metric['total_clients']} clients ({metric['achievement_rate']}%) "
+                        f"met target of {metric['target_value']}"
+                    ])
+                else:
+                    writer.writerow([
+                        f"# {metric['metric_name']}: {metric['total_clients']} clients "
+                        "(no target defined)"
+                    ])
+
+        writer.writerow([])  # blank separator
+
+        # Column headers — include demographic column if grouping enabled
+        if grouping_type != "none":
+            writer.writerow([grouping_label, "Client Record ID", "Metric Name", "Value", "Date", "Author"])
+        else:
+            writer.writerow(["Client Record ID", "Metric Name", "Value", "Date", "Author"])
+
+        for row in rows:
+            if grouping_type != "none":
+                writer.writerow([
+                    row.get("demographic_group", "Unknown"),
+                    row["record_id"],
+                    row["metric_name"],
+                    row["value"],
+                    row["date"],
+                    row["author"],
                 ])
             else:
                 writer.writerow([
-                    f"# {metric['metric_name']}: {metric['total_clients']} clients "
-                    "(no target defined)"
+                    row["record_id"],
+                    row["metric_name"],
+                    row["value"],
+                    row["date"],
+                    row["author"],
                 ])
 
-    writer.writerow([])  # blank separator
+        filename = f"metric_export_{program.name.replace(' ', '_')}_{date_from}_{date_to}.csv"
+        content = csv_buffer.getvalue()
 
-    # Column headers — include demographic column if grouping enabled
-    if grouping_type != "none":
-        writer.writerow([grouping_label, "Client Record ID", "Metric Name", "Value", "Date", "Author"])
-    else:
-        writer.writerow(["Client Record ID", "Metric Name", "Value", "Date", "Author"])
+    # Save to file and create secure download link
+    link = _save_export_and_create_link(
+        request=request,
+        content=content,
+        filename=filename,
+        export_type="metrics",
+        client_count=len(unique_clients),
+        includes_notes=False,
+        recipient=recipient,
+        filters_dict=filters_dict,
+    )
 
-    for row in rows:
-        if grouping_type != "none":
-            writer.writerow([
-                row.get("demographic_group", "Unknown"),
-                row["record_id"],
-                row["metric_name"],
-                row["value"],
-                row["date"],
-                row["author"],
-            ])
-        else:
-            writer.writerow([
-                row["record_id"],
-                row["metric_name"],
-                row["value"],
-                row["date"],
-                row["author"],
-            ])
-
-    # Audit log
+    # Audit log with recipient tracking
     audit_metadata = {
         "program": program.name,
         "metrics": [m.name for m in selected_metrics],
@@ -301,6 +462,8 @@ def export_form(request):
         "date_to": str(date_to),
         "total_clients": len(unique_clients),
         "total_data_points": len(rows),
+        "recipient": recipient,
+        "secure_link_id": str(link.id),
     }
     if grouping_type != "none":
         audit_metadata["grouped_by"] = grouping_label
@@ -314,20 +477,35 @@ def export_form(request):
         user_display=request.user.display_name,
         action="export",
         resource_type="metric_report",
+        ip_address=_get_client_ip(request),
         metadata=audit_metadata,
     )
 
-    return response
+    download_url = request.build_absolute_uri(
+        reverse("reports:download_export", args=[link.id])
+    )
+    return render(request, "reports/export_link_created.html", {
+        "link": link,
+        "download_url": download_url,
+    })
 
 
 def _get_client_or_403(request, client_id):
     """Return client if user has access via program roles, otherwise None.
+
+    Security: Verifies client's demo status matches user's demo status.
+    Demo users can only view demo clients; real users can only view real clients.
 
     Admins without program roles cannot access client data — consistent with
     the RBAC model where admin-only users manage system config, not client records.
     """
     client = get_object_or_404(ClientFile, pk=client_id)
     user = request.user
+
+    # Security: Demo/real data separation - user can only see clients matching their demo status
+    if client.is_demo != user.is_demo:
+        return None
+
     user_program_ids = set(
         UserProgramRole.objects.filter(user=user, status="active")
         .values_list("program_id", flat=True)
@@ -415,6 +593,8 @@ def cmt_export_form(request):
     GET  — display the CMT export form.
     POST — generate and return the CMT-formatted report.
 
+    Access: admin (any program) or program_manager (their programs only).
+
     CMT reports are structured for United Way Canada's funder reporting
     requirements, including:
     - Organisation and programme information
@@ -422,14 +602,14 @@ def cmt_export_form(request):
     - Age demographics (CMT standard categories)
     - Outcome achievement rates
     """
-    if not request.user.is_admin:
+    if not can_create_export(request.user, "cmt"):
         return HttpResponseForbidden("You do not have permission to access this page.")
 
     if request.method != "POST":
-        form = CMTExportForm()
+        form = CMTExportForm(user=request.user)
         return render(request, "reports/cmt_export_form.html", {"form": form})
 
-    form = CMTExportForm(request.POST)
+    form = CMTExportForm(request.POST, user=request.user)
     if not form.is_valid():
         return render(request, "reports/cmt_export_form.html", {"form": form})
 
@@ -440,20 +620,58 @@ def cmt_export_form(request):
     export_format = form.cleaned_data["format"]
 
     # Generate CMT data
+    # Security: Pass user for demo/real filtering
     cmt_data = generate_cmt_data(
         program,
         date_from=date_from,
         date_to=date_to,
         fiscal_year_label=fiscal_year_label,
+        user=request.user,
     )
 
-    # Audit log
+    recipient = form.get_recipient_display()
+    safe_name = program.name.replace(" ", "_").replace("/", "-")
+
+    if export_format == "pdf":
+        from .pdf_views import generate_cmt_pdf
+        pdf_response = generate_cmt_pdf(request, cmt_data)
+        filename = f"CMT_Report_{safe_name}_{fiscal_year_label.replace(' ', '_')}.pdf"
+        content = pdf_response.content
+    else:
+        # Build CSV in memory buffer
+        csv_buffer = io.StringIO()
+        writer = csv.writer(csv_buffer)
+        csv_rows = generate_cmt_csv_rows(cmt_data)
+        for row in csv_rows:
+            writer.writerow(row)
+        filename = f"CMT_Report_{safe_name}_{fiscal_year_label.replace(' ', '_')}.csv"
+        content = csv_buffer.getvalue()
+
+    # Save to file and create secure download link
+    link = _save_export_and_create_link(
+        request=request,
+        content=content,
+        filename=filename,
+        export_type="cmt",
+        client_count=cmt_data.get("total_individuals_served", 0),
+        includes_notes=False,
+        recipient=recipient,
+        filters_dict={
+            "program": program.name,
+            "fiscal_year": fiscal_year_label,
+            "date_from": str(date_from),
+            "date_to": str(date_to),
+        },
+    )
+
+    # Audit log with recipient tracking
     AuditLog.objects.using("audit").create(
         event_timestamp=timezone.now(),
         user_id=request.user.pk,
         user_display=request.user.display_name,
         action="export",
         resource_type="cmt_report",
+        ip_address=_get_client_ip(request),
         metadata={
             "program": program.name,
             "fiscal_year": fiscal_year_label,
@@ -461,25 +679,18 @@ def cmt_export_form(request):
             "date_to": str(date_to),
             "format": export_format,
             "total_individuals_served": cmt_data["total_individuals_served"],
+            "recipient": recipient,
+            "secure_link_id": str(link.id),
         },
     )
 
-    if export_format == "pdf":
-        from .pdf_views import generate_cmt_pdf
-        return generate_cmt_pdf(request, cmt_data)
-
-    # Generate CSV response
-    response = HttpResponse(content_type="text/csv")
-    safe_name = program.name.replace(" ", "_").replace("/", "-")
-    filename = f"CMT_Report_{safe_name}_{fiscal_year_label.replace(' ', '_')}.csv"
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
-
-    writer = csv.writer(response)
-    csv_rows = generate_cmt_csv_rows(cmt_data)
-    for row in csv_rows:
-        writer.writerow(row)
-
-    return response
+    download_url = request.build_absolute_uri(
+        reverse("reports:download_export", args=[link.id])
+    )
+    return render(request, "reports/export_link_created.html", {
+        "link": link,
+        "download_url": download_url,
+    })
 
 
 @login_required
@@ -510,11 +721,23 @@ def client_data_export(request):
 
     if request.method != "POST":
         form = ClientDataExportForm()
-        return render(request, "reports/client_data_export_form.html", {"form": form})
+        # Show accessible client count for preview
+        accessible_clients = get_client_queryset(request.user)
+        total_client_count = accessible_clients.count()
+        return render(request, "reports/client_data_export_form.html", {
+            "form": form,
+            "total_client_count": total_client_count,
+        })
 
     form = ClientDataExportForm(request.POST)
     if not form.is_valid():
-        return render(request, "reports/client_data_export_form.html", {"form": form})
+        # Preserve client count on validation failure
+        accessible_clients = get_client_queryset(request.user)
+        total_client_count = accessible_clients.count()
+        return render(request, "reports/client_data_export_form.html", {
+            "form": form,
+            "total_client_count": total_client_count,
+        })
 
     # Get filter options
     program = form.cleaned_data.get("program")
@@ -523,8 +746,9 @@ def client_data_export(request):
     include_enrolments = form.cleaned_data.get("include_enrolments", True)
     include_consent = form.cleaned_data.get("include_consent", True)
 
-    # Build base queryset
-    clients_qs = ClientFile.objects.all()
+    # Build base queryset — filter by user's demo status for security
+    # Security: Demo users can only export demo clients; real users only real clients
+    clients_qs = get_client_queryset(request.user)
 
     # Apply status filter
     if status_filter:
@@ -558,16 +782,14 @@ def client_data_export(request):
             .order_by("group__sort_order", "sort_order")
         )
 
-    # Build CSV response
-    response = HttpResponse(content_type="text/csv")
+    # Build CSV in memory buffer
+    csv_buffer = io.StringIO()
+    writer = csv.writer(csv_buffer)
     export_date = timezone.now().strftime("%Y-%m-%d")
     filename = f"client_data_export_{export_date}.csv"
     if program:
         safe_name = program.name.replace(" ", "_").replace("/", "-")
         filename = f"client_data_export_{safe_name}_{export_date}.csv"
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
-
-    writer = csv.writer(response)
 
     # Summary header rows
     writer.writerow([f"# Client Data Export"])
@@ -668,15 +890,17 @@ def client_data_export(request):
 
         writer.writerow(row)
 
-    # Audit log
-    AuditLog.objects.using("audit").create(
-        event_timestamp=timezone.now(),
-        user_id=request.user.pk,
-        user_display=request.user.display_name,
-        action="export",
-        resource_type="client_data",
-        metadata={
-            "total_clients": len(clients),
+    # Save to file and create secure download link
+    recipient = form.get_recipient_display()
+    link = _save_export_and_create_link(
+        request=request,
+        content=csv_buffer.getvalue(),
+        filename=filename,
+        export_type="client_data",
+        client_count=len(clients),
+        includes_notes=False,
+        recipient=recipient,
+        filters_dict={
             "program_filter": program.name if program else None,
             "status_filter": status_filter or None,
             "include_custom_fields": include_custom_fields,
@@ -685,4 +909,194 @@ def client_data_export(request):
         },
     )
 
+    # Audit log with recipient tracking
+    AuditLog.objects.using("audit").create(
+        event_timestamp=timezone.now(),
+        user_id=request.user.pk,
+        user_display=request.user.display_name,
+        action="export",
+        resource_type="client_data",
+        ip_address=_get_client_ip(request),
+        metadata={
+            "total_clients": len(clients),
+            "program_filter": program.name if program else None,
+            "status_filter": status_filter or None,
+            "include_custom_fields": include_custom_fields,
+            "include_enrolments": include_enrolments,
+            "include_consent": include_consent,
+            "recipient": recipient,
+            "secure_link_id": str(link.id),
+        },
+    )
+
+    download_url = request.build_absolute_uri(
+        reverse("reports:download_export", args=[link.id])
+    )
+    return render(request, "reports/export_link_created.html", {
+        "link": link,
+        "download_url": download_url,
+    })
+
+
+# ─── Secure link views ──────────────────────────────────────────────
+
+
+@login_required
+def download_export(request, link_id):
+    """
+    Serve an export file if the secure link is still valid.
+
+    The export creator can download their own link. Admins can download
+    any link (for oversight and client_data_export which only admin creates).
+    Every download is logged with who actually downloaded the file.
+    """
+    link = get_object_or_404(SecureExportLink, id=link_id)
+
+    # Permission: creator can download their own export, admin can download any
+    can_download = (request.user == link.created_by) or request.user.is_admin
+    if not can_download:
+        return HttpResponseForbidden("You do not have permission to download this export.")
+
+    # Check link validity (revoked / expired)
+    if not link.is_valid():
+        reason = "revoked" if link.revoked else "expired"
+        return render(request, "reports/export_link_expired.html", {
+            "reason": reason,
+        })
+
+    # Elevated exports have a delay before download is available
+    if link.is_elevated and not link.is_available:
+        return render(request, "reports/export_link_pending.html", {
+            "link": link,
+            "available_at": link.available_at,
+        })
+
+    # Check file exists separately (Railway ephemeral storage may lose files)
+    if not link.file_exists:
+        return render(request, "reports/export_link_expired.html", {
+            "reason": "missing",
+        })
+
+    # Path traversal defence — verify file is within SECURE_EXPORT_DIR
+    real_path = os.path.realpath(link.file_path)
+    real_export_dir = os.path.realpath(settings.SECURE_EXPORT_DIR)
+    if not real_path.startswith(real_export_dir + os.sep):
+        return HttpResponseForbidden("Invalid file path.")
+
+    # Atomic update to prevent race condition on download_count
+    updated = SecureExportLink.objects.filter(pk=link.pk).update(
+        download_count=F("download_count") + 1,
+        last_downloaded_at=timezone.now(),
+        last_downloaded_by=request.user,
+    )
+
+    # Audit log the download (separate from creation audit)
+    AuditLog.objects.using("audit").create(
+        event_timestamp=timezone.now(),
+        user_id=request.user.pk,
+        user_display=request.user.display_name,
+        action="export",
+        resource_type="export_download",
+        ip_address=_get_client_ip(request),
+        metadata={
+            "link_id": str(link.id),
+            "created_by": link.created_by.display_name,
+            "export_type": link.export_type,
+            "client_count": link.client_count,
+        },
+    )
+
+    # Serve file — FileResponse handles proper streaming and cleanup
+    response = FileResponse(
+        open(link.file_path, "rb"),
+        as_attachment=True,
+        filename=link.filename,
+    )
     return response
+
+
+@login_required
+def manage_export_links(request):
+    """
+    Admin view: list all active and recent secure export links.
+
+    Shows link status, download counts, and revocation controls.
+    """
+    if not request.user.is_admin:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+
+    # Show active links + recently expired (last 7 days)
+    cutoff = timezone.now() - timedelta(days=7)
+    links = SecureExportLink.objects.filter(
+        created_at__gte=cutoff,
+    ).select_related("created_by", "last_downloaded_by", "revoked_by")
+
+    # Identify pending elevated exports (still in delay window, not revoked/expired)
+    pending_elevated = [
+        link for link in links
+        if link.is_elevated and not link.revoked
+        and not link.is_available
+        and link.is_valid()
+    ]
+
+    return render(request, "reports/manage_export_links.html", {
+        "links": links,
+        "pending_elevated": pending_elevated,
+    })
+
+
+@login_required
+def revoke_export_link(request, link_id):
+    """
+    Admin action: revoke a secure export link so it can no longer be downloaded.
+
+    POST only. Uses Post/Redirect/Get to avoid resubmit-on-refresh.
+    After revocation, the file is also deleted from disk.
+    """
+    from django.contrib import messages
+    from django.http import HttpResponseNotAllowed
+    from django.shortcuts import redirect
+
+    if not request.user.is_admin:
+        return HttpResponseForbidden("You do not have permission to revoke export links.")
+
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    link = get_object_or_404(SecureExportLink, id=link_id)
+
+    if link.revoked:
+        messages.info(request, "This link was already revoked.")
+        return redirect("reports:manage_export_links")
+
+    # Revoke the link
+    link.revoked = True
+    link.revoked_by = request.user
+    link.revoked_at = timezone.now()
+    link.save(update_fields=["revoked", "revoked_by", "revoked_at"])
+
+    # Delete the file from disk
+    if link.file_path and os.path.exists(link.file_path):
+        try:
+            os.remove(link.file_path)
+        except OSError:
+            pass  # File gone is acceptable — link is already revoked
+
+    # Audit log the revocation
+    AuditLog.objects.using("audit").create(
+        event_timestamp=timezone.now(),
+        user_id=request.user.pk,
+        user_display=request.user.display_name,
+        action="update",
+        resource_type="export_link_revoked",
+        ip_address=_get_client_ip(request),
+        metadata={
+            "link_id": str(link.id),
+            "created_by": link.created_by.display_name,
+            "export_type": link.export_type,
+            "client_count": link.client_count,
+        },
+    )
+
+    messages.success(request, "Export link revoked successfully.")
+    return redirect("reports:manage_export_links")

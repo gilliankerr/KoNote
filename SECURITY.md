@@ -24,7 +24,7 @@ All personally identifiable information (PII) is encrypted at rest using **Ferne
 
 **Program-scoped access:** Users only see clients enrolled in their assigned programs.
 
-**Role hierarchy:** `receptionist` < `staff` < `program_manager`
+**Role hierarchy:** `front_desk` < `staff` < `program_manager`
 
 **Enforcement layers:**
 1. **Middleware** (`ProgramAccessMiddleware`) — checks program overlap at URL level

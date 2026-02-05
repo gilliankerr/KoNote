@@ -1,45 +1,40 @@
 """Forms for progress notes."""
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from .models import ProgressNote, ProgressNoteTemplate, ProgressNoteTemplateSection
 
 
-class QuickNoteForm(forms.ModelForm):
+class QuickNoteForm(forms.Form):
     """Simple form for quick notes — just a text area."""
 
+    notes_text = forms.CharField(
+        widget=forms.Textarea(attrs={
+            "rows": 5,
+            "placeholder": "Write your note here...",
+            "required": True,
+        }),
+        required=True,
+    )
+    follow_up_date = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "date"}),
+        required=False,
+        label=_("Follow up by"),
+        help_text=_("(optional — adds to your home page reminders)"),
+    )
     consent_confirmed = forms.BooleanField(
         required=True,
-        label="We created this note together",
-        help_text="Confirm you reviewed this note with the participant.",
+        label=_("We created this note together"),
+        help_text=_("Confirm you reviewed this note with the participant."),
         error_messages={
-            "required": "Please confirm you reviewed this note together.",
+            "required": _("Please confirm you reviewed this note together."),
         },
     )
-
-    class Meta:
-        model = ProgressNote
-        fields = ["notes_text", "follow_up_date"]
-        widgets = {
-            "notes_text": forms.Textarea(attrs={
-                "rows": 5,
-                "placeholder": "Write your note here...",
-                "required": True,
-            }),
-            "follow_up_date": forms.DateInput(attrs={
-                "type": "date",
-            }),
-        }
-        labels = {
-            "follow_up_date": "Follow up by",
-        }
-        help_texts = {
-            "follow_up_date": "(optional — adds to your home page reminders)",
-        }
 
     def clean_notes_text(self):
         text = self.cleaned_data.get("notes_text", "").strip()
         if not text:
-            raise forms.ValidationError("Note text is required.")
+            raise forms.ValidationError(_("Note text is required."))
         return text
 
 
@@ -49,13 +44,13 @@ class FullNoteForm(forms.Form):
     template = forms.ModelChoiceField(
         queryset=ProgressNoteTemplate.objects.filter(status="active"),
         required=False,
-        label="This note is for...",
-        empty_label="Freeform",
+        label=_("This note is for..."),
+        empty_label=_("Freeform"),
     )
     session_date = forms.DateField(
         widget=forms.DateInput(attrs={"type": "date"}),
         required=False,
-        help_text="Change if this note is for a different day.",
+        help_text=_("Change if this note is for a different day."),
     )
     summary = forms.CharField(
         widget=forms.Textarea(attrs={"rows": 3, "placeholder": "Optional summary..."}),
@@ -64,8 +59,8 @@ class FullNoteForm(forms.Form):
     follow_up_date = forms.DateField(
         widget=forms.DateInput(attrs={"type": "date"}),
         required=False,
-        label="Follow up by",
-        help_text="(optional — adds to your home page reminders)",
+        label=_("Follow up by"),
+        help_text=_("(optional — adds to your home page reminders)"),
     )
     participant_reflection = forms.CharField(
         widget=forms.Textarea(attrs={
@@ -73,15 +68,15 @@ class FullNoteForm(forms.Form):
             "placeholder": "Their words...",
         }),
         required=False,
-        label="Participant's reflection",
-        help_text="Record their words, not your interpretation.",
+        label=_("Participant's reflection"),
+        help_text=_("Record their words, not your interpretation."),
     )
     consent_confirmed = forms.BooleanField(
         required=True,
-        label="We created this note together",
-        help_text="Confirm you reviewed this note with the participant.",
+        label=_("We created this note together"),
+        help_text=_("Confirm you reviewed this note with the participant."),
         error_messages={
-            "required": "Please confirm you reviewed this note together.",
+            "required": _("Please confirm you reviewed this note together."),
         },
     )
 
@@ -143,7 +138,7 @@ class MetricValueForm(forms.Form):
             try:
                 numeric = float(val)
             except ValueError:
-                raise forms.ValidationError("Enter a valid number.")
+                raise forms.ValidationError(_("Enter a valid number."))
             if self.metric_def.min_value is not None and numeric < self.metric_def.min_value:
                 raise forms.ValidationError(
                     f"Value must be at least {self.metric_def.min_value}."
@@ -176,5 +171,5 @@ class NoteCancelForm(forms.Form):
 
     status_reason = forms.CharField(
         widget=forms.Textarea(attrs={"rows": 2, "placeholder": "Reason for cancellation..."}),
-        label="Reason",
+        label=_("Reason"),
     )

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1a1a1a;">
+
+<div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 16px 20px; margin-bottom: 24px;">
+    <strong style="font-size: 16px;">Elevated Export Alert</strong>
+</div>
+
+<p><strong>{{ creator_name }}</strong> ({{ creator_email }}) is exporting data for <strong>{{ link.client_count }} clients</strong>{% if link.includes_notes %} <strong>including clinical notes</strong>{% endif %}.</p>
+
+<table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+    <tr>
+        <td style="padding: 8px 12px; border: 1px solid #dee2e6; background: #f8f9fa; font-weight: bold;">Type</td>
+        <td style="padding: 8px 12px; border: 1px solid #dee2e6;">{{ link.get_export_type_display }}</td>
+    </tr>
+    <tr>
+        <td style="padding: 8px 12px; border: 1px solid #dee2e6; background: #f8f9fa; font-weight: bold;">Clients</td>
+        <td style="padding: 8px 12px; border: 1px solid #dee2e6;">{{ link.client_count }}</td>
+    </tr>
+    <tr>
+        <td style="padding: 8px 12px; border: 1px solid #dee2e6; background: #f8f9fa; font-weight: bold;">Includes notes</td>
+        <td style="padding: 8px 12px; border: 1px solid #dee2e6;">{% if link.includes_notes %}Yes{% else %}No{% endif %}</td>
+    </tr>
+    <tr>
+        <td style="padding: 8px 12px; border: 1px solid #dee2e6; background: #f8f9fa; font-weight: bold;">Stated recipient</td>
+        <td style="padding: 8px 12px; border: 1px solid #dee2e6;">{{ link.recipient }}</td>
+    </tr>
+    <tr>
+        <td style="padding: 8px 12px; border: 1px solid #dee2e6; background: #f8f9fa; font-weight: bold;">Created</td>
+        <td style="padding: 8px 12px; border: 1px solid #dee2e6;">{{ link.created_at|date:"Y-m-d H:i" }}</td>
+    </tr>
+</table>
+
+<p>The download link will become active in <strong>{{ delay_minutes }} minutes</strong> (at {{ available_at|date:"H:i" }}).</p>
+
+<div style="margin: 24px 0;">
+    <p><strong>If this export is unauthorized</strong>, you can revoke it before the download becomes available:</p>
+    <a href="{{ manage_url }}" style="display: inline-block; background: #dc3545; color: #fff; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">Review &amp; Revoke Exports</a>
+</div>
+
+<p style="color: #6c757d; font-size: 14px;">If this export is expected, no action is needed.</p>
+
+<hr style="border: none; border-top: 1px solid #dee2e6; margin: 24px 0;">
+<p style="color: #6c757d; font-size: 12px;">This is an automated notification from KoNote2. You are receiving this because you are an administrator.</p>
+
+</body>
+</html>

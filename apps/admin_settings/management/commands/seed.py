@@ -21,8 +21,9 @@ class Command(BaseCommand):
         self._seed_note_templates()
         self._seed_intake_fields()
         if settings.DEMO_MODE:
-            self._seed_demo_data()
-        self.stdout.write(self.style.SUCCESS("Seed data loaded successfully."))
+            self._create_demo_users_and_clients()
+            self._update_demo_client_fields()
+        self.stdout.write(self.style.SUCCESS("Seed complete."))
 
     def _seed_event_types(self):
         """Delegate to the seed_event_types command so all seeding runs in one place."""
@@ -113,7 +114,7 @@ class Command(BaseCommand):
                 created += 1
         self.stdout.write(f"  Instance settings: {created} created.")
 
-    def _seed_demo_data(self):
+    def _create_demo_users_and_clients(self):
         """Create demo users, programs, and sample clients when DEMO_MODE is on."""
         from apps.auth_app.models import User
         from apps.clients.models import ClientFile, ClientProgramEnrolment
@@ -131,9 +132,10 @@ class Command(BaseCommand):
 
         # Demo users: (username, display_name, is_admin)
         demo_users = [
-            ("demo-receptionist", "Dana Receptionist", False),
-            ("demo-counsellor", "Casey Counsellor", False),
+            ("demo-frontdesk", "Dana Front Desk", False),
+            ("demo-worker", "Casey Worker", False),
             ("demo-manager", "Morgan Manager", False),
+            ("demo-executive", "Eva Executive", False),
             ("demo-admin", "Alex Admin", True),
         ]
 
@@ -143,6 +145,7 @@ class Command(BaseCommand):
                 defaults={
                     "display_name": display_name,
                     "is_admin": is_admin,
+                    "is_demo": True,  # Demo users can only see demo clients
                 },
             )
             if created:
@@ -150,26 +153,28 @@ class Command(BaseCommand):
                 user.save()
 
         # Assign program roles with specific access patterns:
-        # - Receptionist: both programs (can see list of everyone)
-        # - Counsellor: only Demo Program (limited access to demonstrate permissions)
+        # - Front Desk: both programs (can see list of everyone, limited field access)
+        # - Direct Service: only Demo Program (limited access to demonstrate permissions)
         # - Manager: both programs (can see details of everyone)
-        receptionist = User.objects.get(username="demo-receptionist")
-        counsellor = User.objects.get(username="demo-counsellor")
+        # - Executive: both programs (dashboard only, no individual client access)
+        front_desk = User.objects.get(username="demo-frontdesk")
+        worker = User.objects.get(username="demo-worker")
         manager = User.objects.get(username="demo-manager")
+        executive = User.objects.get(username="demo-executive")
 
-        # Receptionist gets access to both programs
+        # Front Desk gets access to both programs
         UserProgramRole.objects.get_or_create(
-            user=receptionist, program=program1,
+            user=front_desk, program=program1,
             defaults={"role": "receptionist"},
         )
         UserProgramRole.objects.get_or_create(
-            user=receptionist, program=program2,
+            user=front_desk, program=program2,
             defaults={"role": "receptionist"},
         )
 
-        # Counsellor gets access to only Demo Program (not Youth Services)
+        # Direct Service worker gets access to only Demo Program (not Youth Services)
         UserProgramRole.objects.get_or_create(
-            user=counsellor, program=program1,
+            user=worker, program=program1,
             defaults={"role": "staff"},
         )
 
@@ -181,6 +186,16 @@ class Command(BaseCommand):
         UserProgramRole.objects.get_or_create(
             user=manager, program=program2,
             defaults={"role": "program_manager"},
+        )
+
+        # Executive gets access to both programs (dashboard/aggregate view only)
+        UserProgramRole.objects.get_or_create(
+            user=executive, program=program1,
+            defaults={"role": "executive"},
+        )
+        UserProgramRole.objects.get_or_create(
+            user=executive, program=program2,
+            defaults={"role": "executive"},
         )
 
         # Sample clients for Demo Program (DEMO-001 to DEMO-005)
@@ -210,6 +225,7 @@ class Command(BaseCommand):
                 client.birth_date = dob
                 client.record_id = record_id
                 client.status = "active"
+                client.is_demo = True  # Demo clients visible only to demo users
                 client.save()
                 ClientProgramEnrolment.objects.create(
                     client_file=client, program=program1, status="enrolled",
@@ -224,17 +240,25 @@ class Command(BaseCommand):
                 client.birth_date = dob
                 client.record_id = record_id
                 client.status = "active"
+                client.is_demo = True  # Demo clients visible only to demo users
                 client.save()
                 ClientProgramEnrolment.objects.create(
                     client_file=client, program=program2, status="enrolled",
                 )
 
         self.stdout.write("  Demo data: users, 2 programs, and 10 sample clients created.")
-        self.stdout.write("    - Receptionist: sees all 10 clients (both programs)")
-        self.stdout.write("    - Counsellor: sees only 5 clients (Demo Program only)")
+        self.stdout.write("    - Front Desk: sees all 10 clients (limited field access)")
+        self.stdout.write("    - Direct Service: sees only 5 clients (Demo Program only)")
         self.stdout.write("    - Manager: sees all 10 clients with full details")
+        self.stdout.write("    - Executive: sees aggregate dashboard (no individual clients)")
 
         # Populate demo clients with rich data for charts and reports
         from django.core.management import call_command
 
         call_command("seed_demo_data", stdout=self.stdout)
+
+    def _update_demo_client_fields(self):
+        """Populate custom field values and consent for demo clients."""
+        from django.core.management import call_command
+
+        call_command("update_demo_client_fields", stdout=self.stdout)

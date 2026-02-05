@@ -10,7 +10,7 @@
         {% if note.status == "cancelled" %}
             <span class="badge badge-danger">{% trans "Cancelled" %}</span>
         {% endif %}
-        <strong>{{ note.effective_date|date:"Y-m-d" }}</strong>
+        <strong>{{ note.effective_date|date:"M d, Y" }}</strong>
         — {% if note.author %}{{ note.author.display_name|default:note.author }}{% else %}{% trans "(unknown author)" %}{% endif %}
         {% if note.author_program %}
             <small>({{ note.author_program.name }})</small>

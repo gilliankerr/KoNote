@@ -26,10 +26,10 @@ from apps.clients.models import CustomFieldDefinition, CustomFieldGroup
 # Format: (group_title, sort_order, fields_list)
 # Each field: (name, input_type, is_required, is_sensitive, receptionist_access, placeholder, options)
 #
-# receptionist_access values:
-#   "edit" — receptionist can view and edit (contact info, emergency, admin fields)
-#   "view" — receptionist can view but not edit (clinical context)
-#   "none" — hidden from receptionists (demographics, baseline, consent)
+# receptionist_access values (controls front desk visibility):
+#   "edit" — front desk can view and edit (contact info, emergency, admin fields)
+#   "view" — front desk can view but not edit (clinical context)
+#   "none" — hidden from front desk staff (demographics, baseline, consent)
 #
 # Workflow guidance (from expert panel):
 # - Stage 1 (first contact): Contact + Emergency + Referral Source — anyone can enter
@@ -54,8 +54,8 @@ INTAKE_FIELD_GROUPS = [
     # =========================================================================
 
     # -------------------------------------------------------------------------
-    # Contact Information — RECEPTIONIST: EDIT
-    # Stage 1: First contact (receptionist, client online, or self-service)
+    # Contact Information — FRONT DESK: EDIT
+    # Stage 1: First contact (front desk, client online, or self-service)
     # -------------------------------------------------------------------------
     (
         "Contact Information",
@@ -90,7 +90,7 @@ INTAKE_FIELD_GROUPS = [
         ],
     ),
     # -------------------------------------------------------------------------
-    # Emergency Contact — RECEPTIONIST: EDIT
+    # Emergency Contact — FRONT DESK: EDIT
     # Stage 1: First contact (critical for safety)
     # -------------------------------------------------------------------------
     (
@@ -112,14 +112,14 @@ INTAKE_FIELD_GROUPS = [
     ),
     # -------------------------------------------------------------------------
     # Referral & Service Information — PARTIAL ACCESS
-    # Referral source/agency: receptionist can edit (administrative)
+    # Referral source/agency: front desk can edit (administrative)
     # Reason for services, barriers, goals: view only (clinical context)
     # -------------------------------------------------------------------------
     (
         "Referral & Service Information",
         30,
         [
-            # Administrative fields — receptionist can edit
+            # Administrative fields — front desk can edit
             ("Referral Source", "select", False, False, "edit", "", [
                 "Self-referral",
                 "Family/Friend",
@@ -133,7 +133,7 @@ INTAKE_FIELD_GROUPS = [
                 "Other",
             ]),
             ("Referring Agency Name", "text", False, False, "edit", "If referred by an agency", []),
-            # Clinical fields — receptionist can view but not edit
+            # Clinical fields — front desk can view but not edit
             ("Primary Reason for Seeking Services", "textarea", False, False, "view", "What brings you to our program?", []),
             ("Barriers to Accessing Services", "select", False, False, "view", "", [
                 "Transportation",
@@ -149,7 +149,7 @@ INTAKE_FIELD_GROUPS = [
         ],
     ),
     # -------------------------------------------------------------------------
-    # Accessibility & Accommodation (AODA) — RECEPTIONIST: EDIT
+    # Accessibility & Accommodation (AODA) — FRONT DESK: EDIT
     # Stage 1: First contact (so staff can prepare accessible space)
     # -------------------------------------------------------------------------
     (
@@ -169,7 +169,7 @@ INTAKE_FIELD_GROUPS = [
         ],
     ),
     # -------------------------------------------------------------------------
-    # Demographics (for funder equity reporting) — RECEPTIONIST: NONE
+    # Demographics (for funder equity reporting) — FRONT DESK: NONE
     # Stage 3: As trust builds (optional, staff explains equity purpose)
     # All fields optional with "Prefer not to answer"
     # -------------------------------------------------------------------------
@@ -227,7 +227,7 @@ INTAKE_FIELD_GROUPS = [
         ],
     ),
     # -------------------------------------------------------------------------
-    # Baseline Status (for outcome measurement) — RECEPTIONIST: NONE
+    # Baseline Status (for outcome measurement) — FRONT DESK: NONE
     # Stage 3: As trust builds (staff collects during early sessions)
     # -------------------------------------------------------------------------
     (
@@ -300,7 +300,7 @@ INTAKE_FIELD_GROUPS = [
         ],
     ),
     # -------------------------------------------------------------------------
-    # Consent & Permissions — RECEPTIONIST: NONE (requires explanation)
+    # Consent & Permissions — FRONT DESK: NONE (requires explanation)
     # Stage 2: Intake appointment
     # -------------------------------------------------------------------------
     (
@@ -327,7 +327,7 @@ INTAKE_FIELD_GROUPS = [
     # =========================================================================
 
     # -------------------------------------------------------------------------
-    # Parent/Guardian Information — RECEPTIONIST: EDIT
+    # Parent/Guardian Information — FRONT DESK: EDIT
     # For youth programs: primary contact is usually the parent, not the child
     # -------------------------------------------------------------------------
     (
@@ -353,7 +353,7 @@ INTAKE_FIELD_GROUPS = [
         ],
     ),
     # -------------------------------------------------------------------------
-    # Health & Safety — RECEPTIONIST: EDIT (for emergencies)
+    # Health & Safety — FRONT DESK: EDIT (for emergencies)
     # Medical info staff need to keep participants safe
     # -------------------------------------------------------------------------
     (
@@ -379,7 +379,7 @@ INTAKE_FIELD_GROUPS = [
         ],
     ),
     # -------------------------------------------------------------------------
-    # Program Consents — RECEPTIONIST: EDIT
+    # Program Consents — FRONT DESK: EDIT
     # Waivers and permissions for youth/recreation programs
     # -------------------------------------------------------------------------
     (
@@ -419,24 +419,10 @@ INTAKE_FIELD_GROUPS = [
 class Command(BaseCommand):
     help = "Seed default intake custom fields for Canadian nonprofit community services."
 
-    def add_arguments(self, parser):
-        parser.add_argument(
-            "--force",
-            action="store_true",
-            help="Seed fields even if custom field groups already exist.",
-        )
-
     def handle(self, *args, **options):
-        # Check if custom fields already exist
-        existing_groups = CustomFieldGroup.objects.count()
-        if existing_groups > 0 and not options["force"]:
-            self.stdout.write(
-                self.style.WARNING(
-                    f"  {existing_groups} custom field group(s) already exist. "
-                    "Use --force to add default fields anyway."
-                )
-            )
-            return
+        # No early-return guard — get_or_create handles idempotency.
+        # A guard here caused a production outage when the DB had groups but
+        # no field definitions. Every startup must ensure all fields exist.
 
         groups_created = 0
         fields_created = 0

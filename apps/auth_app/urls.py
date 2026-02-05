@@ -14,6 +14,7 @@ urlpatterns = [
     path("users/new/", admin_views.user_create, name="user_create"),
     path("users/<int:user_id>/edit/", admin_views.user_edit, name="user_edit"),
     path("users/<int:user_id>/deactivate/", admin_views.user_deactivate, name="user_deactivate"),
+    path("users/<int:user_id>/impersonate/", admin_views.impersonate_user, name="impersonate_user"),
     # Invites (admin only, except accept which is public)
     path("invites/", invite_views.invite_list, name="invite_list"),
     path("invites/new/", invite_views.invite_create, name="invite_create"),

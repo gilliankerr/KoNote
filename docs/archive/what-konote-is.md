@@ -21,7 +21,7 @@ KoNote2 focuses on **outcome-based service delivery** — helping agencies docum
 | **Event Logging** | Document discrete occurrences: intakes, discharges, milestones, crises, hospital visits. |
 | **Charts & Visualisation** | See client progress as line charts and combined timelines. |
 | **Funder Reporting** | Export data for external funders; generate PDF reports. |
-| **Role-Based Access** | Four roles (Admin, Manager, Counsellor, Receptionist) with appropriate permissions for each. |
+| **Role-Based Access** | Four roles (Admin, Manager, Direct Service, Front Desk) with appropriate permissions for each. |
 | **Customisable Terminology** | Change "Client" to "Participant", "Member", or whatever your agency uses. |
 | **Multi-Program Support** | Manage multiple service streams within one organisation. |
 | **Custom Client Fields** | Add agency-specific data fields (funding source, referral date, etc.). |

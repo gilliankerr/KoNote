@@ -9,7 +9,7 @@ from apps.programs.models import Program, UserProgramRole
 from apps.clients.models import ClientFile, ClientProgramEnrolment
 from apps.plans.models import MetricDefinition, PlanSection, PlanTarget, PlanTargetMetric
 from apps.notes.models import ProgressNote, ProgressNoteTarget, MetricValue
-import KoNote2.encryption as enc_module
+import konote.encryption as enc_module
 
 TEST_KEY = Fernet.generate_key().decode()
 
@@ -104,6 +104,10 @@ class NoteViewsTest(TestCase):
     def test_admin_with_program_role_can_create_note(self):
         """Admins who also have a program role can create notes."""
         UserProgramRole.objects.create(user=self.admin, program=self.prog_b, role="program_manager")
+        # Add consent to other_client so note creation is allowed
+        self.other_client.consent_given_at = timezone.now()
+        self.other_client.consent_type = "written"
+        self.other_client.save()
         self.http.login(username="admin", password="pass")
         resp = self.http.post(
             f"/notes/client/{self.other_client.pk}/quick/",
@@ -275,7 +279,7 @@ class NoteViewsTest(TestCase):
         resp = self.http.get(f"/notes/client/{client_no_consent.pk}/quick/")
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "Consent Required")
-        self.assertContains(resp, "cannot create notes")
+        self.assertContains(resp, "Cannot create notes")
 
     def test_note_allowed_with_client_consent(self):
         """Notes can be created when client has consent recorded."""

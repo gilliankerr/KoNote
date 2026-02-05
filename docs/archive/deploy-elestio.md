@@ -89,7 +89,7 @@ Environment variables are how you pass secrets and settings to the application w
 | `FIELD_ENCRYPTION_KEY` | Key for encrypting client PII (from Prerequisites) | `gAAAAABl...` |
 | `DATABASE_URL` | Connection string for the main app database | `postgresql://KoNote2:KoNote2@db:5432/KoNote2` |
 | `AUDIT_DATABASE_URL` | Connection string for the audit database | `postgresql://audit_writer:audit_pass@audit_db:5432/KoNote2_audit` |
-| `DJANGO_SETTINGS_MODULE` | Tells Django to use production settings | `KoNote2.settings.production` |
+| `DJANGO_SETTINGS_MODULE` | Tells Django to use production settings | `konote.settings.production` |
 | `ALLOWED_HOSTS` | Domain names the app will accept requests for (comma-separated) | `KoNote2.myorganisation.ca` |
 | `AUTH_MODE` | Authentication method: `azure` or `local` | `local` |
 
@@ -175,13 +175,13 @@ Before the app can run, you need to:
 
 ```bash
 # Create tables in the main database
-python manage.py migrate --settings=KoNote2.settings.production
+python manage.py migrate --settings=konote.settings.production
 
 # Create tables in the audit database
-python manage.py migrate --database=audit --settings=KoNote2.settings.production
+python manage.py migrate --database=audit --settings=konote.settings.production
 
 # Lock down the audit database (prevent accidental deletes)
-python manage.py lockdown_audit_db --settings=KoNote2.settings.production
+python manage.py lockdown_audit_db --settings=konote.settings.production
 ```
 
 After each command, you should see "OK" or success messages. If you see errors:
@@ -249,7 +249,7 @@ Test that the app is working:
 4. **Check the database:**
    - In the Elest.io console, run:
    ```bash
-   python manage.py dbshell --settings=KoNote2.settings.production
+   python manage.py dbshell --settings=konote.settings.production
    ```
    - Type `\dt` to see tables — you should see `clients`, `outcomes`, `notes`, etc.
    - Type `\q` to exit
@@ -363,8 +363,8 @@ Migrations haven't run yet.
 **Fixes to try:**
 1. In the console, run:
    ```bash
-   python manage.py migrate --settings=KoNote2.settings.production
-   python manage.py migrate --database=audit --settings=KoNote2.settings.production
+   python manage.py migrate --settings=konote.settings.production
+   python manage.py migrate --database=audit --settings=konote.settings.production
    ```
 2. Restart the app
 

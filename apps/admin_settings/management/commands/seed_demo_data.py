@@ -32,6 +32,7 @@ from apps.plans.models import (
 )
 from apps.programs.models import Program
 from django.contrib.auth import get_user_model
+from seeds.demo_client_fields import CLIENT_CUSTOM_FIELDS
 
 User = get_user_model()
 
@@ -571,153 +572,66 @@ CLIENT_EVENTS = {
     ],
 }
 
-# Custom field values for demo clients (Contact, Emergency, Referral)
-# Field names must match those in seed_intake_fields.py
-CLIENT_CUSTOM_FIELDS = {
-    "DEMO-001": {
-        # Contact Information
-        "Preferred Name": "Jordan",
-        "Primary Phone": "(416) 555-0123",
-        "Email": "jordan.rivera@example.com",
-        "Preferred Contact Method": "Text message",
-        "Best Time to Contact": "Afternoon (12pm-5pm)",
-        "Preferred Language of Service": "English",
-        # Emergency Contact
-        "Emergency Contact Name": "Maria Rivera",
-        "Emergency Contact Relationship": "Parent/Guardian",
-        "Emergency Contact Phone": "(416) 555-0124",
-        # Referral
-        "Referral Source": "Community agency",
-        "Referring Agency Name": "Downtown Community Health Centre",
-    },
-    "DEMO-002": {
-        "Preferred Name": "Taylor",
-        "Primary Phone": "(647) 555-0234",
-        "Preferred Contact Method": "Phone call",
-        "Best Time to Contact": "Morning (9am-12pm)",
-        "Preferred Language of Service": "English",
-        "Emergency Contact Name": "Alex Chen",
-        "Emergency Contact Relationship": "Friend",
-        "Emergency Contact Phone": "(647) 555-0235",
-        "Referral Source": "Shelter/Housing provider",
-        "Referring Agency Name": "Covenant House",
-        # Accessibility
-        "Accommodation Needs": "Prefers written appointment reminders",
-    },
-    "DEMO-003": {
-        "Preferred Name": "Avery",
-        "Primary Phone": "(905) 555-0345",
-        "Email": "avery.j@example.com",
-        "Preferred Contact Method": "Email",
-        "Best Time to Contact": "Any time",
-        "Preferred Language of Service": "English",
-        "Emergency Contact Name": "Jamie Johnson",
-        "Emergency Contact Relationship": "Sibling",
-        "Emergency Contact Phone": "(905) 555-0346",
-        "Referral Source": "Hospital/Health provider",
-        "Referring Agency Name": "CAMH",
-    },
-    "DEMO-004": {
-        "Primary Phone": "(416) 555-0456",
-        "Preferred Contact Method": "Text message",
-        "Best Time to Contact": "Evening (5pm-8pm)",
-        "Preferred Language of Service": "English",
-        "Emergency Contact Name": "Priya Patel",
-        "Emergency Contact Relationship": "Parent/Guardian",
-        "Emergency Contact Phone": "(416) 555-0457",
-        "Referral Source": "School/Education",
-        "Referring Agency Name": "Toronto District School Board",
-    },
-    "DEMO-005": {
-        "Preferred Name": "Sam",
-        "Primary Phone": "(647) 555-0567",
-        "Email": "sam.williams@example.com",
-        "Preferred Contact Method": "Email",
-        "Best Time to Contact": "Any time",
-        "Preferred Language of Service": "English",
-        "Emergency Contact Name": "Drew Williams",
-        "Emergency Contact Relationship": "Spouse/Partner",
-        "Emergency Contact Phone": "(647) 555-0568",
-        "Referral Source": "Self-referral",
-    },
-    "DEMO-006": {
-        "Primary Phone": "(416) 555-0678",
-        "Preferred Contact Method": "Text message",
-        "Best Time to Contact": "Afternoon (12pm-5pm)",
-        "Preferred Language of Service": "English",
-        "Emergency Contact Name": "Rosa Martinez",
-        "Emergency Contact Relationship": "Parent/Guardian",
-        "Emergency Contact Phone": "(416) 555-0679",
-        "Referral Source": "School/Education",
-    },
-    "DEMO-007": {
-        "Preferred Name": "Maya",
-        "Primary Phone": "(905) 555-0789",
-        "Preferred Contact Method": "Phone call",
-        "Best Time to Contact": "Morning (9am-12pm)",
-        "Preferred Language of Service": "English",
-        "Emergency Contact Name": "David Thompson",
-        "Emergency Contact Relationship": "Parent/Guardian",
-        "Emergency Contact Phone": "(905) 555-0790",
-        "Referral Source": "Hospital/Health provider",
-        "Accommodation Needs": "Needs quiet space for meetings; social anxiety",
-    },
-    "DEMO-008": {
-        "Primary Phone": "(647) 555-0890",
-        "Preferred Contact Method": "Text message",
-        "Best Time to Contact": "Evening (5pm-8pm)",
-        "Preferred Language of Service": "English",
-        "Emergency Contact Name": "Lisa Nguyen",
-        "Emergency Contact Relationship": "Parent/Guardian",
-        "Emergency Contact Phone": "(647) 555-0891",
-        "Referral Source": "Social services (OW/ODSP)",
-    },
-    "DEMO-009": {
-        "Preferred Name": "Zara",
-        "Primary Phone": "(416) 555-0901",
-        "Email": "zara.a@example.com",
-        "Preferred Contact Method": "Email",
-        "Best Time to Contact": "Afternoon (12pm-5pm)",
-        "Preferred Language of Service": "English",
-        "Emergency Contact Name": "Fatima Ahmed",
-        "Emergency Contact Relationship": "Parent/Guardian",
-        "Emergency Contact Phone": "(416) 555-0902",
-        "Referral Source": "Self-referral",
-    },
-    "DEMO-010": {
-        "Preferred Name": "Liam",
-        "Primary Phone": "(905) 555-1012",
-        "Email": "liam.oconnor@example.com",
-        "Preferred Contact Method": "Phone call",
-        "Best Time to Contact": "Any time",
-        "Preferred Language of Service": "English",
-        "Emergency Contact Name": "Patrick O'Connor",
-        "Emergency Contact Relationship": "Parent/Guardian",
-        "Emergency Contact Phone": "(905) 555-1013",
-        "Referral Source": "Community agency",
-        "Referring Agency Name": "Youth Employment Services",
-    },
-}
+
+# CLIENT_CUSTOM_FIELDS imported from seeds.demo_client_fields (single source of truth)
 
 
 class Command(BaseCommand):
     help = "Populate demo clients with plans, notes, events, and alerts for charts/reports."
+
+    def _populate_custom_fields(self):
+        """Populate custom field values for demo clients (always runs, idempotent)."""
+        fields_updated = 0
+        fields_skipped = 0
+        clients_missing = 0
+        for record_id, field_values in CLIENT_CUSTOM_FIELDS.items():
+            client = ClientFile.objects.filter(record_id=record_id).first()
+            if not client:
+                clients_missing += 1
+                continue
+            for field_name, value in field_values.items():
+                try:
+                    field_def = CustomFieldDefinition.objects.get(name=field_name)
+                    cdv, _ = ClientDetailValue.objects.get_or_create(
+                        client_file=client,
+                        field_def=field_def,
+                    )
+                    cdv.set_value(value)
+                    cdv.save()
+                    fields_updated += 1
+                except CustomFieldDefinition.DoesNotExist:
+                    fields_skipped += 1
+        if fields_updated:
+            self.stdout.write(f"  Custom fields: {fields_updated} values populated for demo clients.")
+        if clients_missing:
+            self.stdout.write(self.style.WARNING(
+                f"  Custom fields: {clients_missing} demo client(s) not found in database. "
+                "Run 'python manage.py seed' to create them."
+            ))
+        if fields_skipped:
+            self.stdout.write(self.style.WARNING(
+                f"  Custom fields: {fields_skipped} skipped (field definitions not found). "
+                "Run 'python manage.py seed' to create them."
+            ))
 
     def handle(self, *args, **options):
         if not settings.DEMO_MODE:
             self.stdout.write(self.style.WARNING("DEMO_MODE is not enabled. Skipping."))
             return
 
-        # Check if data already exists (idempotent guard)
+        # Always populate custom fields (idempotent via get_or_create)
+        self._populate_custom_fields()
+
+        # Check if rich data (notes, plans, events) already exists
         if ProgressNote.objects.filter(client_file__record_id__startswith="DEMO-").exists():
             self.stdout.write("  Demo rich data already exists. Skipping.")
             return
 
         # Fetch shared resources
         try:
-            counsellor = User.objects.get(username="demo-counsellor")
+            worker = User.objects.get(username="demo-worker")
         except User.DoesNotExist:
-            self.stdout.write(self.style.ERROR("demo-counsellor user not found. Run seed first."))
+            self.stdout.write(self.style.ERROR("demo-worker user not found. Run seed first."))
             return
 
         try:
@@ -736,10 +650,10 @@ class Command(BaseCommand):
             return
 
         # Map programs to their note authors:
-        # - Demo Program notes written by demo-counsellor
-        # - Youth Services notes written by demo-manager (counsellor doesn't have access)
+        # - Demo Program notes written by demo-worker
+        # - Youth Services notes written by demo-manager (worker doesn't have access)
         program_authors = {
-            "Demo Program": counsellor,
+            "Demo Program": worker,
             "Youth Services": manager,
         }
 
@@ -761,7 +675,7 @@ class Command(BaseCommand):
             # Get the program and author for this client
             program_name = plan_config.get("program", "Demo Program")
             program = programs_by_name.get(program_name)
-            author = program_authors.get(program_name, counsellor)
+            author = program_authors.get(program_name, worker)
 
             if not program:
                 self.stdout.write(self.style.WARNING(f"  Program '{program_name}' not found. Skipping {record_id}."))
@@ -923,21 +837,5 @@ class Command(BaseCommand):
                     author_program=program,
                 )
 
-            # ----------------------------------------------------------
-            # 5. Populate custom field values (contact, emergency, referral)
-            # ----------------------------------------------------------
-            custom_values = CLIENT_CUSTOM_FIELDS.get(record_id, {})
-            for field_name, value in custom_values.items():
-                try:
-                    field_def = CustomFieldDefinition.objects.get(name=field_name)
-                    cdv, _ = ClientDetailValue.objects.get_or_create(
-                        client_file=client,
-                        field_def=field_def,
-                    )
-                    cdv.set_value(value)
-                    cdv.save()
-                except CustomFieldDefinition.DoesNotExist:
-                    # Field may not exist if seed_intake_fields wasn't run
-                    pass
 
         self.stdout.write(self.style.SUCCESS("  Demo rich data seeded successfully (10 clients across 2 programs)."))

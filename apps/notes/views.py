@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import DateTimeField
+from django.db.models import Count, DateTimeField
 from django.db.models.functions import Coalesce
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
@@ -124,12 +124,13 @@ def note_list(request, client_id):
         return HttpResponseForbidden("You do not have access to this client.")
 
     # Annotate with computed effective_date for filtering and ordering
-    # (backdate if set, otherwise created_at)
+    # (backdate if set, otherwise created_at), plus target count for display
     notes = (
         ProgressNote.objects.filter(client_file=client)
-        .select_related("author", "author_program")
+        .select_related("author", "author_program", "template")
         .annotate(
-            _effective_date=Coalesce("backdate", "created_at", output_field=DateTimeField())
+            _effective_date=Coalesce("backdate", "created_at", output_field=DateTimeField()),
+            target_count=Count("target_entries"),
         )
     )
 
@@ -158,6 +159,14 @@ def note_list(request, client_id):
     paginator = Paginator(notes, 25)
     page = paginator.get_page(request.GET.get("page"))
 
+    # Count active filters for the filter bar indicator
+    active_filter_count = sum([
+        bool(note_type),
+        bool(date_from),
+        bool(date_to),
+        bool(author_filter),
+    ])
+
     # Breadcrumbs: Clients > [Client Name] > Notes
     breadcrumbs = [
         {"url": reverse("clients:client_list"), "label": "Clients"},
@@ -171,6 +180,7 @@ def note_list(request, client_id):
         "filter_date_from": date_from,
         "filter_date_to": date_to,
         "filter_author": author_filter,
+        "active_filter_count": active_filter_count,
         "active_tab": "notes",
         "user_role": getattr(request, "user_program_role", None),
         "breadcrumbs": breadcrumbs,
@@ -196,11 +206,14 @@ def quick_note_create(request, client_id):
         form = QuickNoteForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
-                note = form.save(commit=False)
-                note.client_file = client
-                note.note_type = "quick"
-                note.author = request.user
-                note.author_program = _get_author_program(request.user, client)
+                note = ProgressNote(
+                    client_file=client,
+                    note_type="quick",
+                    author=request.user,
+                    author_program=_get_author_program(request.user, client),
+                    notes_text=form.cleaned_data["notes_text"],
+                    follow_up_date=form.cleaned_data.get("follow_up_date"),
+                )
                 note.save()
 
                 # Auto-complete any pending follow-ups from this author for this client
@@ -391,7 +404,8 @@ def note_summary(request, note_id):
     """HTMX partial: collapsed summary of a single note (reverses note_detail expand)."""
     try:
         note = get_object_or_404(
-            ProgressNote.objects.select_related("author", "author_program"),
+            ProgressNote.objects.select_related("author", "author_program", "template")
+            .annotate(target_count=Count("target_entries")),
             pk=note_id,
         )
         client = _get_client_or_403(request, note.client_file_id)

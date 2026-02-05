@@ -1,0 +1,17 @@
+ELEVATED EXPORT ALERT
+
+{{ creator_name }} ({{ creator_email }}) is exporting data for {{ link.client_count }} clients{% if link.includes_notes %} including clinical notes{% endif %}.
+
+Export details:
+- Type: {{ link.get_export_type_display }}
+- Clients: {{ link.client_count }}
+- Includes notes: {% if link.includes_notes %}Yes{% else %}No{% endif %}
+- Stated recipient: {{ link.recipient }}
+- Created: {{ link.created_at|date:"Y-m-d H:i" }}
+
+The download link will become active in {{ delay_minutes }} minutes (at {{ available_at|date:"H:i" }}).
+
+If this export is unauthorized, you can revoke it before the download becomes available:
+{{ manage_url }}
+
+If this export is expected, no action is needed.

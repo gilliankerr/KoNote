@@ -8,17 +8,115 @@ Welcome to KoNote2 Web! This guide walks you through initial configuration after
 
 ## Table of Contents
 
-1. [First Login](#first-login)
-2. [Configure Instance Settings](#configure-instance-settings)
-3. [Customise Terminology](#customise-terminology)
-4. [Enable/Disable Features](#enable-disable-features)
-5. [Create Programs](#create-programs)
-6. [Create User Accounts](#create-user-accounts)
-7. [Set Up Plan Templates](#set-up-plan-templates)
-8. [Set Up Progress Note Templates](#set-up-progress-note-templates)
-9. [Configure Custom Fields](#configure-custom-fields)
-10. [Review Event Types](#review-event-types)
-11. [Next Steps](#next-steps)
+1. [Deployment Phases](#deployment-phases)
+2. [Demo Mode and Training Accounts](#demo-mode-and-training-accounts)
+3. [First Login](#first-login)
+4. [Configure Instance Settings](#configure-instance-settings)
+5. [Customise Terminology](#customise-terminology)
+6. [Enable/Disable Features](#enable-disable-features)
+7. [Create Programs](#create-programs)
+8. [Create User Accounts](#create-user-accounts)
+9. [Set Up Plan Templates](#set-up-plan-templates)
+10. [Set Up Progress Note Templates](#set-up-progress-note-templates)
+11. [Configure Custom Fields](#configure-custom-fields)
+12. [Review Event Types](#review-event-types)
+13. [Next Steps](#next-steps)
+
+---
+
+## Deployment Phases
+
+KoNote deployment happens in three phases. You can move through them at your own pace.
+
+### Phase 1: Assessment
+
+Explore the system using demo data before making any configuration decisions.
+
+- Log in as one of the **demo users** (demo-manager, demo-counsellor, demo-front-desk)
+- Browse the 5 sample clients (DEMO-001 through DEMO-005)
+- See how plans, progress notes, metrics, and reports work
+- No real client data is involved — experiment freely
+
+**Goal:** Understand how KoNote works before customising it.
+
+### Phase 2: Customisation
+
+Configure KoNote for your organisation's needs.
+
+- Set your agency's terminology ("Client" → "Participant", etc.)
+- Create your programs and assign staff
+- Build plan templates and progress note templates
+- Configure custom fields for your intake forms
+- Create real staff user accounts
+
+Demo users automatically reflect your customisations — when you rename a role, the matching demo account updates accordingly. This lets you test how different roles see the system.
+
+**Goal:** Configure everything before adding real clients.
+
+### Phase 3: Production
+
+Begin real work with real clients.
+
+- Add your first real client
+- Real staff log in with their own accounts
+- Demo data remains available for training new staff
+- There's no "flip the switch" moment — you can run training and production side by side
+
+**Goal:** Deliver services and track outcomes.
+
+---
+
+## Demo Mode and Training Accounts
+
+KoNote includes permanent demo data for training and demonstrations. This is by design — it keeps your real client data safe.
+
+### How It Works
+
+| Account type | What they see |
+|--------------|---------------|
+| **Demo users** (demo-manager, demo-counsellor, etc.) | Demo clients only |
+| **Real users** (your staff accounts) | Real clients only |
+
+There's no toggle or mode switch. Your login determines what you see. Demo users can never see real clients, and real users can never see demo clients.
+
+### Demo Clients
+
+Five sample clients with realistic data:
+
+| Record ID | Profile |
+|-----------|---------|
+| DEMO-001 | Steady improvement over time |
+| DEMO-002 | Struggling, slow progress |
+| DEMO-003 | Mixed results |
+| DEMO-004 | Crisis, then recovery |
+| DEMO-005 | Stable, near discharge |
+
+Each has plans, progress notes, metrics, and events — enough data to see how charts and reports work.
+
+### Demo Users
+
+Four demo accounts for testing different permission levels:
+
+| Username | Role | Use for testing... |
+|----------|------|-------------------|
+| demo-admin | Administrator | System configuration, user management |
+| demo-manager | Program Manager | Program oversight, all client data |
+| demo-counsellor | Direct Service | Case management, notes, plans |
+| demo-receptionist | Front Desk | Limited client info, intake tasks |
+
+When you customise roles (rename, add, adjust permissions), matching demo users are created so you can test how each role sees the system.
+
+### Using Demo Accounts
+
+**For administrators:** Use the Demo Account Directory (Settings → Demo Accounts) to quickly log in as any demo user and test how the system looks for different roles.
+
+**For training:** New staff can log in as the demo user matching their role and practise without affecting real data.
+
+**For demonstrations:** Show funders or board members the system without exposing real client information.
+
+### Demo Data in Reports
+
+Demo clients are **never included** in official reports, exports, or aggregate statistics. When you generate a funder report, only real client data appears.
 
 ---
 
@@ -462,5 +560,5 @@ If your agency expects to serve significantly more than 2,000 clients, a search 
 
 ---
 
-**Version 1.0** — KoNote2 Web
-Last updated: 2026-02-02
+**Version 1.1** — KoNote Web
+Last updated: 2026-02-05

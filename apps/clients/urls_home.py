@@ -10,15 +10,17 @@ from django.utils import timezone
 @login_required
 def home(request):
     from apps.clients.models import ClientFile, ClientProgramEnrolment
-    from apps.clients.views import _get_accessible_clients, _get_accessible_programs
+    from apps.clients.views import _get_accessible_clients, _get_accessible_programs, get_client_queryset
     from apps.events.models import Alert
     from apps.notes.models import ProgressNote
 
     # --- Recently viewed clients (stored in session) ---
+    # Security: Filter by user's demo status to enforce data separation
     recent_ids = request.session.get("recent_clients", [])
     recent_clients = []
     if recent_ids:
-        clients_by_id = {c.pk: c for c in ClientFile.objects.filter(pk__in=recent_ids)}
+        base_queryset = get_client_queryset(request.user)
+        clients_by_id = {c.pk: c for c in base_queryset.filter(pk__in=recent_ids)}
         # Preserve order
         for cid in recent_ids:
             if cid in clients_by_id:

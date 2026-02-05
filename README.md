@@ -109,7 +109,7 @@ For the research basis behind these design choices, see [Design Principles](docs
 ### Security & Compliance
 - Field-level encryption for all PII (Fernet/AES)
 - Dual-database architecture (app + immutable audit log)
-- Role-based access control (Admin, Program Manager, Staff, Receptionist)
+- Role-based access control (Admin, Program Manager, Staff, Front Desk)
 - Session management with configurable timeout
 - HTTPS with HSTS, CSP headers, CSRF protection
 

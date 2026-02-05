@@ -83,7 +83,7 @@ KoNote2 Web is a Django 5.1 application following a server-rendered architecture
 
 ```
 KoNote2-web/
-├── KoNote2/                    # Project configuration
+├── konote/                    # Project configuration
 │   ├── settings/
 │   │   ├── base.py            # Shared settings
 │   │   ├── production.py      # Production overrides
@@ -151,7 +151,7 @@ KoNote2 Web uses two PostgreSQL databases:
 
 ### Database Router
 
-The `AuditRouter` class (`KoNote2/db_router.py`) routes queries:
+The `AuditRouter` class (`konote/db_router.py`) routes queries:
 
 ```python
 class AuditRouter:
@@ -224,7 +224,7 @@ GRANT USAGE, SELECT ON SEQUENCE audit_auditlog_id_seq TO KoNote2_audit;
 | Model | Description |
 |-------|-------------|
 | `Program` | Service line (Housing, Employment, etc.) |
-| `UserProgramRole` | Role assignment (receptionist, staff, program_manager) |
+| `UserProgramRole` | Role assignment (front_desk, staff, program_manager) |
 
 ### clients
 **Purpose:** Client records and custom fields
@@ -374,7 +374,7 @@ All personally identifiable information (PII) is encrypted at the application le
 **Implementation:**
 
 ```python
-# KoNote2/encryption.py
+# konote/encryption.py
 from cryptography.fernet import Fernet
 from django.conf import settings
 
@@ -400,7 +400,7 @@ def decrypt_field(encrypted_value):
 | **Admin** | Instance-wide | Manage settings, users, programs; no client data access without program role |
 | **Program Manager** | Assigned programs | Full client access, manage program staff |
 | **Staff** | Assigned programs | Full client records in assigned programs |
-| **Receptionist** | Assigned programs | Limited client info (name, status) |
+| **Front Desk** | Assigned programs | Limited client info (name, status) |
 
 **Enforcement:** `ProgramAccessMiddleware` checks every request:
 
@@ -556,9 +556,9 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'KoNote2.middleware.program_access.ProgramAccessMiddleware',  # RBAC
-    'KoNote2.middleware.terminology.TerminologyMiddleware',       # Terms
-    'KoNote2.middleware.audit.AuditMiddleware',                   # Logging
+    'konote.middleware.program_access.ProgramAccessMiddleware',  # RBAC
+    'konote.middleware.terminology.TerminologyMiddleware',       # Terms
+    'konote.middleware.audit.AuditMiddleware',                   # Logging
     'csp.middleware.CSPMiddleware',                              # CSP headers
     'django.contrib.messages.middleware.MessageMiddleware',
 ]
@@ -670,7 +670,7 @@ MIDDLEWARE = [
 Every template receives these variables:
 
 ```python
-# KoNote2/context_processors.py
+# konote/context_processors.py
 
 def terminology(request):
     return {'term': get_cached_terminology()}
@@ -847,7 +847,7 @@ OPENROUTER_API_KEY = 'your-api-key'  # Leave empty to disable
 AI endpoints only receive **metadata**, never client PII:
 
 ```python
-# KoNote2/ai.py
+# konote/ai.py
 def suggest_metrics(target_description, program_name):
     # Send only: target text, program name, existing metric names
     # Never send: client names, dates of birth, notes content
@@ -1173,7 +1173,7 @@ Django has built-in internationalization support that KoNote2 could leverage:
 **Step 1: Enable i18n in Settings**
 
 ```python
-# KoNote2/settings/base.py
+# konote/settings/base.py
 USE_I18N = True
 USE_L10N = True
 
@@ -1546,7 +1546,7 @@ class InstanceSetting(models.Model):
 
 | Provider | Template | Button Label |
 |----------|----------|--------------|
-| SharePoint | `https://contoso.sharepoint.com/sites/KoNote2/Clients/{record_id}/` | Open Documents Folder |
+| SharePoint | `https://contoso.sharepoint.com/sites/konote/Clients/{record_id}/` | Open Documents Folder |
 | Google Drive | `https://drive.google.com/drive/search?q={record_id}` | Search Documents |
 
 **SharePoint:** URLs are path-based; folder opens directly.

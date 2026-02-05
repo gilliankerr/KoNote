@@ -12,7 +12,7 @@ import pytest
 
 def pytest_configure():
     """Set up Django settings before any test collection."""
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "KoNote2.settings.test")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "konote.settings.test")
     django.setup()
 
 

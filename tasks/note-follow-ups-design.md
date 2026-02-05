@@ -13,7 +13,7 @@ Add optional follow-up dates to progress notes. When staff record a note, they c
 
 ## User Stories
 
-1. **Counsellor records session note**: After a counselling session, staff adds "Discussed housing application — follow up in 2 weeks" with follow-up date set
+1. **Staff records session note**: After a counselling session, staff adds "Discussed housing application — follow up in 2 weeks" with follow-up date set
 2. **Staff checks home page**: Sees "Follow-ups Due" section showing notes past their follow-up date
 3. **Staff follows up**: Clicks through to client, records new note, old follow-up is marked complete
 4. **Quick reminder**: Staff records quick note "Court date March 15" with follow-up date, creating both documentation and reminder

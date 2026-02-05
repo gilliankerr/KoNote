@@ -1,5 +1,6 @@
 """Forms for user management and invite registration."""
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from apps.programs.models import Program
 
@@ -24,13 +25,13 @@ class UserCreateForm(forms.ModelForm):
     password = forms.CharField(
         widget=forms.PasswordInput,
         min_length=8,
-        help_text="Minimum 8 characters.",
+        help_text=_("Minimum 8 characters."),
     )
     password_confirm = forms.CharField(
         widget=forms.PasswordInput,
-        label="Confirm Password",
+        label=_("Confirm Password"),
     )
-    email = forms.EmailField(required=False, label="Email")
+    email = forms.EmailField(required=False, label=_("Email"))
 
     class Meta:
         model = User
@@ -41,7 +42,7 @@ class UserCreateForm(forms.ModelForm):
         pw = cleaned.get("password")
         pw2 = cleaned.get("password_confirm")
         if pw and pw2 and pw != pw2:
-            self.add_error("password_confirm", "Passwords do not match.")
+            self.add_error("password_confirm", _("Passwords do not match."))
         return cleaned
 
     def save(self, commit=True):
@@ -57,13 +58,13 @@ class UserCreateForm(forms.ModelForm):
 class UserEditForm(forms.ModelForm):
     """Form for editing an existing user."""
 
-    email = forms.EmailField(required=False, label="Email")
+    email = forms.EmailField(required=False, label=_("Email"))
     new_password = forms.CharField(
         widget=forms.PasswordInput,
         required=False,
         min_length=8,
-        label="New Password",
-        help_text="Leave blank to keep current password.",
+        label=_("New Password"),
+        help_text=_("Leave blank to keep current password."),
     )
 
     class Meta:
@@ -89,17 +90,17 @@ class UserEditForm(forms.ModelForm):
 class InviteCreateForm(forms.Form):
     """Form for admins to create an invite link."""
 
-    role = forms.ChoiceField(choices=Invite.ROLE_CHOICES, label="Role")
+    role = forms.ChoiceField(choices=Invite.ROLE_CHOICES, label=_("Role"))
     programs = forms.ModelMultipleChoiceField(
         queryset=Program.objects.filter(status="active"),
         widget=forms.CheckboxSelectMultiple,
         required=False,
-        label="Assign to Programs",
-        help_text="Select which programs this person will be assigned to. Not needed for administrators.",
+        label=_("Assign to Programs"),
+        help_text=_("Select which programs this person will be assigned to. Not needed for administrators."),
     )
     expires_days = forms.IntegerField(
         initial=7, min_value=1, max_value=30,
-        label="Link expires in (days)",
+        label=_("Link expires in (days)"),
     )
 
 
@@ -108,28 +109,28 @@ class InviteAcceptForm(forms.Form):
 
     username = forms.CharField(
         max_length=150,
-        help_text="Choose a username for signing in.",
+        help_text=_("Choose a username for signing in."),
     )
     display_name = forms.CharField(
         max_length=255,
-        label="Your Name",
-        help_text="How your name will appear to others.",
+        label=_("Your Name"),
+        help_text=_("How your name will appear to others."),
     )
     password = forms.CharField(
         widget=forms.PasswordInput,
         min_length=8,
-        help_text="Minimum 8 characters.",
+        help_text=_("Minimum 8 characters."),
     )
     password_confirm = forms.CharField(
         widget=forms.PasswordInput,
-        label="Confirm Password",
+        label=_("Confirm Password"),
     )
-    email = forms.EmailField(required=False, label="Email (optional)")
+    email = forms.EmailField(required=False, label=_("Email (optional)"))
 
     def clean_username(self):
         username = self.cleaned_data["username"]
         if User.objects.filter(username=username).exists():
-            raise forms.ValidationError("This username is already taken.")
+            raise forms.ValidationError(_("This username is already taken."))
         return username
 
     def clean(self):
@@ -137,5 +138,5 @@ class InviteAcceptForm(forms.Form):
         pw = cleaned.get("password")
         pw2 = cleaned.get("password_confirm")
         if pw and pw2 and pw != pw2:
-            self.add_error("password_confirm", "Passwords do not match.")
+            self.add_error("password_confirm", _("Passwords do not match."))
         return cleaned

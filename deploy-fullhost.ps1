@@ -78,7 +78,7 @@ $nodesJson = @"
         },
         "env": {
             "JELASTIC_ENVIRONMENT": "true",
-            "DJANGO_SETTINGS_MODULE": "KoNote2.settings.production",
+            "DJANGO_SETTINGS_MODULE": "konote.settings.production",
             "KoNote2_MODE": "production",
             "AUTH_MODE": "local",
             "PORT": "8000"

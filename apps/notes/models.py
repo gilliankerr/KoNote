@@ -2,6 +2,8 @@
 from django.conf import settings
 from django.db import models
 
+from konote.encryption import decrypt_field, encrypt_field
+
 
 class ProgressNoteTemplate(models.Model):
     """Defines the structure of a full progress note."""
@@ -78,13 +80,37 @@ class ProgressNote(models.Model):
     author_program = models.ForeignKey(
         "programs.Program", on_delete=models.SET_NULL, null=True, blank=True
     )
-    notes_text = models.TextField(default="", blank=True, help_text="Content for quick notes.")
-    summary = models.TextField(default="", blank=True)
-    participant_reflection = models.TextField(
-        default="",
-        blank=True,
-        help_text="The participant's own words about what they're taking away from the session.",
-    )
+    # Encrypted clinical content fields
+    _notes_text_encrypted = models.BinaryField(default=b"", blank=True)
+    _summary_encrypted = models.BinaryField(default=b"", blank=True)
+    _participant_reflection_encrypted = models.BinaryField(default=b"", blank=True)
+
+    @property
+    def notes_text(self):
+        """Content for quick notes (decrypted)."""
+        return decrypt_field(self._notes_text_encrypted)
+
+    @notes_text.setter
+    def notes_text(self, value):
+        self._notes_text_encrypted = encrypt_field(value)
+
+    @property
+    def summary(self):
+        """Summary of the session (decrypted)."""
+        return decrypt_field(self._summary_encrypted)
+
+    @summary.setter
+    def summary(self, value):
+        self._summary_encrypted = encrypt_field(value)
+
+    @property
+    def participant_reflection(self):
+        """The participant's own words about what they're taking away (decrypted)."""
+        return decrypt_field(self._participant_reflection_encrypted)
+
+    @participant_reflection.setter
+    def participant_reflection(self, value):
+        self._participant_reflection_encrypted = encrypt_field(value)
     backdate = models.DateTimeField(null=True, blank=True, help_text="Override date if note is for a past session.")
     begin_timestamp = models.DateTimeField(null=True, blank=True)
     follow_up_date = models.DateField(
@@ -139,8 +165,17 @@ class ProgressNoteTarget(models.Model):
 
     progress_note = models.ForeignKey(ProgressNote, on_delete=models.CASCADE, related_name="target_entries")
     plan_target = models.ForeignKey("plans.PlanTarget", on_delete=models.CASCADE, related_name="note_entries")
-    notes = models.TextField(default="", blank=True)
+    _notes_encrypted = models.BinaryField(default=b"", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def notes(self):
+        """Target-specific notes (decrypted)."""
+        return decrypt_field(self._notes_encrypted)
+
+    @notes.setter
+    def notes(self, value):
+        self._notes_encrypted = encrypt_field(value)
 
     class Meta:
         app_label = "notes"

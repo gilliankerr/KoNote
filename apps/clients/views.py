@@ -14,6 +14,17 @@ from .helpers import get_client_tab_counts, get_document_folder_url
 from .models import ClientDetailValue, ClientFile, ClientProgramEnrolment, CustomFieldGroup
 
 
+def get_client_queryset(user):
+    """Return filtered ClientFile queryset based on user's demo status.
+
+    Security requirement: is_demo is read ONLY from request.user.is_demo.
+    Never read from query params, form data, or cookies.
+    """
+    if user.is_demo:
+        return ClientFile.objects.demo()
+    return ClientFile.objects.real()
+
+
 def _get_accessible_programs(user):
     """Return programs the user can access.
 
@@ -32,16 +43,21 @@ def _get_accessible_programs(user):
 
 
 def _get_accessible_clients(user):
-    """Return client queryset scoped to user's programs.
+    """Return client queryset scoped to user's programs and demo status.
 
     Uses prefetch_related to avoid N+1 queries when displaying enrolments.
     Admins without program roles see no clients.
+
+    Security: Filters by user.is_demo to enforce demo/real data separation.
+    Demo users only see demo clients; real users only see real clients.
     """
     program_ids = UserProgramRole.objects.filter(user=user, status="active").values_list("program_id", flat=True)
     client_ids = ClientProgramEnrolment.objects.filter(
         program_id__in=program_ids, status="enrolled"
     ).values_list("client_file_id", flat=True)
-    return ClientFile.objects.filter(pk__in=client_ids).prefetch_related("enrolments__program")
+    # Filter by demo status using the helper function
+    base_queryset = get_client_queryset(user)
+    return base_queryset.filter(pk__in=client_ids).prefetch_related("enrolments__program")
 
 
 @login_required
@@ -107,6 +123,9 @@ def client_create(request):
             client.birth_date = form.cleaned_data["birth_date"]
             client.record_id = form.cleaned_data["record_id"]
             client.status = form.cleaned_data["status"]
+            # Set is_demo based on the creating user's status
+            # Security: is_demo is immutable after creation
+            client.is_demo = request.user.is_demo
             client.save()
             # Enrol in selected programs
             for program in form.cleaned_data["programs"]:
@@ -121,7 +140,9 @@ def client_create(request):
 @login_required
 @minimum_role("staff")
 def client_edit(request, client_id):
-    client = get_object_or_404(ClientFile, pk=client_id)
+    # Security: Only fetch clients matching user's demo status
+    base_queryset = get_client_queryset(request.user)
+    client = get_object_or_404(base_queryset, pk=client_id)
     available_programs = _get_accessible_programs(request.user)
     current_program_ids = list(
         ClientProgramEnrolment.objects.filter(client_file=client, status="enrolled").values_list("program_id", flat=True)
@@ -176,7 +197,9 @@ def client_edit(request, client_id):
 
 @login_required
 def client_detail(request, client_id):
-    client = get_object_or_404(ClientFile, pk=client_id)
+    # Security: Only fetch clients matching user's demo status
+    base_queryset = get_client_queryset(request.user)
+    client = get_object_or_404(base_queryset, pk=client_id)
     # Track recently viewed clients in session (most recent first, max 10)
     recent = request.session.get("recent_clients", [])
     if client_id in recent:
@@ -194,7 +217,7 @@ def client_detail(request, client_id):
     has_editable_fields = False
     for group in groups:
         if is_receptionist:
-            # Receptionists only see fields with view or edit access
+            # Front desk staff only see fields with view or edit access
             fields = group.fields.filter(status="active", receptionist_access__in=["view", "edit"])
         else:
             fields = group.fields.filter(status="active")
@@ -205,7 +228,7 @@ def client_detail(request, client_id):
                 value = cdv.get_value()
             except ClientDetailValue.DoesNotExist:
                 value = ""
-            # Track if field is editable (staff can edit all, receptionist only if access=edit)
+            # Track if field is editable (staff can edit all, front desk only if access=edit)
             is_editable = not is_receptionist or field_def.receptionist_access == "edit"
             if is_editable:
                 has_editable_fields = True
@@ -221,7 +244,7 @@ def client_detail(request, client_id):
         {"url": reverse("clients:client_list"), "label": "Clients"},
         {"url": "", "label": f"{client.first_name} {client.last_name}"},
     ]
-    # Tab counts for badges (only for non-receptionists, only for full page loads)
+    # Tab counts for badges (only for non-front-desk roles, only for full page loads)
     tab_counts = {} if is_receptionist else get_client_tab_counts(client)
 
     context = {
@@ -247,11 +270,11 @@ def _get_custom_fields_context(client, user_role, hide_empty=False):
 
     Args:
         client: ClientFile instance
-        user_role: User's role (receptionist, counsellor, etc.)
+        user_role: User's role (front desk, direct service, etc.)
         hide_empty: If True, exclude fields without values (for display mode).
                    If False, include all fields (for edit mode).
 
-    Returns a dict with custom_data, has_editable_fields, client, and is_receptionist.
+    Returns a dict with custom_data, has_editable_fields, client, and is_receptionist (front desk flag).
     """
     is_receptionist = user_role == "receptionist"
     groups = CustomFieldGroup.objects.filter(status="active").prefetch_related("fields")
@@ -316,11 +339,14 @@ def client_custom_fields_edit(request, client_id):
 def client_save_custom_fields(request, client_id):
     """Save custom field values for a client.
 
-    Receptionists can only save fields with receptionist_access='edit'.
-    Staff and managers can save all fields.
+    Security: Only fetch clients matching user's demo status.
+    Front desk staff can only save fields with receptionist_access='edit'.
+    Direct service staff and managers can save all fields.
     Returns the read-only display partial for HTMX, or redirects for non-HTMX.
     """
-    client = get_object_or_404(ClientFile, pk=client_id)
+    # Security: Only fetch clients matching user's demo status
+    base_queryset = get_client_queryset(request.user)
+    client = get_object_or_404(base_queryset, pk=client_id)
     user_role = getattr(request, "user_program_role", None)
     is_receptionist = user_role == "receptionist"
 

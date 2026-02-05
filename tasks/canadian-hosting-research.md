@@ -14,6 +14,19 @@ Research conducted 2026-02-04. Evaluating Canadian-owned hosting providers for n
 
 ---
 
+## Current Encryption Status
+
+> **Important:** As of February 2026, KoNote2 encrypts client identifying information (names, birth dates, sensitive custom fields) but **does NOT encrypt progress note content** at the application level.
+>
+> This means:
+> - Canadian hosting is recommended to satisfy PIPEDA/PHIPA data residency requirements
+> - If progress note encryption (SEC1) is implemented, US hosting becomes more viable because clinical content would be encrypted with agency-held keys
+> - All recommended hosting providers encrypt data at rest at the infrastructure level, but this doesn't protect against CLOUD Act requests
+>
+> See TODO.md (SEC1) for progress note encryption status.
+
+---
+
 ## Recommended Options
 
 ### Option 1: FullHost Cloud PaaS (Current Default)

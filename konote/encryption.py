@@ -2,7 +2,7 @@
 Application-level PII encryption using Fernet (AES-128-CBC + HMAC-SHA256).
 
 Usage in models:
-    from KoNote2.encryption import encrypt_field, decrypt_field
+    from konote.encryption import encrypt_field, decrypt_field
 
     class MyModel(models.Model):
         _name_encrypted = models.BinaryField()
@@ -15,8 +15,12 @@ Usage in models:
         def name(self, value):
             self._name_encrypted = encrypt_field(value)
 """
+import logging
+
 from cryptography.fernet import Fernet, InvalidToken
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 _fernet = None
 
@@ -53,6 +57,7 @@ def decrypt_field(ciphertext):
             ciphertext = bytes(ciphertext)
         return f.decrypt(ciphertext).decode("utf-8")
     except InvalidToken:
+        logger.error("Decryption failed — possible key mismatch or data corruption")
         return "[decryption error]"
 
 

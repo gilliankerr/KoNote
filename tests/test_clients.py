@@ -8,7 +8,7 @@ from apps.clients.models import (
     ClientFile, ClientProgramEnrolment, CustomFieldGroup,
     CustomFieldDefinition, ClientDetailValue,
 )
-import KoNote2.encryption as enc_module
+import konote.encryption as enc_module
 
 TEST_KEY = Fernet.generate_key().decode()
 
@@ -402,7 +402,7 @@ class ConsentRecordingTest(TestCase):
         self.assertContains(resp, "verbal")
 
     def test_receptionist_cannot_record_consent(self):
-        """Receptionists cannot record consent (staff-only action)."""
+        """Front desk staff cannot record consent (staff-only action)."""
         from django.utils import timezone
         self.client.login(username="receptionist", password="testpass123")
         today = timezone.now().strftime("%Y-%m-%d")

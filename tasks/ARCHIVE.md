@@ -4,6 +4,45 @@ Tasks moved from TODO.md after 10+ items in Recently Done.
 
 ---
 
+## Completed 2026-02-05
+
+### Secure Export Foundation (all complete)
+
+- [x] Fix demo/real separation in client_data_export, metric, CMT views — 2026-02-05 (EXP0a-d)
+- [x] Add recipient field + audit logging to all export views — 2026-02-05 (EXP2a-d)
+- [x] Add warning dialogs — client count, PII warnings, required recipient — 2026-02-05 (EXP2e-g)
+- [x] Add tests, fix i18n in export templates, verify WCAG contrast, aria-hidden on emojis — 2026-02-05 (TEST-EXP1, I18N-EXP1, A11Y-EXP1-2)
+- [x] Secure links — model, views, templates, cleanup command, revocation — 2026-02-05 (EXP2h-p)
+- [x] Export permission alignment — PM scoped exports, creator downloads, 35 tests, role matrix — 2026-02-05 (PERM1-10)
+
+### Moved from Recently Done (2026-02-05 cleanup)
+
+- [x] Azure deployment guide — 2026-02-04 (DOC20)
+- [x] Documentation improvements — staff guide, archive reorg — 2026-02-03 (DOC18, DOC19)
+- [x] PIPEDA/PHIPA consent workflow + note follow-up dates — 2026-02-03 (PRIV1, FU1)
+
+### Security & Multilingual
+
+- [x] Progress note encryption — CLOUD Act protection — 2026-02-05 (SEC1)
+- [x] MFA documentation — 2026-02-05 (SEC2)
+- [x] Fix French translations not loading — LOCALE_PATHS + EN/FR switcher styling — 2026-02-05 (I18N-FIX1)
+- [x] Multilingual Phases 1A–1C — 636 translations, bilingual login, [EN|FR] toggle — 2026-02-05 (I18N1-2b, TEST-I18N1)
+- [x] Harden seed system — remove fragile guard, deduplicate data — 2026-02-05 (SEED1)
+- [x] Deployment Workflow Phase 1 — demo/real data separation — 2026-02-05 (DEMO1-8)
+- [x] Azure deployment guide — 2026-02-04 (DOC20)
+
+### Previously in Recently Done
+
+- [x] Create "Quick Start for Staff" training doc — 2026-02-03 (DOC18)
+- [x] Fix test suite configuration error — 2026-02-03 (TEST2)
+- [x] PIPEDA/PHIPA consent workflow — block note entry until client consent recorded — 2026-02-03 (PRIV1)
+- [x] Note follow-up dates on home page — 2026-02-03 (FU1)
+- [x] Add CSV export for all client data — 2026-02-03 (EXP1)
+- [x] Mobile responsiveness pass — 2026-02-03 (UI1)
+- [x] Note auto-save / draft recovery — 2026-02-03 (UX21)
+- [x] Add client search filters (program, status, date) — 2026-02-03 (UX19)
+- [x] Add backup automation examples to docs — 2026-02-03 (OPS1)
+
 ## Completed 2026-02-03
 
 - [x] Add consent checkbox to note entry — 2026-02-03 (PRIV2)

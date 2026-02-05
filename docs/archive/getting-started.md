@@ -33,7 +33,7 @@ KoNote2 has security protections built in. When configured correctly, it:
 - **Encrypts client names, emails, birth dates, and phone numbers** — Even if someone accessed your database directly, they'd see scrambled text, not readable data
 - **Blocks most common security mistakes** — The server won't start if critical security settings are missing
 - **Logs who accesses what** — Every time someone views or changes a client record, it's recorded in a separate audit database
-- **Restricts access by role** — Staff only see clients in their assigned programs; receptionists can't view clinical notes
+- **Restricts access by role** — Staff only see clients in their assigned programs; front desk staff can't view clinical notes
 - **Runs security checks automatically** — Every time you start the application, it verifies encryption keys and security settings
 
 ### What You Need to Do
@@ -510,7 +510,7 @@ Performing system checks...
 
 System check identified no issues (0 silenced).
 February 03, 2026 - 14:30:00
-Django version 5.0.2, using settings 'KoNote2.settings'
+Django version 5.0.2, using settings 'konote.settings'
 Starting development server at http://127.0.0.1:8000/
 Quit the server with CTRL-BREAK.
 ```
@@ -591,7 +591,7 @@ pytest tests/test_rbac.py -v
 | File | Tests | Purpose |
 |------|-------|---------|
 | `test_security.py` | PII encryption | Verifies client data is encrypted in database |
-| `test_rbac.py` | 19 tests | Role permissions, receptionist access control |
+| `test_rbac.py` | 19 tests | Role permissions, front desk access control |
 | `test_htmx_errors.py` | 21 tests | Error responses, form validation, HTMX partials |
 | `test_encryption.py` | Key validation | Fernet encrypt/decrypt functions |
 

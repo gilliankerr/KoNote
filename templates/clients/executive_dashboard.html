@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Executive Dashboard" %} — {{ site.product_name|default:"KoNote2" }}{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <h1>{% trans "Executive Overview" %}</h1>
+    <p class="page-subtitle">{% trans "Aggregate statistics across your programs. Individual client records are not accessible from this view to protect confidentiality." %}</p>
+</header>
+
+{# Overall summary cards #}
+<section class="stats-overview" aria-label="{% trans 'Organization Summary' %}">
+    <div class="stats-grid">
+        <article class="stat-card">
+            <div class="stat-value">{{ total_clients }}</div>
+            <div class="stat-label">{% trans "Total" %} {{ term.client_plural|default:"Clients" }}</div>
+        </article>
+        <article class="stat-card">
+            <div class="stat-value">{{ total_active }}</div>
+            <div class="stat-label">{% trans "Active" %}</div>
+        </article>
+        <article class="stat-card {% if overall_consent_pct >= 90 %}stat-success{% elif overall_consent_pct >= 70 %}stat-warning{% else %}stat-alert{% endif %}">
+            <div class="stat-value">{{ overall_consent_pct }}%</div>
+            <div class="stat-label">{% trans "Consent Compliance" %}</div>
+        </article>
+    </div>
+</section>
+
+{# Program breakdown #}
+<section aria-label="{% trans 'Program Statistics' %}">
+    <h2>{{ term.program_plural|default:"Programs" }}</h2>
+
+    {% if program_stats %}
+    <div class="program-cards">
+        {% for stat in program_stats %}
+        <article class="program-card">
+            <header>
+                <span class="program-dot" style="background-color: {{ stat.program.colour_hex }}" aria-hidden="true"></span>
+                <h3>{{ stat.program.name }}</h3>
+            </header>
+
+            <div class="program-metrics">
+                <div class="metric-row">
+                    <span class="metric-label">{% trans "Total" %} {{ term.client_plural|default:"Clients" }}</span>
+                    <span class="metric-value">{{ stat.total }}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">{% trans "Active" %}</span>
+                    <span class="metric-value">{{ stat.active }}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">{% trans "Inactive" %}</span>
+                    <span class="metric-value">{{ stat.inactive }}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">{% trans "Discharged" %}</span>
+                    <span class="metric-value">{{ stat.discharged }}</span>
+                </div>
+                <hr>
+                <div class="metric-row highlight">
+                    <span class="metric-label">{% trans "New this month" %}</span>
+                    <span class="metric-value">{{ stat.new_this_month }}</span>
+                </div>
+                <div class="metric-row highlight">
+                    <span class="metric-label">{% trans "Notes this week" %}</span>
+                    <span class="metric-value">{{ stat.notes_this_week }}</span>
+                </div>
+                <hr>
+                <div class="metric-row {% if stat.consent_pct >= 90 %}metric-success{% elif stat.consent_pct >= 70 %}metric-warning{% else %}metric-alert{% endif %}">
+                    <span class="metric-label">{% trans "Consent compliance" %}</span>
+                    <span class="metric-value">{{ stat.consent_pct }}%</span>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>{% trans "No programs assigned. Contact your administrator to request program access." %}</p>
+    {% endif %}
+</section>
+
+{# Guidance #}
+<section class="executive-guidance" aria-label="{% trans 'Getting More Information' %}">
+    <h2>{% trans "Need More Details?" %}</h2>
+    <p>{% trans "For individual client information or detailed reports, please contact your Program Manager. This dashboard provides oversight while ensuring client confidentiality is maintained." %}</p>
+</section>
+
+<style>
+/* Executive dashboard styles */
+.page-header {
+    margin-bottom: var(--kn-space-lg, 2rem);
+}
+
+.page-subtitle {
+    color: var(--pico-muted-color);
+    font-size: 0.95rem;
+    max-width: 60ch;
+}
+
+.stats-overview {
+    margin-bottom: var(--kn-space-lg, 2rem);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--kn-space-base, 1rem);
+}
+
+.stat-card {
+    text-align: center;
+    padding: var(--kn-space-base, 1rem);
+    margin: 0;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    color: var(--pico-muted-color);
+    font-size: 0.875rem;
+}
+
+.stat-success .stat-value { color: var(--pico-ins-color, #2e7d32); }
+.stat-warning .stat-value { color: var(--pico-mark-background-color, #f9a825); }
+.stat-alert .stat-value { color: var(--pico-del-color, #c62828); }
+
+.program-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--kn-space-base, 1rem);
+}
+
+.program-card {
+    margin: 0;
+}
+
+.program-card header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: var(--kn-space-sm, 0.5rem);
+}
+
+.program-card h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.program-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.program-metrics {
+    font-size: 0.9rem;
+}
+
+.metric-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25rem 0;
+}
+
+.metric-label {
+    color: var(--pico-muted-color);
+}
+
+.metric-value {
+    font-weight: 600;
+}
+
+.metric-row.highlight {
+    background: var(--pico-card-sectionning-background-color);
+    margin: 0 -1rem;
+    padding: 0.25rem 1rem;
+}
+
+.metric-success .metric-value { color: var(--pico-ins-color, #2e7d32); }
+.metric-warning .metric-value { color: var(--pico-mark-background-color, #f9a825); }
+.metric-alert .metric-value { color: var(--pico-del-color, #c62828); }
+
+.program-metrics hr {
+    margin: 0.5rem 0;
+    border: none;
+    border-top: 1px solid var(--pico-muted-border-color);
+}
+
+.executive-guidance {
+    margin-top: var(--kn-space-lg, 2rem);
+    padding: var(--kn-space-base, 1rem);
+    background: var(--pico-card-sectionning-background-color);
+    border-radius: var(--pico-border-radius);
+}
+
+.executive-guidance h2 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.executive-guidance p {
+    margin: 0;
+    color: var(--pico-muted-color);
+    font-size: 0.9rem;
+}
+</style>
+{% endblock %}

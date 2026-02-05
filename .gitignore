@@ -10,8 +10,8 @@ build/
 staticfiles/
 db.sqlite3
 
-# Compiled translation files — generated at build time from .po files
-*.mo
+# Compiled translation files — pre-compiled locally and committed
+# (no gettext needed at build time)
 
 # Virtual environment
 venv/

@@ -1,6 +1,64 @@
-"""Utility functions for the reports app — fiscal year calculations."""
+"""Utility functions for the reports app — fiscal year calculations and permissions."""
 from datetime import date
 from typing import List, Tuple
+
+
+def can_create_export(user, export_type, program=None):
+    """
+    Check if a user can create an export of the given type.
+
+    Permission rules:
+    - client_data: admin only (full PII dump for migration/audit)
+    - metrics / cmt: admin (any program) or program_manager (their programs only)
+    - All other roles (staff, receptionist, executive): no export access
+
+    Args:
+        user: The User instance.
+        export_type: One of "client_data", "metrics", "cmt".
+        program: Optional Program instance — when provided, checks whether
+                 the user manages that specific program.
+
+    Returns:
+        True if the user is allowed to create the export, False otherwise.
+    """
+    from apps.programs.models import UserProgramRole
+
+    if export_type == "client_data":
+        return user.is_admin
+
+    if user.is_admin:
+        return True
+
+    if export_type in ("metrics", "cmt"):
+        qs = UserProgramRole.objects.filter(
+            user=user, role="program_manager", status="active"
+        )
+        if program:
+            return qs.filter(program=program).exists()
+        return qs.exists()
+
+    return False
+
+
+def get_manageable_programs(user):
+    """
+    Return programs the user can export from.
+
+    Admins see all active programs. Program managers see only the
+    programs they manage.
+
+    Returns:
+        QuerySet of Program objects.
+    """
+    from apps.programs.models import Program, UserProgramRole
+
+    if user.is_admin:
+        return Program.objects.filter(status="active")
+
+    managed_ids = UserProgramRole.objects.filter(
+        user=user, role="program_manager", status="active"
+    ).values_list("program_id", flat=True)
+    return Program.objects.filter(pk__in=managed_ids, status="active")
 
 
 def get_fiscal_year_range(year: int) -> Tuple[date, date]:

@@ -9,7 +9,7 @@ from cryptography.fernet import Fernet
 from apps.auth_app.models import User
 from apps.programs.models import Program, UserProgramRole
 from apps.clients.models import ClientFile, ClientProgramEnrolment
-import KoNote2.encryption as enc_module
+import konote.encryption as enc_module
 
 
 TEST_KEY = Fernet.generate_key().decode()
@@ -24,7 +24,7 @@ class Error403ResponseTest(TestCase):
 
         # Create users with different roles
         self.receptionist = User.objects.create_user(
-            username="receptionist", password="testpass123", display_name="Receptionist"
+            username="receptionist", password="testpass123", display_name="Front Desk"
         )
         self.staff_user = User.objects.create_user(
             username="staff", password="testpass123", display_name="Staff"
@@ -205,7 +205,7 @@ class HTMXPartialResponseTest(TestCase):
         """Plan view HTMX request should return plan tab partial."""
         self.client.force_login(self.staff_user)
         response = self.client.get(
-            f"/clients/{self.client_file.pk}/plan/",
+            f"/plans/client/{self.client_file.pk}/",
             HTTP_HX_REQUEST="true",
         )
         self.assertEqual(response.status_code, 200)
@@ -224,7 +224,7 @@ class CustomFieldEditHTMXTest(TestCase):
             username="staff", password="testpass123", display_name="Staff"
         )
         self.receptionist = User.objects.create_user(
-            username="receptionist", password="testpass123", display_name="Receptionist"
+            username="receptionist", password="testpass123", display_name="Front Desk"
         )
 
         self.program = Program.objects.create(name="Test Program")
@@ -254,7 +254,7 @@ class CustomFieldEditHTMXTest(TestCase):
         enc_module._fernet = None
 
     def test_receptionist_edit_mode_blocked_for_no_editable_fields(self):
-        """Receptionist with no editable fields should get 403 on edit mode."""
+        """Front desk staff with no editable fields should get 403 on edit mode."""
         # Remove the editable field, leaving only hidden
         self.editable_field.delete()
 

@@ -160,7 +160,7 @@ All checks should pass. If you see `KoNote2.E001`, your encryption key is missin
 
 ### KoNote2.E002: Security middleware missing
 **Cause:** Custom middleware not in settings.
-**Fix:** This shouldn't happen with default settings. Check `KoNote2/settings/development.py`.
+**Fix:** This shouldn't happen with default settings. Check `konote/settings/development.py`.
 
 ### Database connection refused
 **Cause:** PostgreSQL not running or wrong credentials.

@@ -1,6 +1,7 @@
 """Client forms."""
 from django import forms
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from apps.programs.models import Program
 
@@ -11,24 +12,24 @@ class ConsentRecordForm(forms.Form):
     """Form to record client consent for data collection (PIPEDA/PHIPA compliance)."""
 
     CONSENT_TYPE_CHOICES = [
-        ("written", "Written consent"),
-        ("verbal", "Verbal consent"),
-        ("electronic", "Electronic consent"),
+        ("written", _("Written consent")),
+        ("verbal", _("Verbal consent")),
+        ("electronic", _("Electronic consent")),
     ]
 
     consent_type = forms.ChoiceField(
         choices=CONSENT_TYPE_CHOICES,
-        label="Consent type",
+        label=_("Consent type"),
         initial="written",
     )
     consent_date = forms.DateField(
-        label="Date consent was obtained",
+        label=_("Date consent was obtained"),
         widget=forms.DateInput(attrs={"type": "date"}),
         initial=timezone.now,
     )
     notes = forms.CharField(
         required=False,
-        label="Notes (optional)",
+        label=_("Notes (optional)"),
         widget=forms.Textarea(attrs={"rows": 2, "placeholder": "Any additional details about how consent was obtained..."}),
     )
 
@@ -83,7 +84,7 @@ class CustomFieldValuesForm(forms.Form):
                         label=field_def.name,
                     )
                 elif field_def.input_type == "select" and field_def.options_json:
-                    choices = [("", "— Select —")] + [
+                    choices = [("", _("— Select —"))] + [
                         (opt, opt) for opt in field_def.options_json
                     ]
                     self.fields[field_key] = forms.ChoiceField(
@@ -112,5 +113,5 @@ class CustomFieldDefinitionForm(forms.ModelForm):
             "options_json": forms.Textarea(attrs={"rows": 3, "placeholder": '["Option 1", "Option 2"]'}),
         }
         help_texts = {
-            "receptionist_access": "Set to 'View and edit' for contact info, emergency contacts, and safety alerts.",
+            "receptionist_access": _("Set front desk access to 'View and edit' for contact info, emergency contacts, and safety alerts."),
         }

@@ -1,7 +1,7 @@
 """URL patterns for AI-powered HTMX endpoints."""
 from django.urls import path
 
-from KoNote2 import ai_views
+from konote import ai_views
 
 app_name = "ai"
 urlpatterns = [

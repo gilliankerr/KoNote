@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-This review examines KoNote2's workflows from the perspective of three user roles: **Counsellors** (primary users), **Receptionists**, and **Administrators**. The goal is to identify usability friction points like the recently-fixed "related notes dropdown" issue, where technical data representations (dates only) replaced human-readable content.
+This review examines KoNote2's workflows from the perspective of three user roles: **Direct service staff** (primary users), **Front Desk staff**, and **Administrators**. The goal is to identify usability friction points like the recently-fixed "related notes dropdown" issue, where technical data representations (dates only) replaced human-readable content.
 
 ---
 
@@ -18,7 +18,7 @@ This review examines KoNote2's workflows from the perspective of three user role
 |----------|-----------------|---------|---------------|
 | Event form → Related Note | ~~"Quick Note - 2026-02-03"~~ | **FIXED** | Now shows 40-char preview |
 | Full Note form → Template | "Intake Template" | No description of what sections it includes | Add section count or description |
-| Plan Section form → Programme | "Youth Services" | Counsellor may not know which programme to pick | Add client count or description |
+| Plan Section form → Programme | "Youth Services" | Staff may not know which programme to pick | Add client count or description |
 | Event form → Event Type | "Crisis" | Works OK, but could show colour dot | Consider colour indicator |
 
 ### 2. Missing `__str__` Methods (Developer Oversight)
@@ -31,7 +31,7 @@ These models have no `__str__` method and will display as "Object (1)" if ever s
 | `Alert` | `<Alert object (1)>` | Add: `f"Alert - {self.created_at:%Y-%m-%d}: {content[:40]}"` |
 | `PlanTargetRevision` | `<PlanTargetRevision object>` | Add: `f"{self.name} (rev {self.created_at:%Y-%m-%d})"` |
 
-### 3. Form Complexity (Counsellor Perspective)
+### 3. Form Complexity (Direct Service Perspective)
 
 #### Full Progress Note Form
 
@@ -49,7 +49,7 @@ These models have no `__str__` method and will display as "Object (1)" if ever s
 
 **Problems:**
 - **Consent checkbox is at the bottom** — easy to miss after scrolling through targets
-- **No visual progress indicator** — counsellor doesn't know how far along they are
+- **No visual progress indicator** — staff member doesn't know how far along they are
 - **Targets appear hidden until checkbox clicked** — discoverability issue
 - **All fields shown regardless of template** — overwhelming
 
@@ -70,7 +70,7 @@ These models have no `__str__` method and will display as "Object (1)" if ever s
 
 **Problems:**
 - No visual indication of which tabs have content (e.g., badge count)
-- "Analysis" tab may confuse counsellors (sounds like admin/reporting)
+- "Analysis" tab may confuse direct service staff (sounds like admin/reporting)
 - Tab names use system terminology, not task-oriented language
 
 **Recommendations:**
@@ -85,7 +85,7 @@ These models have no `__str__` method and will display as "Object (1)" if ever s
 | `sort_order` | "Sort order" | Technical jargon | "Display order" or hide entirely |
 | `status_reason` | "Status reason" | Vague | "Why is this being changed?" |
 | `backdate` | "Backdate" | Unclear | "Session date (if different from today)" |
-| `min_value` / `max_value` | Shown to counsellors | Technical | Only show to admins |
+| `min_value` / `max_value` | Shown to direct service staff | Technical | Only show to admins |
 
 ### 6. Error Prevention Gaps
 
@@ -98,16 +98,16 @@ These models have no `__str__` method and will display as "Object (1)" if ever s
 
 ### 7. Role-Specific Issues
 
-#### Counsellor Pain Points
+#### Direct Service Pain Points
 1. **Too many options when starting** — should see "Write a note" prominently, not 5 tabs
 2. **Metric entry is buried** — inside target accordions inside notes
 3. **No "recent clients" shortcut** — must search every time
 4. **Follow-up reminders not prominent** — buried on home page
 
-#### Receptionist Pain Points
+#### Front Desk Pain Points
 1. **Limited but unclear** — knows they can't do things but not always why
 2. **Custom field access confusing** — some fields editable, some view-only, no explanation
-3. **No clear task list** — what should a receptionist actually do in the system?
+3. **No clear task list** — what should a front desk user actually do in the system?
 
 #### Administrator Pain Points
 1. **Template preview missing** — can't see what a plan/note template looks like before deploying
@@ -132,7 +132,7 @@ These models have no `__str__` method and will display as "Object (1)" if ever s
 7. **Improve template dropdowns** — show description or section count
 8. **Add recent clients** to home page sidebar
 9. **Collapsible form sections** — progressive disclosure for Full Note
-10. **Receptionist orientation** — add "Your role" explanation panel
+10. **Front Desk orientation** — add "Your role" explanation panel
 11. **Duplicate note warning** — check before allowing same-day notes
 12. **Keyboard shortcuts system** — with help modal (accessible via `?` key)
 

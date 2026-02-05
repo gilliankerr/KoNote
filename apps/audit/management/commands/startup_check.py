@@ -222,8 +222,8 @@ class Command(BaseCommand):
         middleware = getattr(settings, "MIDDLEWARE", [])
 
         required = [
-            ("KoNote2.middleware.program_access.ProgramAccessMiddleware", "RBAC"),
-            ("KoNote2.middleware.audit.AuditMiddleware", "Audit logging"),
+            ("konote.middleware.program_access.ProgramAccessMiddleware", "RBAC"),
+            ("konote.middleware.audit.AuditMiddleware", "Audit logging"),
         ]
 
         missing = []

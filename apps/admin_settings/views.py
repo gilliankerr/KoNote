@@ -44,7 +44,7 @@ def terminology(request):
         current_terms_en = {}
         current_terms_fr = {}
         for key, defaults in DEFAULT_TERMS.items():
-            default_en, _ = defaults
+            default_en, _default_fr = defaults
             if key in overrides:
                 current_terms_en[key] = overrides[key].display_value
                 current_terms_fr[key] = overrides[key].display_value_fr

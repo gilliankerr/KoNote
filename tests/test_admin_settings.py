@@ -8,7 +8,7 @@ from apps.admin_settings.models import (
     get_default_terms_for_language,
 )
 from apps.auth_app.models import User
-import KoNote2.encryption as enc_module
+import konote.encryption as enc_module
 
 TEST_KEY = Fernet.generate_key().decode()
 
@@ -210,6 +210,8 @@ class FeatureToggleTest(TestCase):
 
 @override_settings(FIELD_ENCRYPTION_KEY=TEST_KEY)
 class InstanceSettingsTest(TestCase):
+    databases = {"default", "audit"}
+
     def setUp(self):
         enc_module._fernet = None
         self.client = Client()
@@ -226,6 +228,7 @@ class InstanceSettingsTest(TestCase):
             "product_name": "MyApp",
             "date_format": "Y-m-d",
             "session_timeout_minutes": "60",
+            "document_storage_provider": "none",
         })
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(InstanceSetting.get("product_name"), "MyApp")

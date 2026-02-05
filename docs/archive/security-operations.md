@@ -168,7 +168,7 @@ pytest tests/test_security.py tests/test_rbac.py tests/test_encryption.py -v
 | File | Tests | What It Covers |
 |------|-------|----------------|
 | `test_security.py` | PII exposure | Client data not in database plaintext, encryption round-trip, ciphertext validation |
-| `test_rbac.py` | 19 tests | Role permissions, receptionist access control, program restrictions, admin-only routes |
+| `test_rbac.py` | 19 tests | Role permissions, front desk access control, program restrictions, admin-only routes |
 | `test_htmx_errors.py` | 21 tests | Error responses, HTMX partials, form validation feedback |
 | `test_encryption.py` | Key validation | Fernet key format, encrypt/decrypt functions |
 

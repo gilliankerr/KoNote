@@ -29,8 +29,17 @@ class SafeLocaleMiddleware(LocaleMiddleware):
             # This catches corrupted .mo files that load but fail on use
             current_lang = translation.get_language()
             if current_lang and current_lang.startswith("fr"):
-                # Try a simple translation to verify the .mo file works
-                translation.gettext("Sign In")
+                # Try a project-specific translation to verify our .mo file works.
+                # We use a KoNote-only string (not a Django built-in) so this
+                # fails if our .mo catalog is missing, even if Django's is loaded.
+                test_str = translation.gettext("Funder Report Export")
+                if test_str == "Funder Report Export":
+                    # Our project .mo file didn't load — French string was not translated
+                    logger.warning(
+                        "French .mo catalog may be missing: project string not translated."
+                    )
+                    translation.activate("en")
+                    request.LANGUAGE_CODE = "en"
 
         except Exception as e:
             # Log the error and fall back to English

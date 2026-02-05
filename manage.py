@@ -25,23 +25,23 @@ def get_default_settings():
 
     # Auto-detect Railway
     if os.environ.get("RAILWAY_ENVIRONMENT"):
-        return "KoNote2.settings.production"
+        return "konote.settings.production"
 
     # Auto-detect Azure App Service
     if os.environ.get("WEBSITE_SITE_NAME"):
-        return "KoNote2.settings.production"
+        return "konote.settings.production"
 
     # Auto-detect Elestio
     if os.environ.get("ELESTIO_VM_NAME"):
-        return "KoNote2.settings.production"
+        return "konote.settings.production"
 
     # Auto-detect any production deployment (has DATABASE_URL but not local dev)
     # This catches Docker, Kubernetes, or any other platform
     if os.environ.get("DATABASE_URL") and not os.environ.get("KoNote2_LOCAL_DEV"):
-        return "KoNote2.settings.production"
+        return "konote.settings.production"
 
     # Default to development for local work
-    return "KoNote2.settings.development"
+    return "konote.settings.development"
 
 
 def main():

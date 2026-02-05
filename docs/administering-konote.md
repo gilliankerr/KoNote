@@ -213,7 +213,7 @@ Capture agency-specific information not in the standard client form.
 | **Admin** | All settings, user management, templates |
 | **Program Manager** | Program-level management |
 | **Staff** | Enter data, write notes, view clients in assigned programs |
-| **Receptionist** | Limited client info, basic data entry |
+| **Front Desk** | Limited client info, basic data entry |
 
 ### Deactivate Users
 
