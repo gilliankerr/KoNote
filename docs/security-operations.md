@@ -643,6 +643,129 @@ Permission tests live in `tests/test_export_permissions.py` and verify:
 
 ---
 
+## Export Data Protection
+
+### CSV Injection Protection
+
+| Aspect | Detail |
+|--------|--------|
+| **What's protected** | Exported CSV files opened in spreadsheet applications |
+| **Invariant** | No cell value starts with `=`, `+`, `-`, or `@` without a tab prefix |
+| **Enforcement** | `sanitise_csv_value()` and `sanitise_csv_row()` in `apps/reports/csv_utils.py` |
+| **Failure mode** | Without sanitisation, a malicious value like `=HYPERLINK("http://evil.com")` could execute when opened in Excel |
+| **Verification** | Export a CSV and inspect raw file — dangerous characters are tab-prefixed |
+| **Configuration required** | None (automatic) |
+
+### Filename Sanitisation
+
+| Aspect | Detail |
+|--------|--------|
+| **What's protected** | Download filenames in HTTP `Content-Disposition` headers |
+| **Invariant** | Download filenames contain only `[A-Za-z0-9_.-]` |
+| **Enforcement** | `sanitise_filename()` in `apps/reports/csv_utils.py` |
+| **Failure mode** | Path traversal or Content-Disposition header injection |
+| **Verification** | Download an export and confirm the filename contains only permitted characters |
+| **Configuration required** | None (automatic) |
+
+### Elevated Export Monitoring
+
+| Aspect | Detail |
+|--------|--------|
+| **What's protected** | Large or sensitive data exports (bulk client data, progress notes) |
+| **Invariant** | Exports with 100+ clients or including progress notes cannot be downloaded for `ELEVATED_EXPORT_DELAY_MINUTES` (default: 10) |
+| **Enforcement** | `SecureExportLink.is_elevated` flag in `apps/reports/models.py`; delay checked at download time |
+| **Failure mode** | Without delay, a compromised account could exfiltrate bulk data before detection |
+| **Verification** | Check Manage Export Links page (`/reports/export-links/`) for elevated status |
+| **Configuration required** | `ELEVATED_EXPORT_DELAY_MINUTES` env var (optional, default 10); email configuration for admin notifications |
+
+### Individual Client Export
+
+Staff-level users can export a single client's data directly (no deferred link). This supports PIPEDA data portability requirements.
+
+| Aspect | Detail |
+|--------|--------|
+| **Permission** | Staff or above, for clients in their assigned programmes |
+| **Delivery** | Direct download (not a deferred export link) |
+| **Selectable sections** | Plans, notes, metrics, events, custom fields |
+| **Audit** | Logged as a client data export with user, client ID, and selected sections |
+
+### Export Recipient Tracking
+
+| Aspect | Detail |
+|--------|--------|
+| **What's protected** | Accountability for data leaving the system |
+| **Invariant** | Every export form requires declaring who receives the data (self, colleague, funder, other) |
+| **Enforcement** | Required field on export creation form; stored on `SecureExportLink` model and in audit log |
+| **Failure mode** | Without tracking, there is no record of why data was exported or who it was shared with |
+| **Verification** | Check audit log or Manage Export Links page for recipient field |
+| **Configuration required** | None (automatic) |
+
+For operational procedures (setup, cron, troubleshooting), see `docs/export-runbook.md`.
+
+---
+
+## Erasure Workflow Security
+
+### State Machine
+
+```
+Request created (by staff+)
+  → Pending approval (all PMs for client's programmes notified by email)
+    → Each PM: approve or reject
+      → If any PM rejects → Request rejected (all parties notified)
+      → If all PMs approve → Erasure executed
+        → RegistrationSubmission PII scrubbed
+        → ClientFile CASCADE deleted (notes, plans, events, alerts, enrolments, metrics, custom fields)
+        → ErasureRequest updated (status=approved, client_file=NULL)
+        → Audit log written (counts only, no PII)
+        → All parties notified by email
+```
+
+### Key Invariants
+
+- **Self-approval prevention:** Requester cannot self-approve their own erasure request.
+- **Single rejection rule:** One rejection = entire request rejected.
+- **Deadlock detection:** If requester is the only active PM for remaining programmes, `is_deadlocked()` returns `True` — admin can approve as fallback.
+- **Non-destructive audit:** `ErasureRequest` survives via `on_delete=SET_NULL`; stores `client_pk`, `client_record_id`, `data_summary` (counts only), `programs_required`, `requested_by_display`.
+- **What auditors see after erasure:** `ErasureRequest` record with reason, all approval records (who, when, which programme), `data_summary` with record counts — no PII.
+- **Email notifications:** Best-effort (failures logged, do not block erasure).
+
+### Enforcement Files
+
+| File | Purpose |
+|------|---------|
+| `apps/clients/erasure.py` | Core erasure logic and execution |
+| `apps/clients/erasure_views.py` | Request, approval, and rejection views |
+| `apps/clients/models.py` | `ErasureRequest` and `ErasureApproval` models |
+
+---
+
+## Demo and Real Data Separation
+
+| Aspect | Detail |
+|--------|--------|
+| **What's protected** | Real client data from demo user access (and vice versa) |
+| **Invariant** | Demo users never see real clients; real users never see demo clients |
+| **Enforcement** | `get_client_queryset(user)` in `apps/clients/views.py` filters on `user.is_demo`; `ClientFileManager.real()` / `.demo()` queryset methods |
+| **Failure mode** | If `is_demo` were read from request params instead of user object, an attacker could bypass. Prevented — flag is read from authenticated user only. |
+| **Verification** | Log in as demo user, confirm no real clients visible; log in as real user, confirm no demo clients visible |
+| **Configuration required** | `DEMO_MODE=true` to create demo users/clients via seed command |
+
+---
+
+## Registration Security
+
+| Aspect | Detail |
+|--------|--------|
+| **Cryptographic slug** | `secrets.token_urlsafe(8)` — resistant to enumeration |
+| **Rate limiting** | 5 submissions per hour per session |
+| **PII encryption** | `RegistrationSubmission` encrypts `first_name`, `last_name`, `email`, `phone` using same Fernet as `ClientFile` |
+| **Duplicate detection** | SHA-256 hash of lowercase email (`email_hash` field, indexed). No decryption needed. |
+| **Consent** | Registration form requires consent checkbox. Consent timestamp stored on record. |
+| **Configuration required** | None (automatic). Admin creates registration links via Admin → Registration Links. |
+
+---
+
 ## Pre-Deployment Security Checklist
 
 Before deploying to production, verify all items:

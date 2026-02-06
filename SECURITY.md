@@ -9,9 +9,12 @@ This document describes the security architecture and how to run security checks
 All personally identifiable information (PII) is encrypted at rest using **Fernet** (AES-128-CBC + HMAC-SHA256).
 
 **Encrypted fields:**
-- `ClientFile`: first_name, middle_name, last_name, birth_date
+- `ClientFile`: first_name, middle_name, last_name, preferred_name, birth_date
 - `User`: email
 - `ClientDetailValue`: value (when `is_sensitive=True`)
+- `ProgressNote`: notes_text, summary, participant_reflection
+- `ProgressNoteTarget`: notes
+- `RegistrationSubmission`: first_name, last_name, email, phone
 
 **How it works:**
 - Raw storage uses `_field_name_encrypted` BinaryField
@@ -42,6 +45,8 @@ All personally identifiable information (PII) is encrypted at rest using **Ferne
 - Client record views (GET requests to `/clients/*`)
 - Login and logout events
 - Failed login attempts
+- Erasure requests (create, approve, reject, cancel, execute)
+- Export creation, download, and revocation
 
 **Fields captured:** user_id, action, resource_type, resource_id, IP address, timestamp
 
@@ -190,6 +195,19 @@ python manage.py test tests.test_security
 python manage.py test
 ```
 
+**Security test files:**
+
+| File | Coverage |
+|------|----------|
+| `tests/test_security.py` | PII exposure, encryption round-trip, ciphertext validation |
+| `tests/test_rbac.py` | Role permissions, programme restrictions, admin-only routes |
+| `tests/test_encryption.py` | Fernet key format, encrypt/decrypt functions |
+| `tests/test_export_permissions.py` | Role-based export access, programme scoping, download permissions |
+| `tests/test_erasure.py` | Erasure workflow, approval logic, deadlock detection, audit preservation |
+| `tests/test_demo_data_separation.py` | Demo/real user isolation, queryset filtering |
+| `tests/test_secure_export.py` | Elevated export delay, link expiry, download authorisation |
+| `tests/test_canadian_localisation.py` | Canadian spelling, locale settings, currency formatting |
+
 ---
 
 ## Security Audit Schedule
@@ -278,6 +296,11 @@ python manage.py rotate_encryption_key --old-key <OLD> --new-key <NEW>
 3. **Admin privilege separation:** Admin users without program roles cannot access client data. This is by design.
 
 4. **Document storage:** URLs link to external systems (SharePoint, Google Drive). Access control on the external system is separate from KoNote2.
+
+### Export Hardening
+
+- **CSV injection protection:** All exported cell values are sanitised with a tab prefix if they start with `=`, `+`, `-`, or `@`. Enforced by `sanitise_csv_value()` in `apps/reports/csv_utils.py`.
+- **Filename sanitisation:** Download filenames are restricted to `[A-Za-z0-9_.-]` via `sanitise_filename()` in `apps/reports/csv_utils.py`, preventing path traversal and Content-Disposition header injection.
 
 ---
 
