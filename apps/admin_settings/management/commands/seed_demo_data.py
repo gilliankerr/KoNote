@@ -2,11 +2,13 @@
 Seed rich demo data for demo clients (DEMO-001 through DEMO-010).
 
 Creates:
-- Plans with sections and targets linked to metrics
+- Plans with sections and targets linked to metrics (including client goals)
 - Progress notes with metric recordings following realistic trends
+- Qualitative progress data (client words, progress descriptors, engagement)
 - Events (intake, follow-ups, referrals, crises)
 - Alerts for clients with notable situations
 - Custom field values (contact info, emergency contacts, referral sources)
+- Demo groups (activity, service, project) with sessions, attendance, and highlights
 
 This gives charts and reports meaningful data to display.
 
@@ -22,6 +24,10 @@ from django.utils import timezone
 
 from apps.clients.models import ClientDetailValue, ClientFile, CustomFieldDefinition
 from apps.events.models import Alert, Event, EventType
+from apps.groups.models import (
+    Group, GroupMembership, GroupSession, GroupSessionAttendance,
+    GroupSessionHighlight, ProjectMilestone, ProjectOutcome,
+)
 from apps.notes.models import MetricValue, ProgressNote, ProgressNoteTarget
 from apps.plans.models import (
     MetricDefinition,
@@ -392,6 +398,34 @@ CLIENT_PLANS = {
     },
 }
 
+# Client goals — set on the first target of each client
+CLIENT_GOALS = {
+    "DEMO-001": "I want to feel like getting out of bed is worth it",
+    "DEMO-002": "I need somewhere safe to sleep that's mine",
+    "DEMO-003": "I want a job where people treat me like a person",
+    "DEMO-004": "I want to stop getting in trouble for skipping",
+    "DEMO-005": "I want to be able to say no when everyone around me is using",
+    "DEMO-006": "I want to stop feeling so angry all the time",
+    "DEMO-007": "I want to stop feeling sick every time I have to talk to people",
+    "DEMO-008": "I just want to get along with my mom again",
+    "DEMO-009": "I want to feel like I belong somewhere",
+    "DEMO-010": "I want to build a life worth staying sober for",
+}
+
+# Qualitative data for progress notes — rotated based on note position
+CLIENT_WORDS_SAMPLES = [
+    "It's hard",
+    "I don't know if this is working",
+    "I almost didn't come today",
+    "I showed up today",
+    "I'm trying",
+    "It's getting a bit easier",
+    "I actually wanted to come today",
+    "Something feels different",
+    "I told my friend about what we talked about",
+    "I'm starting to believe this might work",
+]
+
 # Quick note text samples
 QUICK_NOTE_TEXTS = [
     "Brief check-in. Client reports feeling well today.",
@@ -687,6 +721,7 @@ class Command(BaseCommand):
             # 1. Create plan sections, targets, and link metrics
             # ----------------------------------------------------------
             all_targets = []  # [(PlanTarget, [MetricDefinition, ...])]
+            first_target_for_client = True
 
             for s_idx, section_data in enumerate(plan_config["sections"]):
                 section = PlanSection.objects.create(
@@ -704,6 +739,12 @@ class Command(BaseCommand):
                         description=target_data["desc"],
                         sort_order=t_idx,
                     )
+
+                    # Set client_goal on the first target of each client
+                    if first_target_for_client and record_id in CLIENT_GOALS:
+                        target.client_goal = CLIENT_GOALS[record_id]
+                        target.save()
+                        first_target_for_client = False
 
                     # Create initial revision
                     PlanTargetRevision.objects.create(
@@ -757,6 +798,16 @@ class Command(BaseCommand):
                 note_type = "quick" if is_quick else "full"
                 backdate = now - timedelta(days=days_ago, hours=random.randint(8, 17))
 
+                # Qualitative engagement — progresses over time
+                # Early notes: guarded/motions, middle: engaged, later: valuing
+                progress_fraction = note_idx / max(note_count - 1, 1)
+                if progress_fraction < 0.3:
+                    engagement = "guarded"
+                elif progress_fraction < 0.6:
+                    engagement = "engaged"
+                else:
+                    engagement = "valuing"
+
                 note = ProgressNote.objects.create(
                     client_file=client,
                     note_type=note_type,
@@ -769,15 +820,34 @@ class Command(BaseCommand):
                     summary=(
                         "" if is_quick else random.choice(FULL_NOTE_SUMMARIES)
                     ),
+                    engagement_observation=engagement,
                 )
 
                 # For full notes, record metrics against each target
                 if not is_quick:
+                    # Qualitative progress descriptor — progresses over time
+                    if progress_fraction < 0.3:
+                        descriptor = "harder"
+                    elif progress_fraction < 0.5:
+                        descriptor = "holding"
+                    elif progress_fraction < 0.75:
+                        descriptor = "shifting"
+                    else:
+                        descriptor = "good_place"
+
+                    # Client words — pick from samples based on position
+                    words_idx = min(
+                        int(progress_fraction * len(CLIENT_WORDS_SAMPLES)),
+                        len(CLIENT_WORDS_SAMPLES) - 1,
+                    )
+
                     for target, target_metrics in all_targets:
                         pnt = ProgressNoteTarget.objects.create(
                             progress_note=note,
                             plan_target=target,
                             notes=random.choice(FULL_NOTE_SUMMARIES),
+                            progress_descriptor=descriptor,
+                            client_words=CLIENT_WORDS_SAMPLES[words_idx],
                         )
 
                         for md in target_metrics:
@@ -838,4 +908,306 @@ class Command(BaseCommand):
                 )
 
 
+        # ----------------------------------------------------------
+        # 5. Create demo groups with sessions, attendance, highlights
+        # ----------------------------------------------------------
+        demo_users = {"worker": worker, "manager": manager}
+        demo_clients = {
+            rid: ClientFile.objects.filter(record_id=rid).first()
+            for rid in CLIENT_PLANS
+        }
+        # Remove any that weren't found
+        demo_clients = {k: v for k, v in demo_clients.items() if v is not None}
+        self._create_demo_groups(demo_users, demo_clients, programs_by_name, now)
+
         self.stdout.write(self.style.SUCCESS("  Demo rich data seeded successfully (10 clients across 2 programs)."))
+
+    # ------------------------------------------------------------------
+    # Demo groups: activity groups, service groups, and projects
+    # ------------------------------------------------------------------
+
+    def _create_demo_groups(self, demo_users, demo_clients, programs_by_name, now):
+        """Create demo groups with sessions, attendance, and highlights."""
+
+        worker = demo_users["worker"]
+        manager = demo_users["manager"]
+
+        # Vibes to rotate through for sessions
+        vibes = ["solid", "great", "low", "solid", "great", "solid", "great", "solid"]
+
+        # -------------------------------------------------------
+        # Group 1: Tuesday Basketball (activity_group)
+        # -------------------------------------------------------
+        basketball, created = Group.objects.get_or_create(
+            name="Tuesday Basketball",
+            defaults={
+                "group_type": "activity_group",
+                "program": programs_by_name.get("Demo Program"),
+                "description": "Weekly drop-in basketball at the community centre. Open to all participants.",
+            },
+        )
+
+        if created:
+            self.stdout.write("  Creating group: Tuesday Basketball...")
+
+            # Add 5 demo clients as members (DEMO-001 through DEMO-005)
+            basketball_members = []
+            for rid in ["DEMO-001", "DEMO-002", "DEMO-003", "DEMO-004", "DEMO-005"]:
+                client = demo_clients.get(rid)
+                if client:
+                    membership, _ = GroupMembership.objects.get_or_create(
+                        group=basketball,
+                        client_file=client,
+                        defaults={"role": "member"},
+                    )
+                    basketball_members.append(membership)
+
+            # Create 6 sessions over the past 3 months (roughly every 2 weeks)
+            for i in range(6):
+                days_ago = 80 - (i * 14)  # spread from ~80 days ago to ~10 days ago
+                session_date = (now - timedelta(days=days_ago)).date()
+                session, s_created = GroupSession.objects.get_or_create(
+                    group=basketball,
+                    session_date=session_date,
+                    defaults={
+                        "facilitator": worker,
+                        "group_vibe": vibes[i % len(vibes)],
+                    },
+                )
+                if s_created:
+                    session.notes = "Good energy today. Most participants engaged well."
+                    session.save()
+
+                    # Attendance — most members present, occasional absence
+                    for j, membership in enumerate(basketball_members):
+                        present = not (i == 2 and j == 1)  # one absence in session 3
+                        GroupSessionAttendance.objects.get_or_create(
+                            group_session=session,
+                            membership=membership,
+                            defaults={"present": present},
+                        )
+
+            # Add 2 highlights to earlier sessions
+            basketball_sessions = list(
+                GroupSession.objects.filter(group=basketball).order_by("session_date")
+            )
+            if len(basketball_sessions) >= 3 and len(basketball_members) >= 3:
+                GroupSessionHighlight.objects.get_or_create(
+                    group_session=basketball_sessions[1],
+                    membership=basketball_members[0],
+                    defaults={},
+                )
+                # Set notes via property after creation
+                highlight = GroupSessionHighlight.objects.filter(
+                    group_session=basketball_sessions[1],
+                    membership=basketball_members[0],
+                ).first()
+                if highlight:
+                    highlight.notes = "Jordan showed great leadership — organised the teams and kept things positive."
+                    highlight.save()
+
+                GroupSessionHighlight.objects.get_or_create(
+                    group_session=basketball_sessions[3],
+                    membership=basketball_members[2],
+                    defaults={},
+                )
+                highlight2 = GroupSessionHighlight.objects.filter(
+                    group_session=basketball_sessions[3],
+                    membership=basketball_members[2],
+                ).first()
+                if highlight2:
+                    highlight2.notes = "Avery was quieter than usual but stayed for the whole session. Worth checking in."
+                    highlight2.save()
+
+        # -------------------------------------------------------
+        # Group 2: Wednesday Support Circle (service_group)
+        # -------------------------------------------------------
+        support, created = Group.objects.get_or_create(
+            name="Wednesday Support Circle",
+            defaults={
+                "group_type": "service_group",
+                "program": programs_by_name.get("Youth Services"),
+                "description": "Weekly peer support group for youth. Facilitated discussion and skill-building.",
+            },
+        )
+
+        if created:
+            self.stdout.write("  Creating group: Wednesday Support Circle...")
+
+            # Add 5 youth services clients (DEMO-006 through DEMO-010)
+            support_members = []
+            for rid in ["DEMO-006", "DEMO-007", "DEMO-008", "DEMO-009", "DEMO-010"]:
+                client = demo_clients.get(rid)
+                if client:
+                    membership, _ = GroupMembership.objects.get_or_create(
+                        group=support,
+                        client_file=client,
+                        defaults={"role": "member"},
+                    )
+                    support_members.append(membership)
+
+            # Create 8 sessions over the past 3 months (roughly weekly)
+            session_notes_samples = [
+                "Good discussion about managing stress at school.",
+                "Quiet session today. Several members seemed tired.",
+                "Great energy — members shared coping strategies with each other.",
+                "Focused on conflict resolution skills. Role-playing exercise went well.",
+                "Check-in round took most of the session. Members needed space to talk.",
+                "Introduced grounding techniques. Members practised together.",
+                "Peer support was strong today. Older members mentored newer ones.",
+                "Wrapped up the resilience module. Members reflected on growth.",
+            ]
+            for i in range(8):
+                days_ago = 84 - (i * 11)  # spread from ~84 days ago to ~7 days ago
+                session_date = (now - timedelta(days=days_ago)).date()
+                session, s_created = GroupSession.objects.get_or_create(
+                    group=support,
+                    session_date=session_date,
+                    defaults={
+                        "facilitator": manager,
+                        "group_vibe": vibes[i % len(vibes)],
+                    },
+                )
+                if s_created:
+                    session.notes = session_notes_samples[i]
+                    session.save()
+
+                    # Attendance — vary it a bit
+                    for j, membership in enumerate(support_members):
+                        # A few scattered absences
+                        absent = (i == 1 and j == 2) or (i == 4 and j == 0)
+                        GroupSessionAttendance.objects.get_or_create(
+                            group_session=session,
+                            membership=membership,
+                            defaults={"present": not absent},
+                        )
+
+        # -------------------------------------------------------
+        # Group 3: Community Garden Project (project)
+        # -------------------------------------------------------
+        garden, created = Group.objects.get_or_create(
+            name="Community Garden Project",
+            defaults={
+                "group_type": "project",
+                "program": programs_by_name.get("Demo Program"),
+                "description": "Participants build and maintain a community garden. Develops teamwork, responsibility, and practical skills.",
+            },
+        )
+
+        if created:
+            self.stdout.write("  Creating group: Community Garden Project...")
+
+            # Add 3 demo clients + 2 non-client community members
+            garden_members = []
+            for rid in ["DEMO-001", "DEMO-003", "DEMO-005"]:
+                client = demo_clients.get(rid)
+                if client:
+                    membership, _ = GroupMembership.objects.get_or_create(
+                        group=garden,
+                        client_file=client,
+                        defaults={"role": "member"},
+                    )
+                    garden_members.append(membership)
+
+            # Non-client members (community volunteers)
+            for volunteer_name in ["Maria Santos", "James Wilson"]:
+                membership, _ = GroupMembership.objects.get_or_create(
+                    group=garden,
+                    client_file=None,
+                    member_name=volunteer_name,
+                    defaults={"role": "member"},
+                )
+                garden_members.append(membership)
+
+            # Create 4 sessions over the past 3 months
+            garden_session_notes = [
+                "Planning session — mapped out the garden beds and assigned plots.",
+                "First planting day. Everyone pitched in. Great teamwork.",
+                "Weeding and watering day. Discussed irrigation system ideas.",
+                "Harvest check-in. Tomatoes and beans are coming along well.",
+            ]
+            for i in range(4):
+                days_ago = 75 - (i * 20)  # spread from ~75 days ago to ~15 days ago
+                session_date = (now - timedelta(days=days_ago)).date()
+                session, s_created = GroupSession.objects.get_or_create(
+                    group=garden,
+                    session_date=session_date,
+                    defaults={
+                        "facilitator": worker,
+                        "group_vibe": vibes[i % len(vibes)],
+                    },
+                )
+                if s_created:
+                    session.notes = garden_session_notes[i]
+                    session.save()
+
+                    # Everyone attends the project sessions
+                    for membership in garden_members:
+                        GroupSessionAttendance.objects.get_or_create(
+                            group_session=session,
+                            membership=membership,
+                            defaults={"present": True},
+                        )
+
+            # 3 milestones
+            milestones = [
+                {
+                    "title": "Garden beds built and soil prepared",
+                    "status": "complete",
+                    "due_date": (now - timedelta(days=60)).date(),
+                    "completed_date": (now - timedelta(days=62)).date(),
+                    "notes": "All 6 raised beds built. Soil delivered and mixed with compost.",
+                },
+                {
+                    "title": "First planting complete",
+                    "status": "complete",
+                    "due_date": (now - timedelta(days=40)).date(),
+                    "completed_date": (now - timedelta(days=38)).date(),
+                    "notes": "Planted tomatoes, beans, peppers, and herbs across all beds.",
+                },
+                {
+                    "title": "First harvest and community sharing",
+                    "status": "in_progress",
+                    "due_date": (now + timedelta(days=14)).date(),
+                    "completed_date": None,
+                    "notes": "Aiming to share first harvest with the community kitchen next door.",
+                },
+            ]
+            for idx, ms_data in enumerate(milestones):
+                ProjectMilestone.objects.get_or_create(
+                    group=garden,
+                    title=ms_data["title"],
+                    defaults={
+                        "status": ms_data["status"],
+                        "due_date": ms_data["due_date"],
+                        "completed_date": ms_data["completed_date"],
+                        "notes": ms_data["notes"],
+                        "sort_order": idx,
+                    },
+                )
+
+            # 2 outcomes
+            outcomes = [
+                {
+                    "outcome_date": (now - timedelta(days=30)).date(),
+                    "description": "All 5 members consistently attending weekly sessions. Teamwork and communication skills visibly improved.",
+                    "evidence": "Attendance records show 90%+ participation over 4 sessions. Facilitator observations noted in session notes.",
+                },
+                {
+                    "outcome_date": (now - timedelta(days=10)).date(),
+                    "description": "Two participants (Jordan, Avery) took initiative to organise a watering schedule independently.",
+                    "evidence": "Self-organised schedule posted on garden shed. No facilitator prompting needed.",
+                },
+            ]
+            for oc_data in outcomes:
+                ProjectOutcome.objects.get_or_create(
+                    group=garden,
+                    outcome_date=oc_data["outcome_date"],
+                    defaults={
+                        "description": oc_data["description"],
+                        "evidence": oc_data["evidence"],
+                        "created_by": worker,
+                    },
+                )
+
+        self.stdout.write("  Demo groups seeded.")
