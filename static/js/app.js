@@ -146,6 +146,15 @@ document.body.addEventListener("htmx:sendError", function () {
     showToast("Could not connect to the server. Check your internet connection.", true);
 });
 
+// Focus management for note detail expansion (accessibility)
+// When a note card expands via HTMX, move focus to the detail content
+document.body.addEventListener("htmx:afterSwap", function (event) {
+    var detail = event.detail.target.querySelector(".note-detail-content");
+    if (detail) {
+        detail.focus();
+    }
+});
+
 // Keyboard activation for role="button" elements (WCAG 2.1.1 — Enter/Space triggers click)
 document.addEventListener("keydown", function (e) {
     if ((e.key === "Enter" || e.key === " ") &&

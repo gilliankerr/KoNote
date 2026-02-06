@@ -12,6 +12,18 @@
 
 <form method="post" data-autosave data-client-id="{{ client.pk }}" data-form-type="quick">
     {% csrf_token %}
+
+    <!-- Interaction type — radio pills -->
+    <fieldset class="interaction-pills">
+        <legend>{% trans "What kind of interaction?" %}</legend>
+        {% for radio in form.interaction_type %}
+        {{ radio }}
+        {% endfor %}
+    </fieldset>
+    {% if form.interaction_type.errors %}
+    <small class="error" role="alert">{{ form.interaction_type.errors.0 }}</small>
+    {% endif %}
+
     <label for="{{ form.notes_text.id_for_label }}">{{ term.progress_note|default:"Note" }}</label>
     {{ form.notes_text }}
     {% if form.notes_text.errors %}

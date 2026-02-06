@@ -18,6 +18,11 @@
     {{ form.template }}
     {% if form.template.errors %}<small class="error" role="alert">{{ form.template.errors.0 }}</small>{% endif %}
 
+    <!-- Interaction type — pre-fills from template's default -->
+    <label for="{{ form.interaction_type.id_for_label }}">{% trans "Interaction type" %}</label>
+    {{ form.interaction_type }}
+    {% if form.interaction_type.errors %}<small class="error" role="alert">{{ form.interaction_type.errors.0 }}</small>{% endif %}
+
     <!-- Session date — pre-filled with today -->
     <label for="{{ form.session_date.id_for_label }}">{% trans "Session Date" %}</label>
     {{ form.session_date }}
@@ -137,5 +142,18 @@ document.querySelectorAll(".target-selector").forEach(function (cb) {
         }
     });
 });
+
+// Auto-fill interaction type from template's default
+var templateDefaults = {{ template_defaults_json|safe }};
+var templateSelect = document.querySelector('[name="template"]');
+var interactionSelect = document.querySelector('[name="interaction_type"]');
+if (templateSelect && interactionSelect) {
+    templateSelect.addEventListener("change", function () {
+        var tmplId = this.value;
+        if (tmplId && templateDefaults[tmplId]) {
+            interactionSelect.value = templateDefaults[tmplId];
+        }
+    });
+}
 </script>
 {% endblock %}

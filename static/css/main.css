@@ -469,13 +469,13 @@ body > nav a.nav-active {
 
 /* ---- Note cards ---- */
 .note-card {
+    position: relative;
     padding: var(--kn-space-base) var(--kn-space-lg);
     margin-bottom: var(--kn-space-sm);
     border: 1px solid var(--kn-border-light);
     border-radius: var(--kn-radius-card, 8px);
     border-left: 4px solid var(--kn-primary);
     background: var(--pico-background-color);
-    cursor: pointer;
     transition: box-shadow var(--kn-transition), border-color var(--kn-transition);
 }
 .note-card:hover,
@@ -483,30 +483,43 @@ body > nav a.nav-active {
     box-shadow: var(--kn-shadow-note-hover);
     border-color: var(--kn-primary);
 }
-.note-card:focus {
-    outline: 2px solid var(--kn-primary);
-    outline-offset: 2px;
-}
 .note-card--cancelled {
     opacity: 0.65;
     border-left-color: var(--kn-danger-fg, #c0392b);
 }
-/* When collapsed back via HTMX, the inner wrapper is clickable */
-.note-card-inner {
-    cursor: pointer;
+/* Interaction type border colours */
+.note-card--session   { border-left-color: var(--kn-primary); }
+.note-card--group     { border-left-color: var(--kn-success-fg, #27ae60); }
+.note-card--phone     { border-left-color: var(--kn-info-fg, #2980b9); }
+.note-card--collateral { border-left-color: #8e44ad; }
+.note-card--home_visit { border-left-color: #16a085; }
+.note-card--admin     { border-left-color: var(--kn-text-muted, #888); }
+.note-card--other     { border-left-color: var(--kn-neutral-fg, #555); }
+
+/* Card heading — stretched link makes entire card clickable */
+.note-card-heading {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 2px 0;
+    line-height: 1.4;
 }
-.note-card-header {
+.note-card-link {
+    color: var(--kn-text-primary, var(--pico-color));
+    text-decoration: none;
+}
+.note-card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+.note-card-link:hover {
+    text-decoration: underline;
+}
+.note-card-meta-line {
     display: flex;
     align-items: center;
     gap: var(--kn-space-sm);
-    flex-wrap: wrap;
-    margin-bottom: 4px;
-}
-.note-card-date {
-    font-weight: 600;
-    font-size: 0.9375rem;
-    font-variant-numeric: tabular-nums;
-    color: var(--kn-text-primary, var(--pico-color));
+    margin-bottom: 2px;
 }
 .note-card-ago {
     font-size: 0.8125rem;
@@ -516,6 +529,34 @@ body > nav a.nav-active {
     font-size: 0.8125rem;
     color: var(--kn-text-secondary);
     margin-bottom: var(--kn-space-xs);
+}
+/* Target chips — shown as inline list */
+.note-card-targets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--kn-space-xs) 0;
+}
+.note-card-targets li {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--kn-primary-subtle, #e8f0fe);
+    color: var(--kn-primary, #2c3e50);
+}
+.note-card-targets-overflow {
+    background: var(--kn-neutral-bg, #eee) !important;
+    color: var(--kn-text-muted, #888) !important;
+    font-style: italic;
+}
+@media (max-width: 576px) {
+    .note-card-targets li:nth-child(n+4):not(.note-card-targets-overflow) {
+        display: none;
+    }
 }
 .note-card-preview {
     font-size: 0.9rem;
@@ -554,6 +595,55 @@ body > nav a.nav-active {
 .note-chip--done {
     background: var(--kn-success-bg);
     color: var(--kn-success-fg);
+}
+
+/* ---- Interaction type radio pills (quick note form) ---- */
+.interaction-pills {
+    border: none;
+    padding: 0;
+    margin: 0 0 var(--kn-space-base) 0;
+}
+.interaction-pills legend {
+    font-weight: 600;
+    margin-bottom: var(--kn-space-sm);
+}
+.interaction-pills ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.interaction-pills li {
+    margin: 0;
+}
+.interaction-pills label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    border: 2px solid var(--kn-border-light, #ccc);
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    min-height: 44px;
+    transition: border-color 0.15s, background 0.15s;
+    user-select: none;
+}
+.interaction-pills input[type="radio"] {
+    width: auto;
+    margin: 0;
+}
+.interaction-pills input[type="radio"]:checked + span,
+.interaction-pills label:has(input:checked) {
+    border-color: var(--kn-primary);
+    background: var(--kn-primary-subtle, #e8f0fe);
+}
+
+/* Focus management for expanded note details */
+.note-detail-content:focus {
+    outline: none;
 }
 
 /* ---- Client list search bar ---- */

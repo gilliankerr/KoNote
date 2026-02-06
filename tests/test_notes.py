@@ -56,7 +56,7 @@ class NoteViewsTest(TestCase):
         self.http.login(username="staff", password="pass")
         resp = self.http.post(
             f"/notes/client/{self.client_file.pk}/quick/",
-            {"notes_text": "Client seemed well today.", "consent_confirmed": True},
+            {"notes_text": "Client seemed well today.", "interaction_type": "session", "consent_confirmed": True},
         )
         self.assertEqual(resp.status_code, 302)
         note = ProgressNote.objects.get(client_file=self.client_file)
@@ -68,7 +68,7 @@ class NoteViewsTest(TestCase):
         self.http.login(username="staff", password="pass")
         resp = self.http.post(
             f"/notes/client/{self.client_file.pk}/quick/",
-            {"notes_text": "   ", "consent_confirmed": True},
+            {"notes_text": "   ", "interaction_type": "session", "consent_confirmed": True},
         )
         self.assertEqual(resp.status_code, 200)  # Re-renders form with errors
         self.assertEqual(ProgressNote.objects.count(), 0)
@@ -111,7 +111,7 @@ class NoteViewsTest(TestCase):
         self.http.login(username="admin", password="pass")
         resp = self.http.post(
             f"/notes/client/{self.other_client.pk}/quick/",
-            {"notes_text": "Admin note.", "consent_confirmed": True},
+            {"notes_text": "Admin note.", "interaction_type": "session", "consent_confirmed": True},
         )
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(ProgressNote.objects.count(), 1)
@@ -147,6 +147,7 @@ class NoteViewsTest(TestCase):
         resp = self.http.post(
             f"/notes/client/{self.client_file.pk}/new/",
             {
+                "interaction_type": "session",
                 "summary": "Good session",
                 "consent_confirmed": True,
                 f"target_{target.pk}-target_id": str(target.pk),
@@ -286,7 +287,7 @@ class NoteViewsTest(TestCase):
         self.http.login(username="staff", password="pass")
         resp = self.http.post(
             f"/notes/client/{self.client_file.pk}/quick/",
-            {"notes_text": "Consent is on file.", "consent_confirmed": True},
+            {"notes_text": "Consent is on file.", "interaction_type": "session", "consent_confirmed": True},
         )
         self.assertEqual(resp.status_code, 302)  # Redirect = success
         self.assertEqual(ProgressNote.objects.count(), 1)
@@ -307,7 +308,7 @@ class NoteViewsTest(TestCase):
         self.http.login(username="staff", password="pass")
         resp = self.http.post(
             f"/notes/client/{client_no_consent.pk}/quick/",
-            {"notes_text": "No consent needed.", "consent_confirmed": True},
+            {"notes_text": "No consent needed.", "interaction_type": "session", "consent_confirmed": True},
         )
         self.assertEqual(resp.status_code, 302)  # Redirect = success
         self.assertEqual(ProgressNote.objects.count(), 1)

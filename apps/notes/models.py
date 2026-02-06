@@ -8,7 +8,23 @@ from konote.encryption import decrypt_field, encrypt_field
 class ProgressNoteTemplate(models.Model):
     """Defines the structure of a full progress note."""
 
+    INTERACTION_TYPE_CHOICES = [
+        ("session", "One-on-One Session"),
+        ("group", "Group Session"),
+        ("phone", "Phone Call"),
+        ("collateral", "Contact with Others"),
+        ("home_visit", "Home Visit"),
+        ("admin", "Admin / Paperwork"),
+        ("other", "Other"),
+    ]
+
     name = models.CharField(max_length=255)
+    default_interaction_type = models.CharField(
+        max_length=20,
+        choices=INTERACTION_TYPE_CHOICES,
+        default="session",
+        help_text="Pre-fills the interaction type when this template is selected.",
+    )
     status = models.CharField(
         max_length=20, default="active",
         choices=[("active", "Active"), ("archived", "Archived")],
@@ -66,6 +82,7 @@ class ProgressNote(models.Model):
         ("quick", "Quick Note"),
         ("full", "Full Note"),
     ]
+    INTERACTION_TYPE_CHOICES = ProgressNoteTemplate.INTERACTION_TYPE_CHOICES
     STATUS_CHOICES = [
         ("default", "Active"),
         ("cancelled", "Cancelled"),
@@ -73,6 +90,11 @@ class ProgressNote(models.Model):
 
     client_file = models.ForeignKey("clients.ClientFile", on_delete=models.CASCADE, related_name="progress_notes")
     note_type = models.CharField(max_length=20, choices=NOTE_TYPE_CHOICES)
+    interaction_type = models.CharField(
+        max_length=20,
+        choices=INTERACTION_TYPE_CHOICES,
+        default="session",
+    )
     status = models.CharField(max_length=20, default="default", choices=STATUS_CHOICES)
     status_reason = models.TextField(default="", blank=True)
     template = models.ForeignKey(ProgressNoteTemplate, on_delete=models.SET_NULL, null=True, blank=True)
@@ -149,9 +171,9 @@ class ProgressNote(models.Model):
         if preview:
             if len(preview) > 40:
                 preview = preview[:40].rstrip() + "…"
-            return f"{self.get_note_type_display()} - {date_str}: {preview}"
+            return f"{self.get_interaction_type_display()} - {date_str}: {preview}"
 
-        return f"{self.get_note_type_display()} - {date_str}"
+        return f"{self.get_interaction_type_display()} - {date_str}"
 
     @property
     def effective_date(self):

@@ -1,6 +1,7 @@
 # Phase 4: Progress note views
 """Views for progress notes — quick notes, full notes, timeline, cancellation."""
 import datetime
+import json
 import logging
 
 from django.contrib import messages
@@ -23,7 +24,7 @@ from apps.plans.models import PlanTarget, PlanTargetMetric
 from apps.programs.models import UserProgramRole
 
 from .forms import FullNoteForm, MetricValueForm, NoteCancelForm, QuickNoteForm, TargetNoteForm
-from .models import MetricValue, ProgressNote, ProgressNoteTarget
+from .models import MetricValue, ProgressNote, ProgressNoteTarget, ProgressNoteTemplate
 
 
 def _get_client_or_403(request, client_id):
@@ -125,24 +126,27 @@ def note_list(request, client_id):
         return HttpResponseForbidden("You do not have access to this client.")
 
     # Annotate with computed effective_date for filtering and ordering
-    # (backdate if set, otherwise created_at), plus target count for display
+    # (backdate if set, otherwise created_at), plus target count for display.
+    # prefetch target_entries→plan_target so cards can show target chips (3 queries total)
     notes = (
         ProgressNote.objects.filter(client_file=client)
         .select_related("author", "author_program", "template")
+        .prefetch_related("target_entries__plan_target")
         .annotate(
             _effective_date=Coalesce("backdate", "created_at", output_field=DateTimeField()),
             target_count=Count("target_entries"),
         )
     )
 
-    # Filters
-    note_type = request.GET.get("type", "")
+    # Filters — interaction type replaces the old quick/full type filter
+    interaction_filter = request.GET.get("interaction", "")
     date_from = request.GET.get("date_from", "")
     date_to = request.GET.get("date_to", "")
     author_filter = request.GET.get("author", "")
 
-    if note_type in ("quick", "full"):
-        notes = notes.filter(note_type=note_type)
+    valid_interactions = [c[0] for c in ProgressNote.INTERACTION_TYPE_CHOICES]
+    if interaction_filter in valid_interactions:
+        notes = notes.filter(interaction_type=interaction_filter)
     if date_from:
         try:
             notes = notes.filter(_effective_date__date__gte=datetime.date.fromisoformat(date_from))
@@ -162,7 +166,7 @@ def note_list(request, client_id):
 
     # Count active filters for the filter bar indicator
     active_filter_count = sum([
-        bool(note_type),
+        bool(interaction_filter),
         bool(date_from),
         bool(date_to),
         bool(author_filter),
@@ -177,7 +181,8 @@ def note_list(request, client_id):
     context = {
         "client": client,
         "page": page,
-        "filter_type": note_type,
+        "filter_interaction": interaction_filter,
+        "interaction_choices": ProgressNote.INTERACTION_TYPE_CHOICES,
         "filter_date_from": date_from,
         "filter_date_to": date_to,
         "filter_author": author_filter,
@@ -210,6 +215,7 @@ def quick_note_create(request, client_id):
                 note = ProgressNote(
                     client_file=client,
                     note_type="quick",
+                    interaction_type=form.cleaned_data["interaction_type"],
                     author=request.user,
                     author_program=_get_author_program(request.user, client),
                     notes_text=form.cleaned_data["notes_text"],
@@ -276,6 +282,7 @@ def note_create(request, client_id):
                 note = ProgressNote(
                     client_file=client,
                     note_type="full",
+                    interaction_type=form.cleaned_data["interaction_type"],
                     author=request.user,
                     author_program=_get_author_program(request.user, client),
                     template=form.cleaned_data.get("template"),
@@ -333,6 +340,11 @@ def note_create(request, client_id):
         form = FullNoteForm(initial={"session_date": timezone.localdate()})
         target_forms = _build_target_forms(client)
 
+    # Build template → default_interaction_type mapping for JS auto-fill
+    template_defaults = {}
+    for tmpl in ProgressNoteTemplate.objects.filter(status="active"):
+        template_defaults[str(tmpl.pk)] = tmpl.default_interaction_type
+
     # Breadcrumbs: Clients > [Client Name] > Notes > New Note
     breadcrumbs = [
         {"url": reverse("clients:client_list"), "label": "Clients"},
@@ -345,6 +357,7 @@ def note_create(request, client_id):
         "target_forms": target_forms,
         "client": client,
         "breadcrumbs": breadcrumbs,
+        "template_defaults_json": json.dumps(template_defaults),
     })
 
 
@@ -406,6 +419,7 @@ def note_summary(request, note_id):
     try:
         note = get_object_or_404(
             ProgressNote.objects.select_related("author", "author_program", "template")
+            .prefetch_related("target_entries__plan_target")
             .annotate(target_count=Count("target_entries")),
             pk=note_id,
         )

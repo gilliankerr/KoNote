@@ -5,9 +5,24 @@ from django.utils.translation import gettext_lazy as _
 from .models import ProgressNote, ProgressNoteTemplate, ProgressNoteTemplateSection
 
 
+# Subset of interaction types relevant to quick notes
+QUICK_INTERACTION_CHOICES = [
+    ("phone", _("Phone Call")),
+    ("session", _("Session")),
+    ("home_visit", _("Home Visit")),
+    ("admin", _("Admin")),
+    ("other", _("Other")),
+]
+
+
 class QuickNoteForm(forms.Form):
     """Simple form for quick notes — just a text area."""
 
+    interaction_type = forms.ChoiceField(
+        choices=QUICK_INTERACTION_CHOICES,
+        widget=forms.RadioSelect,
+        label=_("What kind of interaction?"),
+    )
     notes_text = forms.CharField(
         widget=forms.Textarea(attrs={
             "rows": 5,
@@ -46,6 +61,10 @@ class FullNoteForm(forms.Form):
         required=False,
         label=_("This note is for..."),
         empty_label=_("Freeform"),
+    )
+    interaction_type = forms.ChoiceField(
+        choices=ProgressNote.INTERACTION_TYPE_CHOICES,
+        label=_("Interaction type"),
     )
     session_date = forms.DateField(
         widget=forms.DateInput(attrs={"type": "date"}),
@@ -155,7 +174,7 @@ class NoteTemplateForm(forms.ModelForm):
 
     class Meta:
         model = ProgressNoteTemplate
-        fields = ["name", "status"]
+        fields = ["name", "default_interaction_type", "status"]
 
 
 class NoteTemplateSectionForm(forms.ModelForm):

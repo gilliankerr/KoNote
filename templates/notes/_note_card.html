@@ -1,0 +1,55 @@
+{% load i18n %}
+{# Shared partial: note card inner content (used by _tab_notes.html and _note_summary.html) #}
+{# The outer <article> wrapper with id="note-{{ note.pk }}" is in _tab_notes.html #}
+{# This partial renders the collapsed/summary view that gets swapped by HTMX #}
+<h3 id="note-{{ note.pk }}-heading" class="note-card-heading">
+    <a href="#"
+       hx-get="{% url 'notes:note_detail' note_id=note.pk %}"
+       hx-target="#note-{{ note.pk }}"
+       hx-swap="innerHTML"
+       hx-indicator="#loading-bar"
+       class="note-card-link">
+        {{ note.get_interaction_type_display }} &mdash; {{ note.effective_date|date:"M d, Y" }}
+    </a>
+</h3>
+<div class="note-card-meta-line">
+    {% if note.status == "cancelled" %}
+        <span class="badge badge-danger">{% trans "Cancelled" %}</span>
+    {% endif %}
+    <span class="note-card-ago">{{ note.effective_date|timesince }} {% trans "ago" %}</span>
+</div>
+<div class="note-card-author">
+    {% if note.author %}{{ note.author.display_name|default:note.author }}{% else %}{% trans "(unknown)" %}{% endif %}{% if note.author_program %} &middot; {{ note.author_program.name }}{% endif %}
+</div>
+{% if note.target_entries.all %}
+<ul class="note-card-targets" aria-label="{% trans 'Plan targets' %}">
+    {% for entry in note.target_entries.all %}
+        {% if forloop.counter <= 3 %}
+        <li>{{ entry.plan_target.name|truncatechars:30 }}</li>
+        {% endif %}
+    {% endfor %}
+    {% with overflow=note.target_entries.all|length %}
+    {% if overflow > 3 %}
+        <li class="note-card-targets-overflow">+{{ overflow|add:"-3" }} {% trans "more" %}</li>
+    {% endif %}
+    {% endwith %}
+</ul>
+{% endif %}
+{% if note.status == "cancelled" %}
+    <p class="note-card-preview"><del>{{ note.notes_text|truncatechars:200 }}</del></p>
+    {% if note.status_reason %}<p class="note-card-reason">{% trans "Reason:" %} {{ note.status_reason }}</p>{% endif %}
+{% else %}
+    {% if note.notes_text %}
+        <p class="note-card-preview">{{ note.notes_text|truncatechars:200 }}</p>
+    {% endif %}
+{% endif %}
+<div class="note-card-meta">
+    {% if note.template %}
+        <span class="note-chip">{{ note.template.name }}</span>
+    {% endif %}
+    {% if note.follow_up_date %}
+        <span class="note-chip note-chip--followup{% if note.follow_up_completed_at %} note-chip--done{% endif %}">
+            {% if note.follow_up_completed_at %}&#10003; {% endif %}{% trans "Follow-up" %} {{ note.follow_up_date|date:"M d" }}
+        </span>
+    {% endif %}
+</div>

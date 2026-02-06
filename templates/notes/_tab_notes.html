@@ -15,11 +15,12 @@
     <form method="get" action="{% url 'notes:note_list' client_id=client.pk %}">
         <div class="grid">
             <label>
-                {% trans "Type" %}
-                <select name="type">
-                    <option value="">{% trans "All types" %}</option>
-                    <option value="quick" {% if filter_type == "quick" %}selected{% endif %}>{% trans "Quick notes" %}</option>
-                    <option value="full" {% if filter_type == "full" %}selected{% endif %}>{% trans "Full notes" %}</option>
+                {% trans "Interaction" %}
+                <select name="interaction">
+                    <option value="">{% trans "All interactions" %}</option>
+                    {% for value, label in interaction_choices %}
+                    <option value="{{ value }}" {% if filter_interaction == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
                 </select>
             </label>
             <label>
@@ -48,65 +49,24 @@
 {% if page %}
 <div id="notes-timeline">
     {% for note in page %}
-    <div class="note-card{% if note.status == 'cancelled' %} note-card--cancelled{% endif %}"
-         id="note-{{ note.pk }}"
-         hx-get="{% url 'notes:note_detail' note_id=note.pk %}"
-         hx-target="#note-{{ note.pk }}"
-         hx-swap="innerHTML"
-         hx-indicator="#loading-bar"
-         role="button"
-         tabindex="0"
-         aria-label="{% if note.note_type == 'quick' %}{{ term.quick_note|default:'Quick note' }}{% else %}{% trans 'Full note' %}{% endif %} — {{ note.effective_date|date:'M d, Y' }}">
-        <div class="note-card-header">
-            {% if note.note_type == "quick" %}
-                <span class="badge badge-info">{{ term.quick_note|default:"Quick" }}</span>
-            {% else %}
-                <span class="badge badge-success">{% trans "Full" %}</span>
-            {% endif %}
-            {% if note.status == "cancelled" %}
-                <span class="badge badge-danger">{% trans "Cancelled" %}</span>
-            {% endif %}
-            <span class="note-card-date">{{ note.effective_date|date:"M d, Y" }}</span>
-            <span class="note-card-ago">{{ note.effective_date|timesince }} {% trans "ago" %}</span>
-        </div>
-        <div class="note-card-author">
-            {% if note.author %}{{ note.author.display_name|default:note.author }}{% else %}{% trans "(unknown)" %}{% endif %}{% if note.author_program %} &middot; {{ note.author_program.name }}{% endif %}
-        </div>
-        {% if note.status == "cancelled" %}
-            <p class="note-card-preview"><del>{{ note.notes_text|truncatechars:200 }}</del></p>
-            {% if note.status_reason %}<p class="note-card-reason">{% trans "Reason:" %} {{ note.status_reason }}</p>{% endif %}
-        {% else %}
-            {% if note.notes_text %}
-                <p class="note-card-preview">{{ note.notes_text|truncatechars:200 }}</p>
-            {% endif %}
-        {% endif %}
-        <div class="note-card-meta">
-            {% if note.target_count %}
-                <span class="note-chip">{% blocktrans count target_count=note.target_count %}{{ target_count }} target{% plural %}{{ target_count }} targets{% endblocktrans %}</span>
-            {% endif %}
-            {% if note.template %}
-                <span class="note-chip">{{ note.template.name }}</span>
-            {% endif %}
-            {% if note.follow_up_date %}
-                <span class="note-chip note-chip--followup{% if note.follow_up_completed_at %} note-chip--done{% endif %}">
-                    {% if note.follow_up_completed_at %}&#10003; {% endif %}{% trans "Follow-up" %} {{ note.follow_up_date|date:"M d" }}
-                </span>
-            {% endif %}
-        </div>
-    </div>
+    <article class="note-card note-card--{{ note.interaction_type }}{% if note.status == 'cancelled' %} note-card--cancelled{% endif %}"
+             id="note-{{ note.pk }}"
+             aria-labelledby="note-{{ note.pk }}-heading">
+        {% include "notes/_note_card.html" with note=note %}
+    </article>
     {% endfor %}
 </div>
 
 {% if page.has_other_pages %}
 <nav class="pagination" aria-label="{% trans 'Notes pagination' %}">
     {% if page.has_previous %}
-    <a href="?page={{ page.previous_page_number }}&type={{ filter_type }}&author={{ filter_author }}&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}">{% trans "Previous" %}</a>
+    <a href="?page={{ page.previous_page_number }}&interaction={{ filter_interaction }}&author={{ filter_author }}&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}">{% trans "Previous" %}</a>
     {% else %}
     <span class="secondary">{% trans "Previous" %}</span>
     {% endif %}
     {% blocktrans with current=page.number total=page.paginator.num_pages %}Page {{ current }} of {{ total }}{% endblocktrans %}
     {% if page.has_next %}
-    <a href="?page={{ page.next_page_number }}&type={{ filter_type }}&author={{ filter_author }}&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}">{% trans "Next" %}</a>
+    <a href="?page={{ page.next_page_number }}&interaction={{ filter_interaction }}&author={{ filter_author }}&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}">{% trans "Next" %}</a>
     {% else %}
     <span class="secondary">{% trans "Next" %}</span>
     {% endif %}

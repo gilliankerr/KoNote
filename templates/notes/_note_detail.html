@@ -1,17 +1,14 @@
 {% load i18n %}
 <!-- HTMX partial: expanded view of a single note -->
+<div class="note-detail-content" tabindex="-1">
 <header>
     <div>
-        {% if note.note_type == "quick" %}
-            <span class="badge badge-info">{{ term.quick_note|default:"Quick" }}</span>
-        {% else %}
-            <span class="badge badge-success">{% trans "Full" %}</span>
-        {% endif %}
+        <strong>{{ note.get_interaction_type_display }} &mdash; {{ note.effective_date|date:"M d, Y" }}</strong>
         {% if note.status == "cancelled" %}
             <span class="badge badge-danger">{% trans "Cancelled" %}</span>
         {% endif %}
-        <strong>{{ note.effective_date|date:"M d, Y" }}</strong>
-        — {% if note.author %}{{ note.author.display_name|default:note.author }}{% else %}{% trans "(unknown author)" %}{% endif %}
+        <br>
+        {% if note.author %}{{ note.author.display_name|default:note.author }}{% else %}{% trans "(unknown author)" %}{% endif %}
         {% if note.author_program %}
             <small>({{ note.author_program.name }})</small>
         {% endif %}
@@ -71,3 +68,4 @@
        hx-swap="innerHTML"
        class="secondary">{% trans "Collapse" %}</a>
 </footer>
+</div>
