@@ -18,6 +18,18 @@ The core app is feature-complete. These tasks prepare for production use.
 
 ## Coming Up
 
+### Erasure Hardening (from 2026-02-06 expert panel review)
+
+See `tasks/erasure-hardening.md` for full implementation details.
+
+- [ ] Scope PDF receipt access — restrict download to involved PMs, requester, and admins (ERASE-H1)
+- [ ] Write audit before erasure — fail erasure if audit DB is unavailable (ERASE-H2)
+- [ ] Track receipt downloads — add `receipt_downloaded_at` field, warn on approval if not downloaded (ERASE-H3)
+- [ ] Notify requester on rejection — send email with rejection reason (ERASE-H4)
+- [ ] Deduplicate `build_data_summary()` call — compute once in create view (ERASE-H5)
+- [ ] Fix erasure code race condition — add retry loop on IntegrityError (ERASE-H6)
+- [ ] Add pagination to erasure history view — 20 per page (ERASE-H7)
+
 ### Review Follow-ups (from 2026-02-05 session review)
 
 - [ ] Add user-visible warning when erasure email notification fails — so requesters know to notify PMs manually (REV-W3)
@@ -93,6 +105,10 @@ Build after secure export is stable. See `tasks/secure-export-import-plan.md` fo
 
 ## Parking Lot
 
+### Erasure — Deferred Execution for Tier 3
+
+- [ ] Add 24-hour delay before Tier 3 (full erasure) CASCADE delete executes — requires background task scheduler, see `tasks/erasure-hardening.md` section ERASE-H8 (ERASE-H8)
+
 ### Deployment Workflow Enhancements
 
 - [ ] Create Demo Account Directory page in admin settings (DEMO9)
@@ -112,6 +128,7 @@ See [deployment workflow design](docs/plans/2026-02-05-deployment-workflow-desig
 
 ## Recently Done
 
+- [x] Redesign erasure system — tiered anonymisation, erasure codes, PDF receipts, role restrictions, 72 tests — 2026-02-06 (ERASE-REDESIGN)
 - [x] Fix footer links — correct GitHub URL, wire up privacy and help routes, fix help guide nav — 2026-02-06 (FOOT1)
 - [x] Documentation refresh — security docs, feature lists, Getting Started guide, website — 2026-02-06 (DOC-REF1-3, WEB-REF1)
 - [x] Erasure i18n — email templates, completion email, error messages, JS escaping for French — 2026-02-05 (ERASE-I18N1-3, ERASE-JS1)
@@ -141,7 +158,7 @@ For detailed history, see `tasks/ARCHIVE.md`. Summary of completed work:
 | **Reporting** | Funder reports, aggregation, demographics, fiscal year, PDF exports |
 | **Documentation** | Getting started, security ops, deployment guides (Azure, Railway, Elest.io) |
 | **Registration** | Self-service public forms with duplicate detection and capacity limits |
-| **Privacy** | Client data erasure with multi-PM approval, PIPEDA compliance |
+| **Privacy** | Tiered client data erasure (anonymise/purge/delete), multi-PM approval, erasure codes, PDF receipts, PIPEDA compliance |
 | **Accessibility** | WCAG 2.2 AA — semantic HTML, colour contrast, aria attributes |
 | **Canadian localisation** | Postal codes, provinces, phone formats, date/currency by locale |
 | **Roadmap A-F** | Market access, funder reporting, docs, registration, staff productivity — all complete |
