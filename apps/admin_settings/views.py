@@ -277,3 +277,56 @@ def _is_numeric(value):
         return True
     except (ValueError, TypeError):
         return False
+
+
+# --- Demo Account Directory ---
+
+@login_required
+@admin_required
+def demo_directory(request):
+    """List all demo users and demo clients in one place."""
+    from apps.auth_app.models import User
+    from apps.clients.models import ClientFile, ClientProgramEnrolment
+    from apps.programs.models import UserProgramRole
+
+    demo_users = User.objects.filter(is_demo=True).order_by("-is_admin", "display_name")
+    demo_clients = ClientFile.objects.demo().order_by("record_id")
+
+    # Attach roles to each demo user
+    user_roles = {}
+    for role in UserProgramRole.objects.filter(user__is_demo=True, status="active").select_related("program"):
+        user_roles.setdefault(role.user_id, []).append(role)
+
+    user_data = []
+    for user in demo_users:
+        roles = user_roles.get(user.pk, [])
+        role_display = ", ".join(
+            f"{r.get_role_display()} ({r.program.name})" for r in roles
+        )
+        if user.is_admin:
+            role_display = _("Administrator") + (f", {role_display}" if role_display else "")
+        user_data.append({
+            "user": user,
+            "roles": role_display or _("No roles assigned"),
+        })
+
+    # Attach program enrolments to each demo client
+    enrolments = {}
+    for enrol in ClientProgramEnrolment.objects.filter(
+        client_file__is_demo=True, status="enrolled"
+    ).select_related("program"):
+        enrolments.setdefault(enrol.client_file_id, []).append(enrol.program.name)
+
+    client_data = []
+    for client in demo_clients:
+        client_data.append({
+            "client": client,
+            "programs": ", ".join(enrolments.get(client.pk, [])) or _("Not enrolled"),
+        })
+
+    return render(request, "admin_settings/demo_directory.html", {
+        "user_data": user_data,
+        "client_data": client_data,
+        "demo_user_count": len(user_data),
+        "demo_client_count": len(client_data),
+    })

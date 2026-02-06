@@ -27,8 +27,14 @@ def audit_log_list(request):
     user_display = request.GET.get("user_display", "")
     action = request.GET.get("action", "")
     resource_type = request.GET.get("resource_type", "")
+    demo_filter = request.GET.get("demo_filter", "")
 
     # Apply filters
+    if demo_filter == "real":
+        qs = qs.filter(is_demo_context=False)
+    elif demo_filter == "demo":
+        qs = qs.filter(is_demo_context=True)
+
     if date_from:
         try:
             dt = datetime.strptime(date_from, "%Y-%m-%d")
@@ -56,7 +62,7 @@ def audit_log_list(request):
 
     # Build filter query string for pagination links (exclude 'page')
     filter_params = []
-    for key in ("date_from", "date_to", "user_display", "action", "resource_type"):
+    for key in ("date_from", "date_to", "user_display", "action", "resource_type", "demo_filter"):
         val = request.GET.get(key, "")
         if val:
             filter_params.append(f"{key}={val}")
@@ -77,6 +83,7 @@ def audit_log_list(request):
         "user_display": user_display,
         "action_filter": action,
         "resource_type": resource_type,
+        "demo_filter": demo_filter,
     }
     return render(request, "audit/log_list.html", context)
 
@@ -95,6 +102,12 @@ def audit_log_export(request):
     user_display = request.GET.get("user_display", "")
     action = request.GET.get("action", "")
     resource_type = request.GET.get("resource_type", "")
+    demo_filter = request.GET.get("demo_filter", "")
+
+    if demo_filter == "real":
+        qs = qs.filter(is_demo_context=False)
+    elif demo_filter == "demo":
+        qs = qs.filter(is_demo_context=True)
 
     if date_from:
         try:
@@ -126,7 +139,7 @@ def audit_log_export(request):
     response["Content-Disposition"] = f'attachment; filename="audit_log_{today}.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(sanitise_csv_row(["Timestamp", "User", "IP Address", "Action", "Resource Type", "Resource ID", "Program ID"]))
+    writer.writerow(sanitise_csv_row(["Timestamp", "User", "IP Address", "Action", "Resource Type", "Resource ID", "Program ID", "Demo Context"]))
 
     for entry in qs.iterator():
         writer.writerow(sanitise_csv_row([
@@ -137,6 +150,7 @@ def audit_log_export(request):
             entry.resource_type,
             entry.resource_id or "",
             entry.program_id or "",
+            "Yes" if entry.is_demo_context else "No",
         ]))
 
     # Log the export action
@@ -152,6 +166,7 @@ def audit_log_export(request):
         user_display=getattr(request.user, "display_name", str(request.user)),
         action="export",
         resource_type="audit_log",
+        is_demo_context=getattr(request.user, "is_demo", False),
         metadata={"filters": filters_used},
     )
 

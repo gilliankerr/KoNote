@@ -39,5 +39,11 @@
         <p>{% trans "Define structures for progress notes (e.g. Standard session, Crisis intervention)." %}</p>
         <footer><a href="{% url 'note_templates:template_list' %}" role="button" class="outline">{% trans "Manage Templates" %}</a></footer>
     </article>
+
+    <article>
+        <header>{% trans "Demo Accounts" %}</header>
+        <p>{% trans "View all demo users and demo clients. Impersonate demo users for testing." %}</p>
+        <footer><a href="{% url 'admin_settings:demo_directory' %}" role="button" class="outline">{% trans "Demo Directory" %}</a></footer>
+    </article>
 </div>
 {% endblock %}

@@ -466,5 +466,6 @@ def _log_audit(user, action, resource_type, resource_id, ip_address, metadata=No
         action=action,
         resource_type=resource_type,
         resource_id=resource_id,
+        is_demo_context=getattr(user, "is_demo", False) if user else False,
         metadata=metadata or {},
     )

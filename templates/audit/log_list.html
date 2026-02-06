@@ -38,6 +38,14 @@
                 {% trans "Resource type" %}
                 <input type="text" id="resource_type" name="resource_type" value="{{ resource_type }}" placeholder="{% trans 'e.g. client, note' %}">
             </label>
+            <label for="demo_filter">
+                {% trans "Context" %}
+                <select id="demo_filter" name="demo_filter">
+                    <option value="">{% trans "All activity" %}</option>
+                    <option value="real" {% if demo_filter == "real" %}selected{% endif %}>{% trans "Real users only" %}</option>
+                    <option value="demo" {% if demo_filter == "demo" %}selected{% endif %}>{% trans "Demo users only" %}</option>
+                </select>
+            </label>
         </div>
         <div class="grid">
             <div>
@@ -66,9 +74,9 @@
             </thead>
             <tbody>
                 {% for entry in page.object_list %}
-                <tr>
+                <tr{% if entry.is_demo_context %} style="opacity: 0.7;"{% endif %}>
                     <td>{{ entry.event_timestamp|date:"Y-m-d H:i" }}</td>
-                    <td>{{ entry.user_display }}</td>
+                    <td>{{ entry.user_display }}{% if entry.is_demo_context %} <small style="color: var(--pico-del-color, #e53935);">(demo)</small>{% endif %}</td>
                     <td>{{ entry.ip_address|default:"—" }}</td>
                     <td>
                         <span class="badge {% if entry.action == 'create' %}badge-success{% elif entry.action == 'view' or entry.action == 'login' %}badge-info{% elif entry.action == 'update' or entry.action == 'put' or entry.action == 'patch' %}badge-warning{% elif entry.action == 'delete' %}badge-danger{% else %}badge-neutral{% endif %}">

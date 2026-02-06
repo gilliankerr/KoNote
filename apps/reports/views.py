@@ -480,6 +480,7 @@ def export_form(request):
         action="export",
         resource_type="metric_report",
         ip_address=_get_client_ip(request),
+        is_demo_context=getattr(request.user, "is_demo", False),
         metadata=audit_metadata,
     )
 
@@ -675,6 +676,7 @@ def cmt_export_form(request):
         action="export",
         resource_type="cmt_report",
         ip_address=_get_client_ip(request),
+        is_demo_context=getattr(request.user, "is_demo", False),
         metadata={
             "program": program.name,
             "fiscal_year": fiscal_year_label,
@@ -920,6 +922,7 @@ def client_data_export(request):
         action="export",
         resource_type="client_data",
         ip_address=_get_client_ip(request),
+        is_demo_context=getattr(request.user, "is_demo", False),
         metadata={
             "total_clients": len(clients),
             "program_filter": program.name if program else None,
@@ -1001,6 +1004,7 @@ def download_export(request, link_id):
         action="export",
         resource_type="export_download",
         ip_address=_get_client_ip(request),
+        is_demo_context=getattr(request.user, "is_demo", False),
         metadata={
             "link_id": str(link.id),
             "created_by": link.created_by.display_name,
@@ -1094,6 +1098,7 @@ def revoke_export_link(request, link_id):
         action="update",
         resource_type="export_link_revoked",
         ip_address=_get_client_ip(request),
+        is_demo_context=getattr(request.user, "is_demo", False),
         metadata={
             "link_id": str(link.id),
             "created_by": link.created_by.display_name,

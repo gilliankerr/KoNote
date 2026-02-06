@@ -71,6 +71,7 @@ class AuditMiddleware:
                 action=action,
                 resource_type=self._extract_resource_type(request.path),
                 resource_id=self._extract_resource_id(request.path),
+                is_demo_context=getattr(request.user, "is_demo", False),
                 metadata={
                     "path": request.path,
                     "status_code": response.status_code,

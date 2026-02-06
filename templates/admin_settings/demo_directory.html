@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Demo Account Directory" %} — {{ site.product_name|default:"KoNote2" }}{% endblock %}
+
+{% block content %}
+<hgroup>
+    <h1>{% trans "Demo Account Directory" %}</h1>
+    <p>{% trans "All demo users and demo clients in one place. Demo data is isolated from real data." %}</p>
+</hgroup>
+
+{# ---- Demo Users ---- #}
+<h2>{% blocktrans count counter=demo_user_count %}{{ counter }} Demo User{% plural %}{{ counter }} Demo Users{% endblocktrans %}</h2>
+
+{% if user_data %}
+<figure>
+<table role="grid" aria-label="{% trans 'Demo user list' %}">
+    <thead>
+        <tr>
+            <th scope="col">{% trans "Name" %}</th>
+            <th scope="col">{% trans "Username" %}</th>
+            <th scope="col">{% trans "Roles" %}</th>
+            <th scope="col">{% trans "Status" %}</th>
+            <th scope="col">{% trans "Last Login" %}</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in user_data %}
+        <tr>
+            <td>{{ item.user.display_name }}</td>
+            <td>{{ item.user.username }}</td>
+            <td>{{ item.roles }}</td>
+            <td>
+                {% if item.user.is_active %}
+                    <span class="badge badge-success">{% trans "Active" %}</span>
+                {% else %}
+                    <span class="badge badge-danger">{% trans "Inactive" %}</span>
+                {% endif %}
+            </td>
+            <td>{{ item.user.last_login_at|date:"Y-m-d H:i"|default_if_none:_("Never") }}</td>
+            <td>
+                <a href="{% url 'auth_app:user_edit' user_id=item.user.pk %}">{% trans "Edit" %}</a>
+                {% if item.user.is_active %}
+                <a href="{% url 'auth_app:impersonate_user' user_id=item.user.pk %}" style="margin-left: 0.5rem;">{% trans "Impersonate" %}</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</figure>
+{% else %}
+<p>{% trans "No demo users found. Run the seed command to create demo accounts." %}</p>
+{% endif %}
+
+{# ---- Demo Clients ---- #}
+<h2>{% blocktrans count counter=demo_client_count %}{{ counter }} Demo Client{% plural %}{{ counter }} Demo Clients{% endblocktrans %}</h2>
+
+{% if client_data %}
+<figure>
+<table role="grid" aria-label="{% trans 'Demo client list' %}">
+    <thead>
+        <tr>
+            <th scope="col">{% trans "Record ID" %}</th>
+            <th scope="col">{% trans "Name" %}</th>
+            <th scope="col">{% trans "Status" %}</th>
+            <th scope="col">{% trans "Programs" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in client_data %}
+        <tr>
+            <td>{{ item.client.record_id }}</td>
+            <td>{{ item.client }}</td>
+            <td>
+                {% if item.client.status == "active" %}
+                    <span class="badge badge-success">{% trans "Active" %}</span>
+                {% elif item.client.status == "inactive" %}
+                    <span class="badge badge-warning">{% trans "Inactive" %}</span>
+                {% else %}
+                    <span class="badge badge-neutral">{% trans "Discharged" %}</span>
+                {% endif %}
+            </td>
+            <td>{{ item.programs }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</figure>
+{% else %}
+<p>{% trans "No demo clients found. Run the seed command to create demo data." %}</p>
+{% endif %}
+
+<a href="{% url 'admin_settings:dashboard' %}" role="button" class="outline">{% trans "Back to Settings" %}</a>
+{% endblock %}

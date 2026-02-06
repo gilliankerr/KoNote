@@ -484,6 +484,7 @@ def client_export(request, client_id):
                 resource_type="individual_client_export",
                 resource_id=client.pk,
                 ip_address=_get_client_ip(request),
+                is_demo_context=getattr(request.user, "is_demo", False),
                 metadata={
                     "client_id": client.pk,
                     "record_id": client.record_id,

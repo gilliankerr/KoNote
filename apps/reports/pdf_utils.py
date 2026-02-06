@@ -60,5 +60,6 @@ def audit_pdf_export(request, action, resource_type, metadata):
         user_display=request.user.display_name,
         action=action,
         resource_type=resource_type,
+        is_demo_context=getattr(request.user, "is_demo", False),
         metadata=metadata,
     )

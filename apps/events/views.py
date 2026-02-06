@@ -233,6 +233,7 @@ def alert_cancel(request, alert_id):
                 action="cancel",
                 resource_type="alert",
                 resource_id=alert.pk,
+                is_demo_context=getattr(user, "is_demo", False),
                 metadata={"reason": form.cleaned_data["status_reason"]},
             )
             messages.success(request, _("Alert cancelled."))

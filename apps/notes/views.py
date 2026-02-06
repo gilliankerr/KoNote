@@ -477,6 +477,7 @@ def note_cancel(request, note_id):
                 action="cancel",
                 resource_type="progress_note",
                 resource_id=note.pk,
+                is_demo_context=getattr(user, "is_demo", False),
                 metadata={"reason": form.cleaned_data["status_reason"]},
             )
             messages.success(request, _("Note cancelled."))

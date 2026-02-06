@@ -136,6 +136,7 @@ def _audit_impersonation(request, target_user):
             action="login",  # Using 'login' as closest match from ACTION_CHOICES
             resource_type="impersonation",
             resource_id=target_user.id,
+            is_demo_context=True,  # Impersonation is always into a demo user
             metadata={
                 "impersonated_user_id": target_user.id,
                 "impersonated_username": target_user.username,

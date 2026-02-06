@@ -33,6 +33,10 @@ class AuditLog(models.Model):
     old_values = models.JSONField(null=True, blank=True)
     new_values = models.JSONField(null=True, blank=True)
     metadata = models.JSONField(null=True, blank=True)
+    is_demo_context = models.BooleanField(
+        default=False,
+        help_text="True when the action was performed by a demo user.",
+    )
 
     class Meta:
         app_label = "audit"

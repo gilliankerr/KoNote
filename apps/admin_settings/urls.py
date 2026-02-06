@@ -10,4 +10,5 @@ urlpatterns = [
     path("features/", views.features, name="features"),
     path("instance/", views.instance_settings, name="instance_settings"),
     path("diagnose-charts/", views.diagnose_charts, name="diagnose_charts"),
+    path("demo-directory/", views.demo_directory, name="demo_directory"),
 ]

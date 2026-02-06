@@ -315,6 +315,7 @@ def _audit_login(request, user):
             ip_address=_get_client_ip(request),
             action="login",
             resource_type="session",
+            is_demo_context=getattr(user, "is_demo", False),
         )
     except Exception as e:
         logger.error("Audit logging failed for login (user=%s): %s", user.username, e)
@@ -350,6 +351,7 @@ def _audit_logout(request):
             ip_address=_get_client_ip(request),
             action="logout",
             resource_type="session",
+            is_demo_context=getattr(request.user, "is_demo", False),
         )
     except Exception as e:
         logger.error("Audit logging failed for logout (user=%s): %s", request.user.username, e)
