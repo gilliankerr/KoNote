@@ -4,6 +4,7 @@ from django.urls import include, path
 
 from apps.auth_app.views import switch_language
 from konote.error_views import permission_denied_view
+from konote.page_views import help_view, privacy_view
 
 # Custom error handlers
 handler403 = permission_denied_view
@@ -28,5 +29,7 @@ urlpatterns = [
     path("ai/", include("konote.ai_urls")),
     path("", include("apps.registration.urls")),
     path("", include("apps.clients.urls_home")),
+    path("privacy/", privacy_view, name="privacy"),
+    path("help/", help_view, name="help"),
     path("django-admin/", admin.site.urls),
 ]

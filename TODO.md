@@ -15,14 +15,6 @@ The core app is feature-complete. These tasks prepare for production use.
 - [ ] Test backup restore from a real database dump (OPS4)
 - [ ] Verify Railway deployment end-to-end with production-like config (OPS5)
 
-### Documentation Refresh
-
-Update docs and website to reflect all recent work — French, exports, erasure, Canadian localisation, security hardening.
-
-- [ ] Update security docs — encryption details, export controls, audit logging, RBAC enforcement (DOC-REF1)
-- [ ] Update feature list in docs — French support, Canadian localisation, individual export, registration, erasure (DOC-REF2)
-- [ ] Update Getting Started guide — any new setup steps, environment variables, or config (DOC-REF3)
-- [ ] Update website — feature list, screenshots, security messaging, bilingual support (WEB-REF1)
 
 ## Coming Up
 
@@ -120,6 +112,8 @@ See [deployment workflow design](docs/plans/2026-02-05-deployment-workflow-desig
 
 ## Recently Done
 
+- [x] Fix footer links — correct GitHub URL, wire up privacy and help routes, fix help guide nav — 2026-02-06 (FOOT1)
+- [x] Documentation refresh — security docs, feature lists, Getting Started guide, website — 2026-02-06 (DOC-REF1-3, WEB-REF1)
 - [x] Erasure i18n — email templates, completion email, error messages, JS escaping for French — 2026-02-05 (ERASE-I18N1-3, ERASE-JS1)
 - [x] Erasure review fixes — __str__, dead code, aria-labels, email template, 80+ French translations — 2026-02-05 (ERASE-REV2-6)
 - [x] Erasure review fixes — email privacy, auth decorators, HTML — 2026-02-05 (ERASE-REV1)

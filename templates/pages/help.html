@@ -13,11 +13,14 @@
     <nav class="help-nav" aria-label="{% trans 'Help navigation' %}">
         <h2>{% trans "Quick Navigation" %}</h2>
         <ul>
+            <li><a href="#getting-started">{% trans "Getting Started" %}</a></li>
             <li><a href="#searching">{% trans "Searching for" %} {{ term.client_plural }}</a></li>
+            <li><a href="#files">{{ term.client|capfirst }} {{ term.file }}s</a></li>
             <li><a href="#notes">{{ term.progress_note_plural }}</a></li>
             <li><a href="#events">{% trans "Events and Alerts" %}</a></li>
             <li><a href="#plans">{{ term.plan }}s</a></li>
             <li><a href="#reports">{% trans "Analysis and Reports" %}</a></li>
+            <li><a href="#roles">{% trans "Roles" %}</a></li>
             <li><a href="#shortcuts">{% trans "Keyboard Shortcuts" %}</a></li>
             <li><a href="#troubleshooting">{% trans "Troubleshooting" %}</a></li>
             {% if user.is_admin %}
@@ -394,7 +397,7 @@
             </tbody>
         </table>
 
-        <p>{% trans "For detailed administrator documentation, see the" %} <a href="/docs/administering-KoNote2/">{% trans "Administrator Guide" %}</a>.</p>
+        <p>{% trans "Need help with a setting? Contact your system administrator or support team." %}</p>
     </section>
     {% endif %}
 
