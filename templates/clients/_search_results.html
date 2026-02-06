@@ -1,6 +1,6 @@
 {% load i18n %}
 {% if results %}
-<table role="grid" class="client-table">
+<table role="grid" class="client-table" aria-label="{% blocktrans with clients=term.client_plural|default:'Clients' %}{{ clients }} search results{% endblocktrans %}">
     <thead>
         <tr>
             <th scope="col">{% trans "Name" %}</th>

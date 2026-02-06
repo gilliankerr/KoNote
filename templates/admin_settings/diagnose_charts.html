@@ -4,26 +4,26 @@
 {% block title %}{% trans "Chart Diagnostics" %} — {{ site.product_name|default:"KoNote2" }}{% endblock %}
 
 {% block content %}
-<h2>{% trans "Chart Diagnostics" %}</h2>
+<h1>{% trans "Chart Diagnostics" %}</h1>
 <p>{% trans "This page helps diagnose why the Analysis tab might show no charts." %}</p>
 
-<h3>{% trans "System-wide" %}</h3>
-<table>
+<h2>{% trans "System-wide" %}</h3>
+<table aria-label="{% trans 'System-wide diagnostics' %}">
     <tbody>
         <tr>
-            <th>{% trans "Library metrics" %}</th>
+            <th scope="row">{% trans "Library metrics" %}</th>
             <td>{{ lib_metrics }}</td>
             <td>{% if lib_metrics == 0 %}<mark>{% trans "Missing! Run seed command." %}</mark>{% else %}{% trans "OK" %}{% endif %}</td>
         </tr>
         <tr>
-            <th>{% trans "PlanTargetMetric links" %}</th>
+            <th scope="row">{% trans "PlanTargetMetric links" %}</th>
             <td>{{ total_ptm }}</td>
             <td>{% if total_ptm == 0 %}<mark>{% trans "None! Metrics not linked to targets." %}</mark>{% else %}{% trans "OK" %}{% endif %}</td>
         </tr>
     </tbody>
 </table>
 
-<h3>{% blocktrans %}Client: {{ record_id }}{% endblocktrans %}</h3>
+<h2>{% blocktrans %}Client: {{ record_id }}{% endblocktrans %}</h3>
 <form method="get" style="margin-bottom: 1rem;">
     <label for="client">{% trans "Check different client:" %}</label>
     <input type="text" name="client" id="client" value="{{ record_id }}" placeholder="{% trans "e.g., DEMO-001" %}">
@@ -31,10 +31,10 @@
 </form>
 
 {% if client_data %}
-<table>
+<table aria-label="{% blocktrans %}Client {{ record_id }} diagnostics{% endblocktrans %}">
     <tbody>
         <tr>
-            <th>{% trans "Active targets" %}</th>
+            <th scope="row">{% trans "Active targets" %}</th>
             <td>{{ client_data.target_count }}</td>
         </tr>
         {% for target in client_data.targets %}
@@ -44,19 +44,19 @@
         </tr>
         {% endfor %}
         <tr>
-            <th>{% trans "Full notes" %}</th>
+            <th scope="row">{% trans "Full notes" %}</th>
             <td>{{ client_data.full_notes }}</td>
         </tr>
         <tr>
-            <th>{% trans "Quick notes" %}</th>
+            <th scope="row">{% trans "Quick notes" %}</th>
             <td>{{ client_data.quick_notes }}</td>
         </tr>
         <tr>
-            <th>{% trans "ProgressNoteTarget entries" %}</th>
+            <th scope="row">{% trans "ProgressNoteTarget entries" %}</th>
             <td>{{ client_data.pnt_count }}</td>
         </tr>
         <tr>
-            <th>{% trans "MetricValue entries" %}</th>
+            <th scope="row">{% trans "MetricValue entries" %}</th>
             <td>{{ client_data.mv_count }}</td>
         </tr>
     </tbody>
@@ -65,7 +65,7 @@
 <p><mark>{% blocktrans %}Client "{{ record_id }}" not found.{% endblocktrans %}</mark></p>
 {% endif %}
 
-<h3>{% trans "Diagnosis" %}</h3>
+<h2>{% trans "Diagnosis" %}</h3>
 {% if diagnosis %}
 <article class="{% if diagnosis_type == 'error' %}pico-background-red-500{% elif diagnosis_type == 'warning' %}pico-background-yellow-500{% else %}pico-background-green-500{% endif %}">
     <p><strong>{{ diagnosis }}</strong></p>
@@ -73,16 +73,16 @@
 {% endif %}
 
 {% if chart_simulation %}
-<h3>{% blocktrans with count=charts_would_show %}Chart Simulation ({{ count }} would display){% endblocktrans %}</h3>
+<h2>{% blocktrans with count=charts_would_show %}Chart Simulation ({{ count }} would display){% endblocktrans %}</h3>
 <p>{% trans "This shows exactly what the Analysis tab queries for each target/metric combination:" %}</p>
-<table>
+<table aria-label="{% trans 'Chart simulation' %}">
     <thead>
         <tr>
-            <th>{% trans "Target" %}</th>
-            <th>{% trans "Metric" %}</th>
-            <th>{% trans "Values Found" %}</th>
-            <th>{% trans "Numeric Values" %}</th>
-            <th>{% trans "Would Show Chart?" %}</th>
+            <th scope="col">{% trans "Target" %}</th>
+            <th scope="col">{% trans "Metric" %}</th>
+            <th scope="col">{% trans "Values Found" %}</th>
+            <th scope="col">{% trans "Numeric Values" %}</th>
+            <th scope="col">{% trans "Would Show Chart?" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -103,7 +103,7 @@
 </table>
 {% endif %}
 
-<h3>{% trans "How Charts Work" %}</h3>
+<h2>{% trans "How Charts Work" %}</h3>
 <ol>
     <li><strong>{% trans "Library metrics" %}</strong> {% trans "must be seeded (run" %} <code>python manage.py seed</code>)</li>
     <li><strong>{% trans "Targets" %}</strong> {% trans "must have metrics assigned (in the Plan tab)" %}</li>

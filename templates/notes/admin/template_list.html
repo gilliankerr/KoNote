@@ -14,13 +14,13 @@
 </div>
 
 {% if templates %}
-<table>
+<table aria-label="{% blocktrans with note=term.progress_note|default:'Note' %}{{ note }} templates{% endblocktrans %}">
     <thead>
         <tr>
-            <th>{% trans "Name" %}</th>
-            <th>{% trans "Sections" %}</th>
-            <th>{% trans "Status" %}</th>
-            <th>{% trans "Actions" %}</th>
+            <th scope="col">{% trans "Name" %}</th>
+            <th scope="col">{% trans "Sections" %}</th>
+            <th scope="col">{% trans "Status" %}</th>
+            <th scope="col">{% trans "Actions" %}</th>
         </tr>
     </thead>
     <tbody>

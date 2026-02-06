@@ -25,14 +25,14 @@
         </span>
     </header>
     {% if group.fields.all %}
-    <table role="grid">
+    <table role="grid" aria-label="{{ group.title }} {% trans 'custom fields' %}">
         <thead>
             <tr>
-                <th>{% trans "Field" %}</th>
-                <th>{% trans "Type" %}</th>
-                <th>{% trans "Required" %}</th>
-                <th>{% trans "Sensitive" %}</th>
-                <th></th>
+                <th scope="col">{% trans "Field" %}</th>
+                <th scope="col">{% trans "Type" %}</th>
+                <th scope="col">{% trans "Required" %}</th>
+                <th scope="col">{% trans "Sensitive" %}</th>
+                <th scope="col"></th>
             </tr>
         </thead>
         <tbody>

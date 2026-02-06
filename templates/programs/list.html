@@ -19,7 +19,7 @@
 
 {% if program_data %}
 <figure>
-<table role="grid">
+<table role="grid" aria-label="{% blocktrans with programs=term.program_plural|default:'Programs' %}{{ programs }} list{% endblocktrans %}">
     <thead>
         <tr>
             <th scope="col">{{ term.program|default:"Program" }}</th>

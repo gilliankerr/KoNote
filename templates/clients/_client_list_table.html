@@ -1,7 +1,7 @@
 {% load i18n %}
 {% if page.object_list %}
 <figure>
-<table role="grid" class="client-table">
+<table role="grid" class="client-table" aria-label="{% blocktrans with clients=term.client_plural|default:'Clients' %}{{ clients }} list{% endblocktrans %}">
     <thead>
         <tr>
             <th scope="col">{% trans "Name" %}</th>

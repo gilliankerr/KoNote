@@ -12,7 +12,7 @@
 <p><a href="{% url 'auth_app:invite_create' %}" role="button">+ {% trans "New Invite" %}</a></p>
 
 <figure>
-<table role="grid">
+<table role="grid" aria-label="{% trans 'Invite list' %}">
     <thead>
         <tr>
             <th scope="col">{% trans "Role" %}</th>
