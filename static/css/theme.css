@@ -81,44 +81,11 @@
     --pico-form-element-spacing-horizontal: 0.75rem;
 }
 
-/* --- Dark mode --- */
-[data-theme="dark"] {
-    --kn-primary-subtle: rgba(13, 115, 119, 0.15);
-
-    --kn-success-bg: #1a3a2a;
-    --kn-success-fg: #a3d9b1;
-    --kn-info-bg: #1a3040;
-    --kn-info-fg: #90cdf4;
-    --kn-warning-bg: #3d2e0a;
-    --kn-warning-fg: #f6e05e;
-    --kn-danger-bg: #3b1a1a;
-    --kn-danger-fg: #feb2b2;
-    --kn-neutral-bg: #2d3748;
-    --kn-neutral-fg: #cbd5e0;
-
-    --kn-page-bg: var(--pico-background-color);
-    --kn-card-bg: #1e2533;
-    --kn-card-hover-bg: #242d3d;
-    --kn-border: #4a5568;
-    --kn-border-light: #2d3748;
-
-    --kn-text: #e2e8f0;
-    --kn-text-secondary: #cbd5e0;
-    --kn-text-muted: #b8c5d4;   /* Brightened from #a0aec0 for WCAG AA (5.2:1 on #1e2533) */
-    --kn-text-faint: #8e9bb0;   /* Brightened from #718096 for WCAG AA (4.6:1 on #1e2533) */
-
-    --kn-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 0 0.5px rgba(255, 255, 255, 0.05);
-    --kn-shadow-card-hover: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
-    --kn-shadow-note-hover: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.08);
-    --kn-shadow-nav: 0 1px 2px rgba(0, 0, 0, 0.15);
-}
-
-/* --- Auto dark mode (system preference) ---
-   When no data-theme is set (auto mode), apply dark variables
-   if the user's OS prefers dark. Without this, Pico would go dark
-   but KoNote's custom --kn-* variables would stay light. */
+/* --- Dark mode (follows device/OS setting automatically) ---
+   Pico CSS handles its own dark mode via prefers-color-scheme.
+   This block ensures KoNote's custom --kn-* variables also adapt. */
 @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
+    :root {
         --kn-primary-subtle: rgba(13, 115, 119, 0.15);
 
         --kn-success-bg: #1a3a2a;
@@ -140,8 +107,8 @@
 
         --kn-text: #e2e8f0;
         --kn-text-secondary: #cbd5e0;
-        --kn-text-muted: #b8c5d4;
-        --kn-text-faint: #8e9bb0;
+        --kn-text-muted: #b8c5d4;   /* Brightened for WCAG AA (5.2:1 on #1e2533) */
+        --kn-text-faint: #8e9bb0;   /* Brightened for WCAG AA (4.6:1 on #1e2533) */
 
         --kn-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 0 0.5px rgba(255, 255, 255, 0.05);
         --kn-shadow-card-hover: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(255, 255, 255, 0.08);

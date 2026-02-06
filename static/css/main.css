@@ -41,13 +41,8 @@
     top: 0;
     z-index: 1000;
 }
-[data-theme="dark"] .demo-banner {
-    background-color: #3d2e0a;
-    border-bottom-color: #d69e2e;
-    color: #f6e05e;
-}
 @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .demo-banner {
+    .demo-banner {
         background-color: #3d2e0a;
         border-bottom-color: #d69e2e;
         color: #f6e05e;
@@ -178,11 +173,8 @@ body > nav a.nav-active {
     flex-shrink: 0;
 }
 /* Ring around colour dots in dark mode so agency colours stay visible */
-[data-theme="dark"] .program-dot {
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
-}
 @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .program-dot {
+    .program-dot {
         box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
     }
 }
@@ -819,24 +811,14 @@ button.secondary {
     color: #ffffff;
 }
 /* Outline secondary buttons — visible text in dark mode */
-[data-theme="dark"] a[role="button"].outline.secondary,
-[data-theme="dark"] button.outline.secondary {
-    color: var(--kn-text);
-    border-color: var(--kn-border);
-}
-[data-theme="dark"] a[role="button"].outline.secondary:hover,
-[data-theme="dark"] button.outline.secondary:hover {
-    color: var(--kn-text-inverse);
-    background: var(--kn-secondary);
-}
 @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) a[role="button"].outline.secondary,
-    :root:not([data-theme="light"]) button.outline.secondary {
+    a[role="button"].outline.secondary,
+    button.outline.secondary {
         color: var(--kn-text);
         border-color: var(--kn-border);
     }
-    :root:not([data-theme="light"]) a[role="button"].outline.secondary:hover,
-    :root:not([data-theme="light"]) button.outline.secondary:hover {
+    a[role="button"].outline.secondary:hover,
+    button.outline.secondary:hover {
         color: var(--kn-text-inverse);
         background: var(--kn-secondary);
     }
@@ -1920,28 +1902,6 @@ article[aria-label="notification"].fading-out {
 }
 
 .keyboard-shortcuts-btn:hover {
-    background: var(--kn-primary-subtle);
-    border-color: var(--kn-primary);
-    color: var(--kn-primary);
-}
-
-/* Theme toggle button in footer */
-.theme-toggle-btn {
-    background: none;
-    border: 1px solid var(--kn-border-light);
-    border-radius: var(--kn-radius-badge);
-    padding: 0.125rem 0.5rem;
-    font-size: 0.875rem;
-    color: var(--kn-text-muted);
-    cursor: pointer;
-    transition: all var(--kn-transition);
-    min-height: 44px; /* WCAG touch target */
-    min-width: 44px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-.theme-toggle-btn:hover {
     background: var(--kn-primary-subtle);
     border-color: var(--kn-primary);
     color: var(--kn-primary);

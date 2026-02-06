@@ -2455,10 +2455,6 @@ msgstr "Session :"
 msgid "min"
 msgstr "min"
 
-#: templates/base.html — Theme toggle
-msgid "Toggle dark mode"
-msgstr "Basculer le mode sombre"
-
 #: templates/base.html — Keyboard shortcuts modal
 msgid "Keyboard shortcuts"
 msgstr "Raccourcis clavier"
