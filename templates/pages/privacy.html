@@ -8,45 +8,153 @@
     <h1>{% trans "Privacy Policy" %}</h1>
 
     <div class="notice">
-        <p>{% trans "This page should display your organisation's privacy policy." %}</p>
-        <p>{% trans "Administrators: Please customise the privacy policy template and configure it for your instance." %}</p>
+        <p>{% trans "This page describes how KoNote2 protects your data. Each organisation should customise this policy for their specific practices and hosting configuration." %}</p>
+        <p>{% trans "Administrators: See the full privacy policy template in the deployment documentation for a version you can tailor to your organisation." %}</p>
     </div>
 
-    <section>
-        <h2>{% trans "Data Protection Overview" %}</h2>
-
-        <p>{% trans "KoNote2 is designed with privacy and security as core features:" %}</p>
-
-        <h3>{% trans "Encryption" %}</h3>
+    <!-- Quick Navigation -->
+    <nav class="privacy-nav" aria-label="{% trans 'Privacy policy navigation' %}">
         <ul>
-            <li>{% trans "All personally identifiable information is encrypted at rest" %}</li>
-            <li>{% trans "Data in transit is protected by TLS/HTTPS" %}</li>
-            <li>{% trans "Passwords are hashed using Argon2id" %}</li>
+            <li><a href="#encryption">{% trans "Encryption" %}</a></li>
+            <li><a href="#access-control">{% trans "Access Control" %}</a></li>
+            <li><a href="#sessions">{% trans "Sessions" %}</a></li>
+            <li><a href="#audit">{% trans "Audit Logging" %}</a></li>
+            <li><a href="#erasure">{% trans "Data Erasure" %}</a></li>
+            <li><a href="#exports">{% trans "Data Exports" %}</a></li>
+            <li><a href="#rights">{% trans "Your Rights" %}</a></li>
+        </ul>
+    </nav>
+
+    <section id="encryption">
+        <h2>{% trans "Encryption" %}</h2>
+
+        <h3>{% trans "Data at Rest" %}</h3>
+        <p>{% trans "All personally identifiable information (PII) is encrypted before being stored in the database using Fernet symmetric encryption:" %}</p>
+        <ul>
+            <li>{% trans "Algorithm: AES-128 in CBC mode with HMAC-SHA256 authentication" %}</li>
+            <li>{% trans "Encryption keys are stored in environment variables, separate from the database and source code" %}</li>
+            <li>{% trans "Key rotation is supported without downtime" %}</li>
+        </ul>
+        <p><strong>{% trans "Encrypted fields include:" %}</strong> {% trans "names, dates of birth, contact information, email addresses, session notes, and any custom fields marked as sensitive by administrators." %}</p>
+
+        <h3>{% trans "Data in Transit" %}</h3>
+        <ul>
+            <li>{% trans "All connections are encrypted using TLS (HTTPS)" %}</li>
+            <li>{% trans "HTTP Strict Transport Security (HSTS) is enabled" %}</li>
+            <li>{% trans "Database connections use SSL/TLS" %}</li>
         </ul>
 
-        <h3>{% trans "Access Control" %}</h3>
+        <h3>{% trans "Passwords" %}</h3>
         <ul>
-            <li>{% trans "Role-based access controls limit who can see what" %}</li>
-            <li>{% trans "Staff can only access" %} {{ term.client_plural }} {% trans "in their assigned" %} {{ term.program_plural }}</li>
+            <li>{% trans "Passwords are hashed using Argon2id (winner of the Password Hashing Competition)" %}</li>
+            <li>{% trans "Each password has a unique random salt" %}</li>
+            <li>{% trans "Passwords are never stored in readable form" %}</li>
+            <li>{% trans "Minimum password length: 10 characters" %}</li>
+        </ul>
+    </section>
+
+    <section id="access-control">
+        <h2>{% trans "Access Control" %}</h2>
+
+        <p>{% trans "Access to" %} {{ term.client }} {% trans "information is controlled through role-based permissions:" %}</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "Role" %}</th>
+                    <th>{% trans "Access Level" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>{% trans "Administrator" %}</strong></td>
+                    <td>{% trans "System settings and user management. No" %} {{ term.client }} {% trans "data access unless also assigned a" %} {{ term.program }} {% trans "role." %}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Program Manager" %}</strong></td>
+                    <td>{% trans "Full access to" %} {{ term.client_plural }} {% trans "in assigned" %} {{ term.program_plural }}{% trans ". Can edit" %} {{ term.plan }}s {% trans "and export data." %}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Staff" %}</strong></td>
+                    <td>{% trans "Access to" %} {{ term.client_plural }} {% trans "in assigned" %} {{ term.program_plural }}{% trans ". Can write notes and record events." %}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Front Desk" %}</strong></td>
+                    <td>{% trans "Limited" %} {{ term.client }} {% trans "information only. Cannot view full records or export data." %}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <ul>
+            <li>{% trans "Staff can only see" %} {{ term.client_plural }} {% trans "in" %} {{ term.program_plural }} {% trans "they are assigned to" %}</li>
             <li>{% trans "Administrative functions are restricted to administrators" %}</li>
+            <li>{% trans "All permission checks are enforced server-side" %}</li>
         </ul>
+    </section>
 
-        <h3>{% trans "Audit Logging" %}</h3>
+    <section id="sessions">
+        <h2>{% trans "Sessions and Cookies" %}</h2>
+
         <ul>
-            <li>{% trans "All access to" %} {{ term.client }} {% trans "data is logged" %}</li>
-            <li>{% trans "Login attempts are recorded with timestamps and IP addresses" %}</li>
-            <li>{% trans "Data changes are tracked with before/after values" %}</li>
-            <li>{% trans "Audit logs are stored separately and cannot be modified" %}</li>
+            <li>{% trans "Sessions automatically expire after a period of inactivity (default: 30 minutes)" %}</li>
+            <li>{% trans "Session timeout resets with each action you take" %}</li>
+            <li>{% trans "Sessions are stored server-side — only a session identifier is kept in your browser" %}</li>
+            <li>{% trans "Cookies are HTTP-only (not accessible to JavaScript) and secure (HTTPS only)" %}</li>
         </ul>
 
-        <h3>{% trans "Your Rights" %}</h3>
+        <p>{% trans "KoNote2 uses only essential cookies required for the application to function. No advertising, tracking, or analytics cookies are used." %}</p>
+    </section>
+
+    <section id="audit">
+        <h2>{% trans "Audit Logging" %}</h2>
+
+        <p>{% trans "All access to and changes of" %} {{ term.client }} {% trans "data are recorded in a separate audit database:" %}</p>
+        <ul>
+            <li>{% trans "Login attempts (successful and failed) with timestamps and IP addresses" %}</li>
+            <li>{% trans "Every time a" %} {{ term.client }} {% trans "record is viewed" %}</li>
+            <li>{% trans "All data changes with before and after values" %}</li>
+            <li>{% trans "Data exports — who exported what and when" %}</li>
+            <li>{% trans "Permission changes and administrative actions" %}</li>
+        </ul>
+        <p>{% trans "Audit logs are stored in a separate database and are append-only — they cannot be modified or deleted through the application." %}</p>
+    </section>
+
+    <section id="erasure">
+        <h2>{% trans "Data Erasure" %}</h2>
+
+        <p>{% trans "KoNote2 supports formal data erasure requests in compliance with PIPEDA:" %}</p>
+        <ul>
+            <li>{% trans "Any staff member can initiate an erasure request for a" %} {{ term.client }}</li>
+            <li>{% trans "All program managers for that" %} {{ term.client }}'s {{ term.program_plural }} {% trans "must approve the request" %}</li>
+            <li>{% trans "Once approved, all" %} {{ term.client }} {% trans "data is permanently and irreversibly deleted" %}</li>
+            <li>{% trans "The audit trail records that an erasure occurred, but no personal information is retained" %}</li>
+        </ul>
+    </section>
+
+    <section id="exports">
+        <h2>{% trans "Data Exports" %}</h2>
+
+        <ul>
+            <li>{% trans "Program managers and administrators can export" %} {{ term.metric }} {% trans "data in CSV format" %}</li>
+            <li>{% trans "Individual" %} {{ term.client }} {% trans "data can be exported for privacy access requests" %}</li>
+            <li>{% trans "Export download links expire after a limited time" %}</li>
+            <li>{% trans "All exports are recorded in the audit log" %}</li>
+            <li>{% trans "Exported files include protections against formula injection" %}</li>
+        </ul>
+    </section>
+
+    <section id="rights">
+        <h2>{% trans "Your Rights" %}</h2>
+
         <p>{% trans "Under PIPEDA and applicable privacy legislation, you have the right to:" %}</p>
         <ul>
             <li>{% trans "Request access to your personal information" %}</li>
             <li>{% trans "Request correction of inaccurate information" %}</li>
+            <li>{% trans "Request erasure of your personal information" %}</li>
             <li>{% trans "Withdraw consent for specific uses" %}</li>
-            <li>{% trans "File a complaint with the Privacy Commissioner" %}</li>
+            <li>{% trans "File a complaint with the Privacy Commissioner of Canada" %}</li>
         </ul>
+        <p>{% trans "Organisations must respond to access requests within 30 days as required by PIPEDA." %}</p>
     </section>
 
     <section>
@@ -57,6 +165,11 @@
         {% else %}
         <p>{% trans "Please contact your system administrator for privacy questions." %}</p>
         {% endif %}
+
+        <p>{% trans "For complaints not resolved to your satisfaction:" %}</p>
+        <p><strong>{% trans "Office of the Privacy Commissioner of Canada" %}</strong><br>
+        {% trans "Website:" %} <a href="https://www.priv.gc.ca" target="_blank" rel="noopener">www.priv.gc.ca</a><br>
+        {% trans "Phone:" %} 1-800-282-1376</p>
     </section>
 
 </div>
@@ -76,8 +189,34 @@
     margin-bottom: 2rem;
 }
 
+.privacy-nav {
+    background: var(--pico-card-background-color, #f5f5f5);
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.privacy-nav ul {
+    columns: 2;
+    margin-bottom: 0;
+    list-style: none;
+    padding: 0;
+}
+
+@media (max-width: 600px) {
+    .privacy-nav ul {
+        columns: 1;
+    }
+}
+
 .privacy-page section {
     margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--pico-muted-border-color, #e0e0e0);
+}
+
+.privacy-page section:last-child {
+    border-bottom: none;
 }
 
 .privacy-page h2 {
@@ -98,6 +237,16 @@
 
 .privacy-page li {
     margin-bottom: 0.5rem;
+}
+
+.privacy-page table {
+    margin: 1rem 0;
+}
+
+@media print {
+    .privacy-page section {
+        break-inside: avoid;
+    }
 }
 </style>
 {% endblock %}

@@ -87,9 +87,10 @@ All data transmitted between your browser and our servers is encrypted using:
 For users authenticating with local accounts (not SSO):
 
 - **Hashing Algorithm:** Argon2id (winner of the Password Hashing Competition)
-- **Parameters:** Memory cost 64 MB, time cost 3 iterations, parallelism 4
-- **Salting:** Unique 16-byte random salt per password
+- **Parameters:** Django's default Argon2 parameters (automatically updated with Django security releases)
+- **Salting:** Unique random salt per password
 - **Rehashing:** Passwords automatically rehashed if security parameters are upgraded
+- **Minimum Length:** 10 characters
 
 ### 3.4 Database Security
 
@@ -109,6 +110,7 @@ For users authenticating with local accounts (not SSO):
 - **Input Validation:** All user input validated server-side using Django forms
 - **SQL Injection Prevention:** Parameterised queries via Django ORM
 - **Rate Limiting:** Authentication endpoints rate-limited to prevent brute force attacks
+- **Export Security:** Exported files protected against formula injection; download links expire after a configurable period; all exports audit-logged
 
 ---
 
@@ -120,18 +122,14 @@ Access to client information is controlled through a role-based permission syste
 
 | Role | Access Level |
 |------|--------------|
-| **System Administrator** | Full system configuration; no client data access by default |
-| **Agency Administrator** | Manage users, programmes, settings; configurable client access |
-| **Programme Manager** | Full access to assigned programme(s) and their clients |
-| **Staff** | Access limited to assigned clients and programmes |
-| **Read-Only** | View-only access to assigned records |
+| **Administrator** | System settings and user management. No client data access unless also assigned a programme role. |
+| **Programme Manager** | Full access to assigned programme(s) and their clients. Can edit plans and export data. |
+| **Staff** | Access to clients in assigned programmes. Can write notes and record events. |
+| **Front Desk** | Limited client information only. Cannot view full records or export data. |
 
 ### 4.2 Client Assignment
 
-Staff can only access client records when explicitly assigned. Assignment can be:
-- **Direct:** Individual staff-to-client assignment
-- **Programme-based:** Access to all clients in assigned programmes
-- **Team-based:** Access through team membership
+Staff can only access client records for programmes they are assigned to. Assignment is programme-based: users are assigned to one or more programmes and can access all clients enrolled in those programmes.
 
 ### 4.3 Administrative Access
 
@@ -226,7 +224,7 @@ We use only essential cookies required for the application to function:
 
 | Cookie Name | Purpose | Duration |
 |-------------|---------|----------|
-| `sessionid` | Maintains your login session | [SESSION DURATION - e.g., 8 hours of inactivity] |
+| `sessionid` | Maintains your login session | [SESSION DURATION - default: 30 minutes of inactivity] |
 | `csrftoken` | Prevents cross-site request forgery attacks | 1 year |
 
 ### 8.2 No Tracking Cookies
@@ -251,7 +249,22 @@ We do not use:
 
 > **Note:** Retention periods should align with your organisation's record retention policy and applicable regulations (e.g., funder requirements, professional standards).
 
-### 9.1 Data Deletion
+### 9.1 Data Erasure
+
+KoNote2 supports formal data erasure requests in compliance with PIPEDA:
+
+1. **Request** — Any staff member can initiate an erasure request for a client
+2. **Approval** — All programme managers for that client's programmes must approve the request
+3. **Execution** — Once approved, all client data is permanently and irreversibly deleted, including:
+   - Client profile and contact information
+   - All notes, plans, events, and alerts
+   - All metric recordings and custom field values
+   - Programme enrolment records
+4. **Audit Trail** — The audit log records that an erasure occurred (date, who requested, who approved) but retains no personal information about the erased client
+
+Self-approval is prevented — the person requesting erasure cannot also be the sole approver. A single rejection from any programme manager cancels the entire request.
+
+### 9.2 Data Deletion on Retention Expiry
 
 After retention periods expire, data is securely deleted:
 - Database records permanently deleted with verification
@@ -266,8 +279,9 @@ You have the right to:
 
 1. **Access** — Request a copy of your personal information we hold
 2. **Correction** — Request correction of inaccurate information
-3. **Withdrawal of Consent** — Withdraw consent for specific uses (where consent is the legal basis)
-4. **Complaint** — File a complaint with the Office of the Privacy Commissioner of Canada
+3. **Erasure** — Request deletion of your personal information (subject to a multi-step approval process)
+4. **Withdrawal of Consent** — Withdraw consent for specific uses (where consent is the legal basis)
+5. **Complaint** — File a complaint with the Office of the Privacy Commissioner of Canada
 
 ### 10.1 For Clients
 
