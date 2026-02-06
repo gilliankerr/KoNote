@@ -234,7 +234,7 @@ body > nav a.nav-active {
 }
 .search-input-wrapper {
     flex: 1;
-    min-width: 200px;
+    min-width: 400px;
 }
 .search-label {
     display: block;
@@ -532,6 +532,16 @@ body > nav a.nav-active {
 .note-chip--done {
     background: var(--kn-success-bg);
     color: var(--kn-success-fg);
+}
+
+/* ---- Client list search bar ---- */
+.list-search-bar {
+    margin-bottom: var(--kn-space-base);
+}
+.list-search-bar input[type="search"] {
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 0;
 }
 
 /* ---- Filter bar (collapsed by default, opens when filters active) ---- */
@@ -1402,6 +1412,7 @@ article[aria-label="notification"].fading-out {
     }
     .search-input-wrapper {
         width: 100%;
+        min-width: 0;
     }
     .search-actions {
         width: 100%;

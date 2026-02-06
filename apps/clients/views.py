@@ -84,6 +84,7 @@ def client_list(request):
     # Get filter values from query params
     status_filter = request.GET.get("status", "")
     program_filter = request.GET.get("program", "")
+    search_query = request.GET.get("q", "").strip().lower()
 
     # Decrypt names and build display list
     client_data = []
@@ -100,9 +101,17 @@ def client_list(request):
             if int(program_filter) not in program_ids:
                 continue
 
+        name = f"{client.first_name} {client.last_name}"
+
+        # Apply text search (name or record ID)
+        if search_query:
+            record = (client.record_id or "").lower()
+            if search_query not in name.lower() and search_query not in record:
+                continue
+
         client_data.append({
             "client": client,
-            "name": f"{client.first_name} {client.last_name}",
+            "name": name,
             "programs": programs,
         })
 
@@ -116,6 +125,7 @@ def client_list(request):
         "accessible_programs": accessible_programs,
         "status_filter": status_filter,
         "program_filter": program_filter,
+        "search_query": request.GET.get("q", ""),
     }
 
     # HTMX request — return only the table partial
