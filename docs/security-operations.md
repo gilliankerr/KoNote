@@ -1,6 +1,10 @@
 # Security Operations Guide
 
-KoNote includes automated security checks and comprehensive audit logging to help you protect client data and meet compliance requirements. This guide explains how to use these tools.
+**Last updated:** February 2026 | **Applies to:** KoNote2 v1.x
+
+> **Disclaimer:** This document describes KoNote2's security features and how to operate them. It is not legal advice. Consult your privacy officer or legal counsel for your specific compliance requirements.
+
+This guide is for IT staff, managed service providers, and technical consultants who are setting up, maintaining, or troubleshooting a KoNote2 deployment. For a non-technical overview, see the [Security Overview](security-overview.md). For technical architecture details, see [Security Architecture](security-architecture.md).
 
 ---
 
@@ -18,7 +22,7 @@ KoNote includes automated security checks and comprehensive audit logging to hel
 
 ## Security Checks
 
-KoNote runs security checks automatically with every `manage.py` command (runserver, migrate, etc.). You can also run them explicitly.
+KoNote2 runs security checks automatically with every `manage.py` command (runserver, migrate, etc.). You can also run them explicitly.
 
 ### Basic Check (Development)
 
@@ -26,7 +30,7 @@ KoNote runs security checks automatically with every `manage.py` command (runser
 python manage.py check
 ```
 
-This runs Django's system checks plus KoNote's custom security checks. All checks must pass for the server to start.
+This runs Django's system checks plus KoNote2's custom security checks. All checks must pass for the server to start.
 
 **Expected output (success):**
 ```
@@ -50,19 +54,7 @@ python manage.py check --deploy
 
 This adds deployment-specific checks for production security settings (HTTPS cookies, DEBUG mode, etc.).
 
-### Check IDs and What They Mean
-
-| ID | Severity | What It Checks | How to Fix |
-|----|----------|----------------|------------|
-| `KoNote.E001` | Error | Encryption key exists and is valid | Generate key: `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"` and add to `.env` |
-| `KoNote.E002` | Error | Security middleware is loaded | Check `MIDDLEWARE` in settings includes `ProgramAccessMiddleware` and `AuditMiddleware` |
-| `KoNote.W001` | Warning | DEBUG=True (deploy check only) | Set `DEBUG=False` in production |
-| `KoNote.W002` | Warning | Session cookies not secure | Set `SESSION_COOKIE_SECURE=True` when using HTTPS |
-| `KoNote.W003` | Warning | CSRF cookies not secure | Set `CSRF_COOKIE_SECURE=True` when using HTTPS |
-| `KoNote.W004` | Warning | Argon2 not primary hasher | Add `Argon2PasswordHasher` first in `PASSWORD_HASHERS` |
-
-**Errors (E)** prevent the server from starting.
-**Warnings (W)** allow the server to start but indicate security gaps.
+For the full list of check IDs and what they mean, see [Security Architecture — System Check IDs](security-architecture.md#2-system-check-ids).
 
 ---
 
@@ -153,50 +145,9 @@ Exits with code 1 if any warnings are present. Use this in CI pipelines to enfor
 
 ---
 
-## Running Security Tests
-
-KoNote includes automated tests that verify security properties. These tests create temporary data that is cleaned up automatically.
-
-### Run All Security Tests
-
-```bash
-pytest tests/test_security.py tests/test_rbac.py tests/test_encryption.py -v
-```
-
-### What Each Test File Covers
-
-| File | Tests | What It Covers |
-|------|-------|----------------|
-| `test_security.py` | PII exposure | Client data not in database plaintext, encryption round-trip, ciphertext validation |
-| `test_rbac.py` | 19 tests | Role permissions, front desk access control, program restrictions, admin-only routes |
-| `test_htmx_errors.py` | 21 tests | Error responses, HTMX partials, form validation feedback |
-| `test_encryption.py` | Key validation | Fernet key format, encrypt/decrypt functions |
-
-### Example Test Run
-
-```bash
-pytest tests/test_security.py -v
-```
-
-**Expected output:**
-```
-tests/test_security.py::PIIExposureTest::test_client_name_not_in_database_plaintext PASSED
-tests/test_security.py::PIIExposureTest::test_encrypted_field_contains_ciphertext PASSED
-tests/test_security.py::PIIExposureTest::test_property_accessor_decrypts_correctly PASSED
-tests/test_security.py::RBACBypassTest::test_staff_cannot_access_other_program PASSED
-tests/test_security.py::RBACBypassTest::test_admin_route_blocked_for_staff PASSED
-...
-```
-
-### Test Data
-
-The test suite creates temporary users, programs, and clients to verify security properties. This data exists only during test execution and is automatically deleted afterward. It does not affect your real database.
-
----
-
 ## Audit Logging
 
-Every significant action in KoNote is logged to a separate audit database. This provides an immutable record for compliance and incident investigation.
+Every significant action in KoNote2 is logged to a separate audit database. This provides a record for compliance and incident investigation.
 
 ### What Gets Logged
 
@@ -205,7 +156,7 @@ Every significant action in KoNote is logged to a separate audit database. This 
 | Login/Logout | User, timestamp, IP address, success/failure |
 | Client view | Who viewed which client, when |
 | Create/Update/Delete | What changed, old values, new values |
-| Exports | Who exported what data |
+| Exports | Who exported what data, recipient |
 | Admin actions | Settings changes, user management |
 
 ### Viewing Audit Logs
@@ -262,11 +213,11 @@ ORDER BY event_timestamp DESC;
 
 ### Audit Database Security
 
-The audit database is designed to be append-only:
+The audit database should be configured as append-only to prevent tampering:
 
-- The `audit_writer` user should have INSERT permission only (no UPDATE or DELETE)
-- This prevents tampering with audit records
-- Configure this in PostgreSQL when setting up the audit database
+- Configure the `audit_writer` database user with INSERT permission only (no UPDATE or DELETE)
+- This is a configuration step during deployment — it is not enforced automatically by the application
+- Verify this by attempting an UPDATE or DELETE as `audit_writer` — it should be denied by PostgreSQL
 
 ---
 
@@ -282,6 +233,8 @@ This includes:
 - Any custom fields marked "sensitive"
 
 There is no backdoor, no recovery option, no "forgot password" flow. The data is gone.
+
+This is why we recommend Standard Protection for most agencies — your hosting provider maintains the key alongside your application, and key loss is extremely unlikely as long as you maintain access to your hosting account.
 
 ### Why This Matters for Nonprofits
 
@@ -373,7 +326,7 @@ Annual review date: ____________
 1. All encrypted fields display `[decryption error]`
 2. Client names, notes, and sensitive fields are permanently unreadable
 3. You may need to rebuild client records from paper files or external sources
-4. This may constitute a PIPEDA compliance issue (failure to maintain records)
+4. You would need to notify the Privacy Commissioner and affected clients, as this constitutes a loss of personal information under PIPEDA
 
 **Prevention is the only cure.**
 
@@ -385,61 +338,6 @@ Annual review date: ____________
 - A documented succession plan that includes key recovery
 
 The goal is protection that will actually be maintained, not theoretical maximum security that fails in practice.
-
----
-
-## Encrypted Fields
-
-KoNote uses Fernet encryption (AES-128 in CBC mode with HMAC-SHA256 for authentication) to protect sensitive data at the application level.
-
-### What Is Encrypted
-
-| Data | Model | Fields |
-|------|-------|--------|
-| **Client identity** | ClientFile | first_name, middle_name, last_name, preferred_name, birth_date |
-| **Custom fields marked sensitive** | ClientDetailValue | value (when field definition has `is_sensitive=True`) |
-| **Progress note content** | ProgressNote | notes_text, summary, participant_reflection |
-| **Target notes within progress notes** | ProgressNoteTarget | notes |
-
-### What Is NOT Encrypted
-
-- Metric values (numeric/categorical data without identifying information)
-- Program names, outcome definitions, target descriptions
-- Dates, timestamps, status fields
-- User accounts (except email addresses)
-
-Metric values are intentionally not encrypted because:
-- They are numeric or categorical (e.g., "3", "improved", "yes/no")
-- Without client identity, metric values are not personally identifiable
-- Client identity is already encrypted
-- Encrypting metrics would break reporting and aggregation queries
-
-If an agency uses free-text metrics containing clinical content, they should use custom fields marked "sensitive" instead.
-
-### Search Limitations
-
-Encrypted fields cannot be searched via SQL. This means:
-- Client search loads accessible clients into Python and filters in memory
-- This is acceptable for up to approximately 2,000 clients
-- Progress note content search is not supported (search by date, client, or status instead)
-
----
-
-## Encryption Key Management
-
-### About the Encryption Key
-
-`FIELD_ENCRYPTION_KEY` encrypts all personally identifiable information (PII) in the database:
-
-- Client names (first, middle, last, preferred)
-- Email addresses
-- Phone numbers
-- Dates of birth
-- Custom fields marked as sensitive
-- Progress note content, summaries, and participant reflections
-- Target notes within progress notes
-
-The encryption uses Fernet (AES-128 in CBC mode with HMAC-SHA256 for authentication).
 
 ### Backing Up Your Key
 
@@ -460,7 +358,15 @@ Store your encryption key separately from database backups. Good options:
 
 ### Rotating the Encryption Key
 
-If you suspect your key has been compromised, or as part of regular security hygiene:
+**Do not rotate your encryption key unless you have a specific reason.** Key rotation re-encrypts every encrypted field in the database, which carries its own risks. An error during rotation could result in data loss.
+
+**When to rotate:**
+
+- **When staff with key access leave the organisation** — Immediately
+- **After a suspected security incident** — Immediately
+- **When changing hosting providers** — During migration
+
+**How to rotate:**
 
 ```bash
 # 1. Generate a new key
@@ -477,20 +383,11 @@ python manage.py rotate_encryption_key --old-key="YOUR_OLD_KEY" --new-key="YOUR_
 
 **Important:** Test key rotation in a staging environment first.
 
-### Key Rotation Schedule
-
-For compliance, consider rotating encryption keys:
-
-- **Every 90 days** — Recommended baseline
-- **When staff with key access leave** — Immediately
-- **After a suspected security incident** — Immediately
-- **When changing hosting providers** — During migration
-
 ---
 
 ## Authentication Security
 
-KoNote supports two authentication modes. Each has different multi-factor authentication (MFA) options.
+KoNote2 supports two authentication modes. Each has different multi-factor authentication (MFA) options.
 
 ### Which Authentication Mode Should You Use?
 
@@ -504,38 +401,38 @@ KoNote supports two authentication modes. Each has different multi-factor authen
 
 If your agency uses Microsoft 365, use Azure AD SSO. This gives you:
 
-- **Multi-factor authentication** — configured in Azure, not in KoNote
+- **Multi-factor authentication** — configured in Azure, not in KoNote2
 - **Conditional access policies** — restrict logins by location, device, or risk level
 - **Centralised user management** — add/remove users through your existing Microsoft admin
-- **Audit logging through Azure** — in addition to KoNote's own audit logs
+- **Audit logging through Azure** — in addition to KoNote2's own audit logs
 
 #### How It Works
 
-1. A user clicks "Sign in with Microsoft" on the KoNote login page
+1. A user clicks "Sign in with Microsoft" on the KoNote2 login page
 2. They are redirected to Microsoft's login page
 3. Microsoft handles password verification and MFA (SMS, authenticator app, security key, etc.)
-4. The user is redirected back to KoNote, now authenticated
+4. The user is redirected back to KoNote2, now authenticated
 
 #### Enabling MFA for Azure AD Users
 
-MFA is configured in Azure, not in KoNote. To enable it:
+MFA is configured in Azure, not in KoNote2. To enable it:
 
 1. Sign in to the [Azure Portal](https://portal.azure.com)
-2. Navigate to **Microsoft Entra ID** (formerly Azure Active Directory) → **Security** → **Authentication methods**
+2. Navigate to **Microsoft Entra ID** (formerly Azure Active Directory) > **Security** > **Authentication methods**
 3. Enable MFA for all users or specific security groups
 4. Configure allowed authentication methods (authenticator app is recommended)
 
-Once enabled, all users signing into KoNote through Microsoft will be prompted for MFA. No changes are needed in KoNote itself.
+Once enabled, all users signing into KoNote2 through Microsoft will be prompted for MFA. No changes are needed in KoNote2 itself.
 
-#### Azure AD Setup for KoNote
+#### Azure AD Setup for KoNote2
 
-To connect KoNote to your Azure AD:
+To connect KoNote2 to your Azure AD:
 
 1. Create an **App Registration** in Microsoft Entra ID
-2. Set the redirect URI to your KoNote instance (e.g., `https://konote.youragency.ca/auth/callback`)
+2. Set the redirect URI to your KoNote2 instance (e.g., `https://konote.youragency.ca/auth/callback`)
 3. Copy the Application (client) ID and Directory (tenant) ID
 4. Create a client secret
-5. Add the following environment variables to KoNote:
+5. Add the following environment variables to KoNote2:
    - `AZURE_AD_CLIENT_ID` — your Application (client) ID
    - `AZURE_AD_CLIENT_SECRET` — your client secret
    - `AZURE_AD_TENANT_ID` — your Directory (tenant) ID
@@ -549,11 +446,11 @@ Local auth is suitable for:
 - Development and testing environments
 - Small agencies without Microsoft 365
 - Demos and trials
-- Agencies evaluating KoNote before committing to Azure AD
+- Agencies evaluating KoNote2 before committing to Azure AD
 
 #### Security Measures for Local Auth
 
-Even without MFA, KoNote enforces strong security for local passwords:
+Even without MFA, KoNote2 enforces strong security for local passwords:
 
 | Measure | Detail |
 |---------|--------|
@@ -582,278 +479,12 @@ This feature is not yet implemented. If your agency needs MFA now, Azure AD SSO 
 
 | Standard | MFA Requirement |
 |----------|-----------------|
-| **PIPEDA** | Not explicitly required, but "appropriate safeguards" expected |
+| **PIPEDA** | Not explicitly required, but the Privacy Commissioner increasingly considers MFA a reasonable safeguard for sensitive data |
 | **PHIPA** | Not explicitly required, but recommended for health data |
 | **SOC 2** | Typically expected for access to sensitive systems |
 | **WCAG 2.2** | MFA flows must be accessible (no CAPTCHA, support assistive technology) |
 
 For agencies serving vulnerable populations (health, housing, youth services), MFA is considered a best practice even when not legally mandated. Azure AD SSO is the simplest way to meet this expectation.
-
----
-
-## Role-Based Export Permissions
-
-KoNote separates system administration from data access. Being an "admin" gives you control over system configuration (programs, users, settings) — it does **not** automatically grant access to client records or reports.
-
-### Permission Matrix
-
-| Action | Front Desk | Staff | Program Manager | Executive | Admin |
-|--------|:----------:|:-----:|:---------------:|:---------:|:-----:|
-| See client records | Limited fields | Full records | Their programs | No (dashboard only) | No (config only) |
-| Create metrics export | No | No | Their programs | No | Any program |
-| Create CMT export | No | No | Their programs | No | Any program |
-| Create client data export | No | No | No | No | Yes |
-| Download own export | N/A | N/A | Yes | N/A | Yes |
-| Download others' exports | No | No | No | No | Yes |
-| Manage/revoke export links | No | No | No | No | Yes |
-
-### Design Rationale
-
-**Why program managers can export (not just admins):**
-Program managers already see client data through the application. Export creation follows existing data access — if you can see the data, you can export it. Requiring an admin to generate every funder report creates an unnecessary bottleneck.
-
-**Why exports are scoped to programs:**
-A program manager for "Youth Services" should not be able to export data from "Housing Support." The program dropdown only shows programs the user manages. This is enforced server-side by the form's queryset.
-
-**Why client_data_export stays admin-only:**
-This is a full PII dump designed for data migration and audit purposes — not day-to-day reporting. It contains all client fields across all programs.
-
-**Why executives can't export:**
-Executives see aggregate dashboards only. They do not have access to individual client records, so they should not be able to export them.
-
-**Why only the creator can download:**
-Export links are deferred downloads, not a sharing mechanism. The creator generated the data from their own program scope. Sharing the download with others would bypass program scoping.
-
-### How It Works in Code
-
-- `can_create_export(user, export_type, program)` — central permission check in `apps/reports/utils.py`
-- `get_manageable_programs(user)` — returns programs available for export forms
-- `has_export_access` — template context variable controlling nav visibility
-- Form querysets filter programs server-side (not just in the UI)
-- All exports are audit logged with the creator, recipient, and link ID
-
-### Test Coverage
-
-Permission tests live in `tests/test_export_permissions.py` and verify:
-- Each role gets the correct access/denial for each export type
-- Program scoping prevents cross-program exports
-- Download permissions enforce creator-only + admin access
-- Manage/revoke views remain admin-only
-- The `has_export_access` context variable is set correctly per role
-
----
-
-## Export Data Protection
-
-### CSV Injection Protection
-
-| Aspect | Detail |
-|--------|--------|
-| **What's protected** | Exported CSV files opened in spreadsheet applications |
-| **Invariant** | No cell value starts with `=`, `+`, `-`, or `@` without a tab prefix |
-| **Enforcement** | `sanitise_csv_value()` and `sanitise_csv_row()` in `apps/reports/csv_utils.py` |
-| **Failure mode** | Without sanitisation, a malicious value like `=HYPERLINK("http://evil.com")` could execute when opened in Excel |
-| **Verification** | Export a CSV and inspect raw file — dangerous characters are tab-prefixed |
-| **Configuration required** | None (automatic) |
-
-### Filename Sanitisation
-
-| Aspect | Detail |
-|--------|--------|
-| **What's protected** | Download filenames in HTTP `Content-Disposition` headers |
-| **Invariant** | Download filenames contain only `[A-Za-z0-9_.-]` |
-| **Enforcement** | `sanitise_filename()` in `apps/reports/csv_utils.py` |
-| **Failure mode** | Path traversal or Content-Disposition header injection |
-| **Verification** | Download an export and confirm the filename contains only permitted characters |
-| **Configuration required** | None (automatic) |
-
-### Elevated Export Monitoring
-
-| Aspect | Detail |
-|--------|--------|
-| **What's protected** | Large or sensitive data exports (bulk client data, progress notes) |
-| **Invariant** | Exports with 100+ clients or including progress notes cannot be downloaded for `ELEVATED_EXPORT_DELAY_MINUTES` (default: 10) |
-| **Enforcement** | `SecureExportLink.is_elevated` flag in `apps/reports/models.py`; delay checked at download time |
-| **Failure mode** | Without delay, a compromised account could exfiltrate bulk data before detection |
-| **Verification** | Check Manage Export Links page (`/reports/export-links/`) for elevated status |
-| **Configuration required** | `ELEVATED_EXPORT_DELAY_MINUTES` env var (optional, default 10); email configuration for admin notifications |
-
-### Individual Client Export
-
-Staff-level users can export a single client's data directly (no deferred link). This supports PIPEDA data portability requirements.
-
-| Aspect | Detail |
-|--------|--------|
-| **Permission** | Staff or above, for clients in their assigned programmes |
-| **Delivery** | Direct download (not a deferred export link) |
-| **Selectable sections** | Plans, notes, metrics, events, custom fields |
-| **Audit** | Logged as a client data export with user, client ID, and selected sections |
-
-### Export Recipient Tracking
-
-| Aspect | Detail |
-|--------|--------|
-| **What's protected** | Accountability for data leaving the system |
-| **Invariant** | Every export form requires declaring who receives the data (self, colleague, funder, other) |
-| **Enforcement** | Required field on export creation form; stored on `SecureExportLink` model and in audit log |
-| **Failure mode** | Without tracking, there is no record of why data was exported or who it was shared with |
-| **Verification** | Check audit log or Manage Export Links page for recipient field |
-| **Configuration required** | None (automatic) |
-
-For operational procedures (setup, cron, troubleshooting), see `docs/export-runbook.md`.
-
----
-
-## Erasure Workflow Security
-
-### State Machine
-
-```
-Request created (by staff+)
-  → Pending approval (all PMs for client's programmes notified by email)
-    → Each PM: approve or reject
-      → If any PM rejects → Request rejected (all parties notified)
-      → If all PMs approve → Erasure executed
-        → RegistrationSubmission PII scrubbed
-        → ClientFile CASCADE deleted (notes, plans, events, alerts, enrolments, metrics, custom fields)
-        → ErasureRequest updated (status=approved, client_file=NULL)
-        → Audit log written (counts only, no PII)
-        → All parties notified by email
-```
-
-### Key Invariants
-
-- **Self-approval prevention:** Requester cannot self-approve their own erasure request.
-- **Single rejection rule:** One rejection = entire request rejected.
-- **Deadlock detection:** If requester is the only active PM for remaining programmes, `is_deadlocked()` returns `True` — admin can approve as fallback.
-- **Non-destructive audit:** `ErasureRequest` survives via `on_delete=SET_NULL`; stores `client_pk`, `client_record_id`, `data_summary` (counts only), `programs_required`, `requested_by_display`.
-- **What auditors see after erasure:** `ErasureRequest` record with reason, all approval records (who, when, which programme), `data_summary` with record counts — no PII.
-- **Email notifications:** Best-effort (failures logged, do not block erasure).
-
-### Enforcement Files
-
-| File | Purpose |
-|------|---------|
-| `apps/clients/erasure.py` | Core erasure logic and execution |
-| `apps/clients/erasure_views.py` | Request, approval, and rejection views |
-| `apps/clients/models.py` | `ErasureRequest` and `ErasureApproval` models |
-
----
-
-## Demo and Real Data Separation
-
-| Aspect | Detail |
-|--------|--------|
-| **What's protected** | Real client data from demo user access (and vice versa) |
-| **Invariant** | Demo users never see real clients; real users never see demo clients |
-| **Enforcement** | `get_client_queryset(user)` in `apps/clients/views.py` filters on `user.is_demo`; `ClientFileManager.real()` / `.demo()` queryset methods |
-| **Failure mode** | If `is_demo` were read from request params instead of user object, an attacker could bypass. Prevented — flag is read from authenticated user only. |
-| **Verification** | Log in as demo user, confirm no real clients visible; log in as real user, confirm no demo clients visible |
-| **Configuration required** | `DEMO_MODE=true` to create demo users/clients via seed command |
-
----
-
-## Registration Security
-
-| Aspect | Detail |
-|--------|--------|
-| **Cryptographic slug** | `secrets.token_urlsafe(8)` — resistant to enumeration |
-| **Rate limiting** | 5 submissions per hour per session |
-| **PII encryption** | `RegistrationSubmission` encrypts `first_name`, `last_name`, `email`, `phone` using same Fernet as `ClientFile` |
-| **Duplicate detection** | SHA-256 hash of lowercase email (`email_hash` field, indexed). No decryption needed. |
-| **Consent** | Registration form requires consent checkbox. Consent timestamp stored on record. |
-| **Configuration required** | None (automatic). Admin creates registration links via Admin → Registration Links. |
-
----
-
-## Independent Security Review
-
-KoNote2 is open-source software that handles sensitive client information. Any agency considering adoption — or already using KoNote2 — can get an **independent security review** at any time, no vendor permission needed. This is a key advantage over proprietary case management tools where you have to trust the vendor's claims.
-
-### What You Can Verify
-
-These are the specific claims we make that a third-party review can confirm:
-
-1. **Encryption at rest** — All client names, notes, and outcome ratings are encrypted using Fernet (AES-128-CBC with HMAC). The encrypted fields are stored as ciphertext in the database — a database breach alone does not expose client data.
-
-2. **Key management options** — Agencies can either:
-   - Manage their own encryption key (set `FIELD_ENCRYPTION_KEY` themselves)
-   - Use a hosting-managed key (provider sets it during deployment)
-   - Either way, the key never touches the codebase
-
-3. **Audit logging** — Every data access, export, and admin action is logged to a separate audit database. Logs cannot be modified through the application.
-
-4. **Role-based access control** — Four roles (receptionist, staff, program manager, admin) with server-side enforcement. No client-side-only checks.
-
-5. **Export controls** — Elevated exports require admin approval, have time delays, and generate audit entries.
-
-6. **Demo/real data separation** — Demo users never see real client data and vice versa, enforced at the query level.
-
-### How to Do a Review
-
-#### Option 1: AI-Powered Code Review (Free, Fast)
-
-Use an AI code review tool to scan the entire codebase. Recommended tools:
-
-- **Jules** (jules.google.com) — Google's AI code agent
-- **GPT Codex** — OpenAI's code review tool
-- **Claude Code** — Anthropic's CLI tool (what built this software)
-
-Any of these can review the full codebase in minutes and produce a detailed security report. See the **AI Review Prompt** below for a ready-made prompt you can copy and paste.
-
-#### Option 2: Professional Penetration Test (Paid, Thorough)
-
-Hire a security firm to do a full penetration test. The open-source codebase means they have white-box access — far more thorough than black-box testing.
-
-#### Option 3: Internal IT Review
-
-If your agency has IT staff, they can clone the repo and review the security architecture directly.
-
-### AI Review Prompt
-
-Copy and paste this prompt into any AI code review tool (Claude Code, GPT Codex, Jules, etc.) after pointing it at the KoNote2 repository:
-
-> You are reviewing an open-source Django web application called KoNote2 that stores sensitive client information for nonprofit social service agencies. Please conduct a security-focused code review and produce a report covering:
->
-> **1. Encryption Implementation**
-> - Are client names, notes, and ratings actually encrypted at rest?
-> - What encryption algorithm is used? Is it current and appropriate?
-> - How is the encryption key managed? Could it be accidentally exposed?
-> - Are there any fields containing PII that are NOT encrypted?
->
-> **2. Authentication & Authorization**
-> - Are role-based access controls enforced server-side (not just in templates)?
-> - Can a lower-privilege user access higher-privilege endpoints?
-> - Is the Azure AD SSO integration implemented securely?
-> - Are local passwords hashed with a strong algorithm?
->
-> **3. Data Export Security**
-> - Are exports protected against unauthorized access?
-> - Do secure download links expire properly?
-> - Is there CSV injection protection?
-> - Are exports logged in the audit trail?
->
-> **4. Audit Logging**
-> - Is the audit log stored separately from application data?
-> - Can audit entries be modified or deleted through the application?
-> - Are all sensitive operations logged?
->
-> **5. Common Vulnerabilities (OWASP Top 10)**
-> - SQL injection
-> - Cross-site scripting (XSS)
-> - Cross-site request forgery (CSRF)
-> - Insecure direct object references
-> - Security misconfiguration
->
-> **6. Privacy Compliance**
-> - Does the application support PIPEDA requirements (data portability, consent)?
-> - Is there proper data separation between demo and production data?
->
-> Please flag any issues found as Critical, High, Medium, or Low severity, and provide specific file paths and line numbers where possible.
-
-### Re-Reviewing After Updates
-
-Agencies can re-run their review after any update to verify nothing has regressed. Because the code is public, every change is visible and auditable.
 
 ---
 
@@ -875,8 +506,9 @@ Before deploying to production, verify all items:
 - [ ] `CSRF_COOKIE_SECURE=True` (requires HTTPS)
 - [ ] HTTPS is configured and working
 - [ ] Encryption key is backed up in a secure location (not with database backups)
-- [ ] Audit database user has INSERT-only permissions
+- [ ] Audit database user (`audit_writer`) has INSERT-only permissions
 - [ ] All test users/data removed from production database
+- [ ] Data processing agreement in place with hosting provider
 
 ### Verify After Deployment
 
@@ -891,14 +523,14 @@ Before deploying to production, verify all items:
 
 ### Suspected Data Breach
 
-1. **Immediately rotate the encryption key** (see above)
+1. **Immediately rotate the encryption key** (see Key Management above)
 2. **Rotate the SECRET_KEY** — this invalidates all user sessions
    ```bash
    python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
    ```
 3. **Review audit logs** for unauthorised access patterns
 4. **Document the timeline** — when discovered, what was accessed, response actions
-5. **Notify affected parties** per PIPEDA/GDPR requirements (typically within 72 hours)
+5. **Notify the Privacy Commissioner and affected individuals as soon as feasible** — PIPEDA's Breach of Security Safeguards Regulations require notification when there is a real risk of significant harm. There is no fixed deadline, but "as soon as feasible" is the legal standard, and delays must be justified.
 6. **Engage legal/compliance** if required by your organisation
 
 ### Lost Encryption Key
@@ -907,9 +539,9 @@ If you've lost your encryption key and have no backup:
 
 - Encrypted PII fields (names, emails, birth dates) are **permanently unrecoverable**
 - Encrypted progress note content is **permanently unrecoverable**
-- Non-encrypted data (metric values, program assignments, dates) remains accessible
+- Non-encrypted data (metric values, programme assignments, dates) remains accessible
 - You will need to re-enter client identifying information manually
-- Consider this a data loss incident for compliance reporting purposes
+- This constitutes a loss of personal information — notify the Privacy Commissioner and affected clients as required under PIPEDA
 
 ### Suspicious Login Activity
 
@@ -926,44 +558,11 @@ If you've lost your encryption key and have no backup:
 
 ---
 
-## Privacy Compliance Support
-
-KoNote's security features support compliance with privacy regulations including PIPEDA (Canada), PHIPA (Ontario health), and GDPR (EU). However, **compliance depends on how you configure and use the system**.
-
-### Security Features That Support Compliance
-
-| Feature | Supports |
-|---------|----------|
-| Field-level PII encryption | Data protection, breach mitigation |
-| Progress note encryption | Clinical content protection |
-| Role-based access control | Access limitation, need-to-know |
-| Comprehensive audit logging | Accountability, incident investigation |
-| Session timeout controls | Access security |
-| Separate audit database | Log integrity, tamper resistance |
-
-### What You Still Need to Do
-
-KoNote provides technical controls, but compliance also requires:
-
-- **Privacy policies** — Document what data you collect and why
-- **Consent procedures** — Obtain and record client consent
-- **Staff training** — Ensure staff understand privacy obligations
-- **Breach response plan** — Know what to do if data is compromised
-- **Data retention policies** — Define how long you keep data
-- **Access request procedures** — How clients can see/correct their data
-
-### Resources
-
-- [Office of the Privacy Commissioner of Canada — PIPEDA](https://www.priv.gc.ca/en/privacy-topics/privacy-laws-in-canada/the-personal-information-protection-and-electronic-documents-act-pipeda/)
-- [Information and Privacy Commissioner of Ontario — PHIPA](https://www.ipc.on.ca/health/)
-- [GDPR Official Text](https://gdpr-info.eu/)
-
-> **Disclaimer:** This documentation describes KoNote's security features. It is not legal advice. Consult your privacy officer, legal counsel, or a qualified privacy professional to ensure your specific implementation meets your jurisdiction's requirements.
-
----
-
 ## Further Reading
 
+- [Security Overview](security-overview.md) — Non-technical summary for boards and funders
+- [Security Architecture](security-architecture.md) — Technical details for developers and security reviewers
+- [Independent Review Guide](independent-review.md) — How to verify KoNote2's security claims
+- [PIA Template Answers](pia-template-answers.md) — Pre-written answers for Privacy Impact Assessments
 - [Deploying KoNote](deploying-konote.md) — Deployment options and setup
-- [Technical Documentation](technical-documentation.md) — Architecture details
 - [Administering KoNote](administering-konote.md) — Day-to-day administration
