@@ -1981,6 +1981,13 @@ article[aria-label="notification"].fading-out {
     font-weight: 600;
 }
 
+.extend-session-btn {
+    font-size: 0.75rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--kn-radius-s, 0.25rem);
+    cursor: pointer;
+}
+
 /* Mobile footer */
 @media (max-width: 600px) {
     .site-footer-inner {

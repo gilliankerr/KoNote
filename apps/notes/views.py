@@ -123,7 +123,7 @@ def _search_notes_in_memory(notes_list, query):
     Encrypted fields can't be searched in SQL — we decrypt each note's text
     fields and check for a case-insensitive substring match.
 
-    Returns list of matching notes, each with a ``_search_snippet`` attribute
+    Returns list of matching notes, each with a ``search_snippet`` attribute
     showing the text surrounding the first match.
     """
     query_lower = query.lower()
@@ -142,7 +142,7 @@ def _search_notes_in_memory(notes_list, query):
         # Check each field for a match
         for text, field_name in fields:
             if query_lower in text.lower():
-                note._search_snippet = _get_search_snippet(text, query)
+                note.search_snippet = _get_search_snippet(text, query)
                 matching.append(note)
                 break  # one match per note is enough
     return matching

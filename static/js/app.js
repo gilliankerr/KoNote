@@ -16,6 +16,45 @@ document.body.addEventListener("htmx:configRequest", function (event) {
     }
 });
 
+// --- Link form error messages to their inputs (aria-describedby) ---
+// Scans for <small class="error" id="..."> and links the preceding input/select/textarea
+(function () {
+    function linkErrorMessages() {
+        var errors = document.querySelectorAll("small.error[id]");
+        errors.forEach(function (errorEl) {
+            // Walk backwards through siblings to find the form control
+            var sibling = errorEl.previousElementSibling;
+            while (sibling) {
+                var input = null;
+                var tag = sibling.tagName.toLowerCase();
+                if (tag === "input" || tag === "textarea" || tag === "select") {
+                    input = sibling;
+                } else {
+                    // Check inside the sibling (Django might wrap inputs)
+                    input = sibling.querySelector("input, textarea, select");
+                }
+                if (input) {
+                    var existing = input.getAttribute("aria-describedby");
+                    if (existing) {
+                        input.setAttribute("aria-describedby", existing + " " + errorEl.id);
+                    } else {
+                        input.setAttribute("aria-describedby", errorEl.id);
+                    }
+                    input.setAttribute("aria-invalid", "true");
+                    break;
+                }
+                sibling = sibling.previousElementSibling;
+            }
+        });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", linkErrorMessages);
+    } else {
+        linkErrorMessages();
+    }
+})();
+
 // --- Auto-dismiss success messages after 8 seconds ---
 // Error messages stay visible until manually dismissed
 (function () {
@@ -699,6 +738,7 @@ document.addEventListener("click", function (event) {
     function setupSessionTimer() {
         var timerEl = document.getElementById("session-timer");
         var remainingEl = document.getElementById("session-remaining");
+        var extendBtn = document.getElementById("extend-session");
         if (!timerEl || !remainingEl) return;
 
         var timeoutMinutes = parseInt(timerEl.getAttribute("data-timeout"), 10) || 30;
@@ -714,6 +754,11 @@ document.addEventListener("click", function (event) {
                 timerEl.classList.add("critical");
             } else if (mins <= WARNING_THRESHOLD) {
                 timerEl.classList.add("warning");
+            }
+
+            // Show/hide extend button at warning threshold
+            if (extendBtn) {
+                extendBtn.hidden = mins > WARNING_THRESHOLD;
             }
         }
 
@@ -739,6 +784,14 @@ document.addEventListener("click", function (event) {
         activityEvents.forEach(function(evt) {
             document.addEventListener(evt, resetDebounced, { passive: true });
         });
+
+        // Extend session button — resets the timer explicitly
+        if (extendBtn) {
+            extendBtn.addEventListener("click", function() {
+                resetTimer();
+                extendBtn.hidden = true;
+            });
+        }
 
         // Simple debounce for activity tracking
         function debounce(fn, delay) {

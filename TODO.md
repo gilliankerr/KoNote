@@ -31,20 +31,20 @@ Weekly accountability reports for admins. Requires working email configuration.
 
 ### Security Review Fixes (from SEC-REV1)
 
-- [ ] Encrypt PlanTarget.name, .description, .status_reason fields + PlanTargetRevision equivalents (SEC-FIX1)
-- [ ] Add MultiFernet key rotation support to konote/encryption.py (SEC-FIX2)
+- [x] Encrypt PlanTarget.name, .description, .status_reason fields + PlanTargetRevision equivalents (SEC-FIX1)
+- [x] Add MultiFernet key rotation support to konote/encryption.py (SEC-FIX2)
 - [x] Change decryption error return from "[decryption error]" to empty string (SEC-FIX3)
 
 ### Privacy Review Fixes (from SEC-REV2)
 
-- [ ] Create daily management command to alert admins about expired retention dates (PRIV-FIX1)
-- [ ] Add Privacy Officer name/email to InstanceSettings and expose in templates (PRIV-FIX2)
+- [x] Create daily management command to alert admins about expired retention dates (PRIV-FIX1)
+- [x] Add Privacy Officer name/email to InstanceSettings and expose in templates (PRIV-FIX2)
 
 ### Accessibility Review Fixes (from SEC-REV3)
 
-- [ ] Add data table alternatives for Chart.js charts (A11Y-FIX1)
-- [ ] Add aria-live to session timer + "Extend Session" button (A11Y-FIX2)
-- [ ] Add aria-describedby to full note form error messages (A11Y-FIX3)
+- [x] Add data table alternatives for Chart.js charts (A11Y-FIX1)
+- [x] Add aria-live to session timer + "Extend Session" button (A11Y-FIX2)
+- [x] Add aria-describedby to full note form error messages (A11Y-FIX3)
 - [x] Increase auto-dismiss delay from 3s to 8-10s (A11Y-FIX4)
 - [x] Create 404.html and 500.html error pages extending base.html (A11Y-FIX5)
 
@@ -113,6 +113,7 @@ See [deployment workflow design](docs/plans/2026-02-05-deployment-workflow-desig
 
 ## Recently Done
 
+- [x] Security, privacy, accessibility review fixes — encrypted PlanTarget fields, MultiFernet rotation, aria-live timer, data tables for charts, aria-describedby on forms, Privacy Officer settings, retention expiry alerts — 2026-02-06 (SEC-FIX1-2, PRIV-FIX1-2, A11Y-FIX1-3)
 - [x] Fix 3 review bugs — AuditLog crash on metric import, group re-add constraint, ghost revisions — 2026-02-06 (QR-FIX4-6)
 - [x] Fix 4 group view bugs — attendance name mismatch, membership form, role handling, demo separation — 2026-02-06 (QR-FIX1-3)
 - [x] Client voice, qualitative progress, groups app (Phases A-D) — encrypted client_goal on targets, progress descriptors, engagement observation, 7-model groups app, 3 demo groups — 2026-02-06 (CV1-4)

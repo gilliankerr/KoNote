@@ -190,9 +190,13 @@ def target_create(request, section_id):
     if request.method == "POST":
         form = PlanTargetForm(request.POST)
         if form.is_valid():
-            target = form.save(commit=False)
-            target.plan_section = section
-            target.client_file = section.client_file
+            target = PlanTarget(
+                plan_section=section,
+                client_file=section.client_file,
+            )
+            target.name = form.cleaned_data["name"]
+            target.description = form.cleaned_data.get("description", "")
+            target.client_goal = form.cleaned_data.get("client_goal", "")
             target.save()
             # Create initial revision
             PlanTargetRevision.objects.create(
@@ -225,7 +229,7 @@ def target_edit(request, target_id):
         raise PermissionDenied(_("You don't have permission to access this page."))
 
     if request.method == "POST":
-        form = PlanTargetForm(request.POST, instance=target)
+        form = PlanTargetForm(request.POST)
         if form.is_valid():
             # Save old values as a revision BEFORE overwriting
             PlanTargetRevision.objects.create(
@@ -237,11 +241,18 @@ def target_edit(request, target_id):
                 status_reason=target.status_reason,
                 changed_by=request.user,
             )
-            form.save()
+            target.name = form.cleaned_data["name"]
+            target.description = form.cleaned_data.get("description", "")
+            target.client_goal = form.cleaned_data.get("client_goal", "")
+            target.save()
             messages.success(request, _("Target updated."))
             return redirect("plans:plan_view", client_id=target.client_file.pk)
     else:
-        form = PlanTargetForm(instance=target, initial={"client_goal": target.client_goal})
+        form = PlanTargetForm(initial={
+            "name": target.name,
+            "description": target.description,
+            "client_goal": target.client_goal,
+        })
 
     return render(request, "plans/target_form.html", {
         "form": form,
@@ -260,7 +271,7 @@ def target_status(request, target_id):
         raise PermissionDenied(_("You don't have permission to access this page."))
 
     if request.method == "POST":
-        form = PlanTargetStatusForm(request.POST, instance=target)
+        form = PlanTargetStatusForm(request.POST)
         if form.is_valid():
             # Revision with old values BEFORE overwriting
             PlanTargetRevision.objects.create(
@@ -272,14 +283,19 @@ def target_status(request, target_id):
                 status_reason=target.status_reason,
                 changed_by=request.user,
             )
-            form.save()
+            target.status = form.cleaned_data["status"]
+            target.status_reason = form.cleaned_data.get("status_reason", "")
+            target.save()
             messages.success(request, _("Target status updated."))
             return render(request, "plans/_target.html", {
                 "target": target,
                 "can_edit": True,
             })
     else:
-        form = PlanTargetStatusForm(instance=target)
+        form = PlanTargetStatusForm(initial={
+            "status": target.status,
+            "status_reason": target.status_reason,
+        })
 
     return render(request, "plans/_target_status.html", {
         "target": target,
